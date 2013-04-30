@@ -1,0 +1,7 @@
+test
+csp.py
+*_wrap.c
+.ropeproject
+*.py[cow]
+*.so
+*.o
