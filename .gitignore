@@ -1,6 +1,9 @@
+build
+*.egg-info
 test
 csp.py
 *_wrap.c
+*_wrap.cpp
 .ropeproject
 *.py[cow]
 *.so

@@ -1,6 +1,6 @@
 # file: test.py
 
-import csp
+from cprocsp import csp
 
 
 def test_constants():
