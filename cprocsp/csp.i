@@ -2,6 +2,8 @@
 */
 
 %module csp
+%include "typemaps.i"
+
 %{
 #include <stdio.h>
 #ifdef _WIN32
@@ -16,4 +18,10 @@
 #include <WinCryptEx.h>
 %}
 
+%include "wintypes.i"
+%include "defines.i"
 %include <WinCryptEx.h>
+%include "errors.i"
+%include "context.i"
+/*%include "hash.i"*/
+/*%include "sign.i"*/

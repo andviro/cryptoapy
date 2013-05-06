@@ -1,0 +1,516 @@
+/* vim: ft=swig
+*/
+typedef void *HCERTSTORE;
+// Handle returned by the store provider when opened.
+typedef void *HCERTSTOREPROV;
+
+//+-------------------------------------------------------------------------
+//  Certificate context.
+//
+//  A certificate context contains both the encoded and decoded representation
+//  of a certificate. A certificate context returned by a cert store function
+//  must be freed by calling the CertFreeCertificateContext function. The
+//  CertDuplicateCertificateContext function can be called to make a duplicate
+//  copy (which also must be freed by calling CertFreeCertificateContext).
+//--------------------------------------------------------------------------
+typedef struct _CERT_CONTEXT {
+    DWORD                   dwCertEncodingType;
+    BYTE                    *pbCertEncoded;
+    DWORD                   cbCertEncoded;
+    PCERT_INFO              pCertInfo;
+    HCERTSTORE              hCertStore;
+} CERT_CONTEXT, *PCERT_CONTEXT;
+typedef const CERT_CONTEXT *PCCERT_CONTEXT;
+
+//+-------------------------------------------------------------------------
+//  Information stored in a certificate request
+//
+//  The Subject, Algorithm, PublicKey and Attribute BLOBs are the encoded
+//  representation of the information.
+//--------------------------------------------------------------------------
+typedef struct _CERT_REQUEST_INFO {
+    DWORD                   dwVersion;
+    CERT_NAME_BLOB          Subject;
+    CERT_PUBLIC_KEY_INFO    SubjectPublicKeyInfo;
+    DWORD                   cAttribute;
+    PCRYPT_ATTRIBUTE        rgAttribute;
+} CERT_REQUEST_INFO, *PCERT_REQUEST_INFO;
+
+//+-------------------------------------------------------------------------
+//  Certificate Request versions
+//--------------------------------------------------------------------------
+#define CERT_REQUEST_V1     0
+
+//+-------------------------------------------------------------------------
+//  Open the cert store using the specified store provider.
+//
+//  If CERT_STORE_DELETE_FLAG is set, then, the store is deleted. NULL is
+//  returned for both success and failure. However, GetLastError() returns 0
+//  for success and nonzero for failure.
+//
+//  If CERT_STORE_SET_LOCALIZED_NAME_FLAG is set, then, if supported, the
+//  provider sets the store's CERT_STORE_LOCALIZED_NAME_PROP_ID property.
+//  The store's localized name can be retrieved by calling
+//  CertSetStoreProperty(dwPropID = CERT_STORE_LOCALIZED_NAME_PROP_ID).
+//  This flag is supported by the following providers (and their sz_
+//  equivalent):
+//      CERT_STORE_PROV_FILENAME_A
+//      CERT_STORE_PROV_FILENAME_W
+//      CERT_STORE_PROV_SYSTEM_A
+//      CERT_STORE_PROV_SYSTEM_W
+//      CERT_STORE_PROV_SYSTEM_REGISTRY_A
+//      CERT_STORE_PROV_SYSTEM_REGISTRY_W
+//      CERT_STORE_PROV_PHYSICAL_W
+//
+//  If CERT_STORE_DEFER_CLOSE_UNTIL_LAST_FREE_FLAG is set, then, the
+//  closing of the store's provider is deferred until all certificate,
+//  CRL and CTL contexts obtained from the store are freed. Also,
+//  if a non NULL HCRYPTPROV was passed, then, it will continue to be used.
+//  By default, the store's provider is closed on the final CertCloseStore.
+//  If this flag isn't set, then, any property changes made to previously
+//  duplicated contexts after the final CertCloseStore will not be persisted.
+//  By setting this flag, property changes made
+//  after the CertCloseStore will be persisted. Note, setting this flag
+//  causes extra overhead in doing context duplicates and frees.
+//  If CertCloseStore is called with CERT_CLOSE_STORE_FORCE_FLAG, then,
+//  the CERT_STORE_DEFER_CLOSE_UNTIL_LAST_FREE_FLAG flag is ignored.
+//
+//  CERT_STORE_MANIFOLD_FLAG can be set to check for certificates having the
+//  manifold extension and archive the "older" certificates with the same
+//  manifold extension value. A certificate is archived by setting the
+//  CERT_ARCHIVED_PROP_ID.
+//
+//  By default, contexts having the CERT_ARCHIVED_PROP_ID, are skipped
+//  during enumeration. CERT_STORE_ENUM_ARCHIVED_FLAG can be set to include
+//  archived contexts when enumerating. Note, contexts having the
+//  CERT_ARCHIVED_PROP_ID are still found for explicit finds, such as,
+//  finding a context with a specific hash or finding a certificate having
+//  a specific issuer and serial number.
+//
+//  CERT_STORE_UPDATE_KEYID_FLAG can be set to also update the Key Identifier's
+//  CERT_KEY_PROV_INFO_PROP_ID property whenever a certificate's
+//  CERT_KEY_IDENTIFIER_PROP_ID or CERT_KEY_PROV_INFO_PROP_ID property is set
+//  and the other property already exists. If the Key Identifier's
+//  CERT_KEY_PROV_INFO_PROP_ID already exists, it isn't updated. Any
+//  errors encountered are silently ignored.
+//
+//  By default, this flag is implicitly set for the "My\.Default" CurrentUser
+//  and LocalMachine physical stores.
+//
+//  CERT_STORE_READONLY_FLAG can be set to open the store as read only.
+//  Otherwise, the store is opened as read/write.
+//
+//  CERT_STORE_OPEN_EXISTING_FLAG can be set to only open an existing
+//  store. CERT_STORE_CREATE_NEW_FLAG can be set to create a new store and
+//  fail if the store already exists. Otherwise, the default is to open
+//  an existing store or create a new store if it doesn't already exist.
+//
+//  hCryptProv specifies the crypto provider to use to create the hash
+//  properties or verify the signature of a subject certificate or CRL.
+//  The store doesn't need to use a private
+//  key. If the CERT_STORE_NO_CRYPT_RELEASE_FLAG isn't set, hCryptProv is
+//  CryptReleaseContext'ed on the final CertCloseStore.
+//
+//  Note, if the open fails, hCryptProv is released if it would have been
+//  released when the store was closed.
+//
+//  If hCryptProv is zero, then, the default provider and container for the
+//  PROV_RSA_FULL provider type is CryptAcquireContext'ed with
+//  CRYPT_VERIFYCONTEXT access. The CryptAcquireContext is deferred until
+//  the first create hash or verify signature. In addition, once acquired,
+//  the default provider isn't released until process exit when crypt32.dll
+//  is unloaded. The acquired default provider is shared across all stores
+//  and threads.
+//
+//  After initializing the store's data structures and optionally acquiring a
+//  default crypt provider, CertOpenStore calls CryptGetOIDFunctionAddress to
+//  get the address of the CRYPT_OID_OPEN_STORE_PROV_FUNC specified by
+//  lpszStoreProvider. Since a store can contain certificates with different
+//  encoding types, CryptGetOIDFunctionAddress is called with dwEncodingType
+//  set to 0 and not the dwEncodingType passed to CertOpenStore.
+//  PFN_CERT_DLL_OPEN_STORE_FUNC specifies the signature of the provider's
+//  open function. This provider open function is called to load the
+//  store's certificates and CRLs. Optionally, the provider may return an
+//  array of functions called before a certificate or CRL is added or deleted
+//  or has a property that is set.
+//
+//  Use of the dwEncodingType parameter is provider dependent. The type
+//  definition for pvPara also depends on the provider.
+//
+//  Store providers are installed or registered via
+//  CryptInstallOIDFunctionAddress or CryptRegisterOIDFunction, where,
+//  dwEncodingType is 0 and pszFuncName is CRYPT_OID_OPEN_STORE_PROV_FUNC.
+//
+//  Here's a list of the predefined provider types (implemented in crypt32.dll):
+//
+//  CERT_STORE_PROV_MSG:
+//      Gets the certificates and CRLs from the specified cryptographic message.
+//      dwEncodingType contains the message and certificate encoding types.
+//      The message's handle is passed in pvPara. Given,
+//          HCRYPTMSG hCryptMsg; pvPara = (const void *) hCryptMsg;
+//
+//  CERT_STORE_PROV_MEMORY
+//  sz_CERT_STORE_PROV_MEMORY:
+//      Opens a store without any initial certificates or CRLs. pvPara
+//      isn't used.
+//
+//  CERT_STORE_PROV_FILE:
+//      Reads the certificates and CRLs from the specified file. The file's
+//      handle is passed in pvPara. Given,
+//          HANDLE hFile; pvPara = (const void *) hFile;
+//
+//      For a successful open, the file pointer is advanced past
+//      the certificates and CRLs and their properties read from the file.
+//      Note, only expects a serialized store and not a file containing
+//      either a PKCS #7 signed message or a single encoded certificate.
+//
+//      The hFile isn't closed.
+//
+//  CERT_STORE_PROV_REG:
+//      Reads the certificates and CRLs from the registry. The registry's
+//      key handle is passed in pvPara. Given,
+//          HKEY hKey; pvPara = (const void *) hKey;
+//
+//      The input hKey isn't closed by the provider. Before returning, the
+//      provider opens it own copy of the hKey.
+//
+//      If CERT_STORE_READONLY_FLAG is set, then, the registry subkeys are
+//      RegOpenKey'ed with KEY_READ_ACCESS. Otherwise, the registry subkeys
+//      are RegCreateKey'ed with KEY_ALL_ACCESS.
+//
+//      This provider returns the array of functions for reading, writing,
+//      deleting and property setting certificates and CRLs.
+//      Any changes to the opened store are immediately pushed through to
+//      the registry. However, if CERT_STORE_READONLY_FLAG is set, then,
+//      writing, deleting or property setting results in a
+//      SetLastError(E_ACCESSDENIED).
+//
+//      Note, all the certificates and CRLs are read from the registry
+//      when the store is opened. The opened store serves as a write through
+//      cache.
+//
+//      If CERT_REGISTRY_STORE_SERIALIZED_FLAG is set, then, the
+//      contexts are persisted as a single serialized store subkey in the
+//      registry.
+//
+//  CERT_STORE_PROV_PKCS7:
+//  sz_CERT_STORE_PROV_PKCS7:
+//      Gets the certificates and CRLs from the encoded PKCS #7 signed message.
+//      dwEncodingType specifies the message and certificate encoding types.
+//      The pointer to the encoded message's blob is passed in pvPara. Given,
+//          CRYPT_DATA_BLOB EncodedMsg; pvPara = (const void *) &EncodedMsg;
+//
+//      Note, also supports the IE3.0 special version of a
+//      PKCS #7 signed message referred to as a "SPC" formatted message.
+//
+//  CERT_STORE_PROV_SERIALIZED:
+//  sz_CERT_STORE_PROV_SERIALIZED:
+//      Gets the certificates and CRLs from memory containing a serialized
+//      store.  The pointer to the serialized memory blob is passed in pvPara.
+//      Given,
+//          CRYPT_DATA_BLOB Serialized; pvPara = (const void *) &Serialized;
+//
+//  CERT_STORE_PROV_FILENAME_A:
+//  CERT_STORE_PROV_FILENAME_W:
+//  CERT_STORE_PROV_FILENAME:
+//  sz_CERT_STORE_PROV_FILENAME_W:
+//  sz_CERT_STORE_PROV_FILENAME:
+//      Opens the file and first attempts to read as a serialized store. Then,
+//      as a PKCS #7 signed message. Finally, as a single encoded certificate.
+//      The filename is passed in pvPara. The filename is UNICODE for the
+//      "_W" provider and ASCII for the "_A" provider. For "_W": given,
+//          LPCWSTR pwszFilename; pvPara = (const void *) pwszFilename;
+//      For "_A": given,
+//          LPCSTR pszFilename; pvPara = (const void *) pszFilename;
+//
+//      Note, the default (without "_A" or "_W") is unicode.
+//
+//      Note, also supports the reading of the IE3.0 special version of a
+//      PKCS #7 signed message file referred to as a "SPC" formatted file.
+//
+//  CERT_STORE_PROV_SYSTEM_A:
+//  CERT_STORE_PROV_SYSTEM_W:
+//  CERT_STORE_PROV_SYSTEM:
+//  sz_CERT_STORE_PROV_SYSTEM_W:
+//  sz_CERT_STORE_PROV_SYSTEM:
+//      Opens the specified logical "System" store. The upper word of the
+//      dwFlags parameter is used to specify the location of the system store.
+//
+//      A "System" store is a collection consisting of one or more "Physical"
+//      stores. A "Physical" store is registered via the
+//      CertRegisterPhysicalStore API. Each of the registered physical stores
+//      is CertStoreOpen'ed and added to the collection via
+//      CertAddStoreToCollection.
+//
+//      The CERT_SYSTEM_STORE_CURRENT_USER, CERT_SYSTEM_STORE_LOCAL_MACHINE,
+//      CERT_SYSTEM_STORE_CURRENT_SERVICE, CERT_SYSTEM_STORE_SERVICES,
+//      CERT_SYSTEM_STORE_USERS, CERT_SYSTEM_STORE_CURRENT_USER_GROUP_POLICY,
+//      CERT_SYSTEM_STORE_LOCAL_MACHINE_GROUP_POLICY and
+//      CERT_SYSTEM_STORE_LOCAL_MACHINE_ENTERPRSE
+//      system stores by default have a "SystemRegistry" store that is
+//      opened and added to the collection.
+//
+//      The system store name is passed in pvPara. The name is UNICODE for the
+//      "_W" provider and ASCII for the "_A" provider. For "_W": given,
+//          LPCWSTR pwszSystemName; pvPara = (const void *) pwszSystemName;
+//      For "_A": given,
+//          LPCSTR pszSystemName; pvPara = (const void *) pszSystemName;
+//
+//      Note, the default (without "_A" or "_W") is UNICODE.
+//
+//      The system store name can't contain any backslashes.
+//
+//      If CERT_SYSTEM_STORE_RELOCATE_FLAG is set in dwFlags, pvPara
+//      points to a CERT_SYSTEM_STORE_RELOCATE_PARA data structure instead
+//      of pointing to a null terminated UNICODE or ASCII string.
+//      Sibling physical stores are also opened as relocated using
+//      pvPara's hKeyBase.
+//
+//      The CERT_SYSTEM_STORE_SERVICES or CERT_SYSTEM_STORE_USERS system
+//      store name must be prefixed with the ServiceName or UserName.
+//      For example, "ServiceName\Trust".
+//
+//      Stores on remote computers can be accessed for the
+//      CERT_SYSTEM_STORE_LOCAL_MACHINE, CERT_SYSTEM_STORE_SERVICES,
+//      CERT_SYSTEM_STORE_USERS, CERT_SYSTEM_STORE_LOCAL_MACHINE_GROUP_POLICY
+//      or CERT_SYSTEM_STORE_LOCAL_MACHINE_ENTERPRISE
+//      locations by prepending the computer name. For example, a remote
+//      local machine store is accessed via "\\ComputerName\Trust" or
+//      "ComputerName\Trust". A remote service store is accessed via
+//      "\\ComputerName\ServiceName\Trust". The leading "\\" backslashes are
+//      optional in the ComputerName.
+//
+//      If CERT_STORE_READONLY_FLAG is set, then, the registry is
+//      RegOpenKey'ed with KEY_READ_ACCESS. Otherwise, the registry is
+//      RegCreateKey'ed with KEY_ALL_ACCESS.
+//
+//      The "root" store is treated differently from the other system
+//      stores. Before a certificate is added to or deleted from the "root"
+//      store, a pop up message box is displayed. The certificate's subject,
+//      issuer, serial number, time validity, sha1 and md5 thumbprints are
+//      displayed. The user is given the option to do the add or delete.
+//      If they don't allow the operation, LastError is set to E_ACCESSDENIED.
+//
+//  CERT_STORE_PROV_SYSTEM_REGISTRY_A
+//  CERT_STORE_PROV_SYSTEM_REGISTRY_W
+//  CERT_STORE_PROV_SYSTEM_REGISTRY
+//  sz_CERT_STORE_PROV_SYSTEM_REGISTRY_W
+//  sz_CERT_STORE_PROV_SYSTEM_REGISTRY
+//      Opens the "System" store's default "Physical" store residing in the
+//      registry. The upper word of the dwFlags
+//      parameter is used to specify the location of the system store.
+//
+//      After opening the registry key associated with the system name,
+//      the CERT_STORE_PROV_REG provider is called to complete the open.
+//
+//      The system store name is passed in pvPara. The name is UNICODE for the
+//      "_W" provider and ASCII for the "_A" provider. For "_W": given,
+//          LPCWSTR pwszSystemName; pvPara = (const void *) pwszSystemName;
+//      For "_A": given,
+//          LPCSTR pszSystemName; pvPara = (const void *) pszSystemName;
+//
+//      Note, the default (without "_A" or "_W") is UNICODE.
+//
+//      If CERT_SYSTEM_STORE_RELOCATE_FLAG is set in dwFlags, pvPara
+//      points to a CERT_SYSTEM_STORE_RELOCATE_PARA data structure instead
+//      of pointing to a null terminated UNICODE or ASCII string.
+//
+//      See above for details on prepending a ServiceName and/or ComputerName
+//      to the store name.
+//
+//      If CERT_STORE_READONLY_FLAG is set, then, the registry is
+//      RegOpenKey'ed with KEY_READ_ACCESS. Otherwise, the registry is
+//      RegCreateKey'ed with KEY_ALL_ACCESS.
+//
+//      The "root" store is treated differently from the other system
+//      stores. Before a certificate is added to or deleted from the "root"
+//      store, a pop up message box is displayed. The certificate's subject,
+//      issuer, serial number, time validity, sha1 and md5 thumbprints are
+//      displayed. The user is given the option to do the add or delete.
+//      If they don't allow the operation, LastError is set to E_ACCESSDENIED.
+//
+//  CERT_STORE_PROV_PHYSICAL_W
+//  CERT_STORE_PROV_PHYSICAL
+//  sz_CERT_STORE_PROV_PHYSICAL_W
+//  sz_CERT_STORE_PROV_PHYSICAL
+//      Opens the specified "Physical" store in the "System" store.
+//
+//      Both the system store and physical names are passed in pvPara. The
+//      names are separated with an intervening "\". For example,
+//      "Root\.Default". The string is UNICODE.
+//
+//      The system and physical store names can't contain any backslashes.
+//
+//      If CERT_SYSTEM_STORE_RELOCATE_FLAG is set in dwFlags, pvPara
+//      points to a CERT_SYSTEM_STORE_RELOCATE_PARA data structure instead
+//      of pointing to a null terminated UNICODE string.
+//      The specified physical store is opened as relocated using pvPara's
+//      hKeyBase.
+//
+//      For CERT_SYSTEM_STORE_SERVICES or CERT_SYSTEM_STORE_USERS,
+//      the system and physical store names
+//      must be prefixed with the ServiceName or UserName. For example,
+//      "ServiceName\Root\.Default".
+//
+//      Physical stores on remote computers can be accessed for the
+//      CERT_SYSTEM_STORE_LOCAL_MACHINE, CERT_SYSTEM_STORE_SERVICES,
+//      CERT_SYSTEM_STORE_USERS, CERT_SYSTEM_STORE_LOCAL_MACHINE_GROUP_POLICY
+//      or CERT_SYSTEM_STORE_LOCAL_MACHINE_ENTERPRISE
+//      locations by prepending the computer name. For example, a remote
+//      local machine store is accessed via "\\ComputerName\Root\.Default"
+//      or "ComputerName\Root\.Default". A remote service store is
+//      accessed via "\\ComputerName\ServiceName\Root\.Default". The
+//      leading "\\" backslashes are optional in the ComputerName.
+//
+//  CERT_STORE_PROV_COLLECTION
+//  sz_CERT_STORE_PROV_COLLECTION
+//      Opens a store that is a collection of other stores. Stores are
+//      added or removed to/from the collection via the CertAddStoreToCollection
+//      and CertRemoveStoreFromCollection APIs.
+//
+//  CERT_STORE_PROV_SMART_CARD_W
+//  CERT_STORE_PROV_SMART_CARD
+//  sz_CERT_STORE_PROV_SMART_CARD_W
+//  sz_CERT_STORE_PROV_SMART_CARD
+//      Opens a store instantiated over a particular smart card storage.  pvPara
+//      identifies where on the card the store is located and is of the
+//      following format:
+//
+//                Card Name\Provider Name\Provider Type[\Container Name]
+//
+//      Container Name is optional and if NOT specified the Card Name is used
+//      as the Container Name.  Future versions of the provider will support
+//      instantiating the store over the entire card in which case just
+//      Card Name ( or id ) will be sufficient.
+//
+//  Here's a list of the predefined provider types (implemented in
+//  cryptnet.dll):
+//
+//  CERT_STORE_PROV_LDAP_W
+//  CERT_STORE_PROV_LDAP
+//  sz_CERT_STORE_PROV_LDAP_W
+//  sz_CERT_STORE_PROV_LDAP
+//      Opens a store over the results of the query specified by and LDAP
+//      URL which is passed in via pvPara.  In order to do writes to the
+//      store the URL must specify a BASE query, no filter and a single
+//      attribute.
+//
+//--------------------------------------------------------------------------
+
+WINCRYPT32API
+HCERTSTORE
+WINAPI
+CertOpenStore(
+    IN LPCSTR lpszStoreProvider,
+    IN DWORD dwEncodingType,
+    IN HCRYPTPROV hCryptProv,
+    IN DWORD dwFlags,
+    IN const void *pvPara
+    );
+
+
+WINCRYPT32API
+HCERTSTORE
+WINAPI
+CertOpenSystemStore(
+    IN HCRYPTPROV hProv,
+    IN LPCTSTR pszSubsystemProtocol
+    );
+
+//+-------------------------------------------------------------------------
+//  Certificate Store close flags
+//--------------------------------------------------------------------------
+#define CERT_CLOSE_STORE_FORCE_FLAG         0x00000001
+#define CERT_CLOSE_STORE_CHECK_FLAG         0x00000002
+
+//+-------------------------------------------------------------------------
+//  Close a cert store handle.
+//
+//  There needs to be a corresponding close for each open and duplicate.
+//
+//  Even on the final close, the cert store isn't freed until all of its
+//  certificate and CRL contexts have also been freed.
+//
+//  On the final close, the hCryptProv passed to CertStoreOpen is
+//  CryptReleaseContext'ed.
+//
+//  To force the closure of the store with all of its memory freed, set the
+//  CERT_STORE_CLOSE_FORCE_FLAG. This flag should be set when the caller does
+//  its own reference counting and wants everything to vanish.
+//
+//  To check if all the store's certificates and CRLs have been freed and that
+//  this is the last CertCloseStore, set the CERT_CLOSE_STORE_CHECK_FLAG. If
+//  set and certs, CRLs or stores still need to be freed/closed, FALSE is
+//  returned with LastError set to CRYPT_E_PENDING_CLOSE. Note, for FALSE,
+//  the store is still closed. This is a diagnostic flag.
+//
+//  LastError is preserved unless CERT_CLOSE_STORE_CHECK_FLAG is set and FALSE
+//  is returned.
+//--------------------------------------------------------------------------
+WINCRYPT32API
+BOOL
+WINAPI
+CertCloseStore(
+    IN HCERTSTORE hCertStore,
+    DWORD dwFlags
+    );
+
+//+-------------------------------------------------------------------------
+//  Enumerate the certificate contexts in the store.
+//
+//  If a certificate isn't found, NULL is returned.
+//  Otherwise, a pointer to a read only CERT_CONTEXT is returned. CERT_CONTEXT
+//  must be freed by calling CertFreeCertificateContext or is freed when passed as the
+//  pPrevCertContext on a subsequent call. CertDuplicateCertificateContext
+//  can be called to make a duplicate.
+//
+//  pPrevCertContext MUST BE NULL to enumerate the first
+//  certificate in the store. Successive certificates are enumerated by setting
+//  pPrevCertContext to the CERT_CONTEXT returned by a previous call.
+//
+//  NOTE: a NON-NULL pPrevCertContext is always CertFreeCertificateContext'ed by
+//  this function, even for an error.
+//--------------------------------------------------------------------------
+WINCRYPT32API
+PCCERT_CONTEXT
+WINAPI
+CertEnumCertificatesInStore(
+    IN HCERTSTORE hCertStore,
+    IN PCCERT_CONTEXT pPrevCertContext
+    );
+
+//+-------------------------------------------------------------------------
+//  Find the first or next certificate context in the store.
+//
+//  The certificate is found according to the dwFindType and its pvFindPara.
+//  See below for a list of the find types and its parameters.
+//
+//  Currently dwFindFlags is only used for CERT_FIND_SUBJECT_ATTR,
+//  CERT_FIND_ISSUER_ATTR or CERT_FIND_CTL_USAGE. Otherwise, must be set to 0.
+//
+//  Usage of dwCertEncodingType depends on the dwFindType.
+//
+//  If the first or next certificate isn't found, NULL is returned.
+//  Otherwise, a pointer to a read only CERT_CONTEXT is returned. CERT_CONTEXT
+//  must be freed by calling CertFreeCertificateContext or is freed when passed as the
+//  pPrevCertContext on a subsequent call. CertDuplicateCertificateContext
+//  can be called to make a duplicate.
+//
+//  pPrevCertContext MUST BE NULL on the first
+//  call to find the certificate. To find the next certificate, the
+//  pPrevCertContext is set to the CERT_CONTEXT returned by a previous call.
+//
+//  NOTE: a NON-NULL pPrevCertContext is always CertFreeCertificateContext'ed by
+//  this function, even for an error.
+//--------------------------------------------------------------------------
+WINCRYPT32API
+PCCERT_CONTEXT
+WINAPI
+CertFindCertificateInStore(
+    IN HCERTSTORE hCertStore,
+    IN DWORD dwCertEncodingType,
+    IN DWORD dwFindFlags,
+    IN DWORD dwFindType,
+    IN const void *pvFindPara,
+    IN PCCERT_CONTEXT pPrevCertContext
+    );
