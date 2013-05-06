@@ -1,5 +1,7 @@
 /* vim: ft=swig
 */
+#define WINBASEAPI
+
 
 WINBASEAPI DWORD WINAPI GetLastError(void);
 

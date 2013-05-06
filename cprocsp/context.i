@@ -2,13 +2,12 @@
 */
 
 %rename(CryptAcquireContext) CryptAcquireContextA;
-%apply HCRYPTPROV *OUTPUT { HCRYPTPROV *phProv };
 
 WINADVAPI
 BOOL
 WINAPI
 CryptAcquireContextA(
-    HCRYPTPROV *phProv,
+    HCRYPTPROV *OUTPUT,
     LPCSTR pszContainer,
     LPCSTR pszProvider,
     DWORD dwProvType,

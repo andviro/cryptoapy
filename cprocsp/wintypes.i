@@ -28,6 +28,10 @@ typedef char *PSZ;
 #endif
 #endif
 
+#ifndef WINADVAPI
+#define WINADVAPI
+#endif
+
 #ifndef FALSE
 #define FALSE               0
 #endif

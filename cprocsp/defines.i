@@ -159,7 +159,7 @@ typedef ULONG_PTR HCRYPTKEY;
 typedef ULONG_PTR HCRYPTHASH;
 
 /* dwFlags definitions for CryptAcquireContext*/
-#define CRYPT_VERIFYCONTEXT     0xF0000000
+#define CRYPT_VERIFYCONTEXT     0xF0000000u
 #define CRYPT_NEWKEYSET         0x00000008
 #define CRYPT_DELETEKEYSET      0x00000010
 #define CRYPT_MACHINE_KEYSET    0x00000020
@@ -186,7 +186,7 @@ typedef ULONG_PTR HCRYPTHASH;
 /* dwFlags definitions for CryptDeriveKey*/
 #define	CRYPT_SERVER			0x00000400
 
-#define KEY_LENGTH_MASK         0xFFFF0000
+#define KEY_LENGTH_MASK         0xFFFF0000u
 
 /* dwFlag definitions for CryptExportKey*/
 #define CRYPT_Y_ONLY            0x00000001
