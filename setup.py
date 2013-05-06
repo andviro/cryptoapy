@@ -13,7 +13,7 @@ csp = Extension('cprocsp._csp',
                     '-DCP_IOVEC_USE_SYSTEM',
                     '-DHAVE_LIMITS_H',
                     '-DHAVE_STDINT_H',
-                    '-DSIZEOF_VOID_P=4'
+                    '-DSIZEOF_VOID_P=4',
                     '-I/opt/cprocsp/include',
                     '-I/opt/cprocsp/include/cpcsp',
                     '-I/opt/cprocsp/include/asn1c/rtsrc',
