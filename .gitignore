@@ -1,4 +1,5 @@
 build
+*.egg
 *.egg-info
 test
 csp.py
