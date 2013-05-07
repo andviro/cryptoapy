@@ -23,5 +23,6 @@
 %include <WinCryptEx.h>
 %include "errors.i"
 %include "context.i"
+%include "cert.i"
 /*%include "hash.i"*/
 /*%include "sign.i"*/

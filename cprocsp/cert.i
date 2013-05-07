@@ -4,6 +4,29 @@ typedef void *HCERTSTORE;
 // Handle returned by the store provider when opened.
 typedef void *HCERTSTOREPROV;
 
+#define WINCRYPT32API
+
+//+-------------------------------------------------------------------------
+//  Certificate versions
+//--------------------------------------------------------------------------
+#define CERT_V1     0
+#define CERT_V2     1
+#define CERT_V3     2
+
+//  Certificate Information Flags
+//--------------------------------------------------------------------------
+#define CERT_INFO_VERSION_FLAG                      1
+#define CERT_INFO_SERIAL_NUMBER_FLAG                2
+#define CERT_INFO_SIGNATURE_ALGORITHM_FLAG          3
+#define CERT_INFO_ISSUER_FLAG                       4
+#define CERT_INFO_NOT_BEFORE_FLAG                   5
+#define CERT_INFO_NOT_AFTER_FLAG                    6
+#define CERT_INFO_SUBJECT_FLAG                      7
+#define CERT_INFO_SUBJECT_PUBLIC_KEY_INFO_FLAG      8
+#define CERT_INFO_ISSUER_UNIQUE_ID_FLAG             9
+#define CERT_INFO_SUBJECT_UNIQUE_ID_FLAG            10
+#define CERT_INFO_EXTENSION_FLAG                    11
+
 //+-------------------------------------------------------------------------
 //  Certificate context.
 //
@@ -40,6 +63,137 @@ typedef struct _CERT_REQUEST_INFO {
 //  Certificate Request versions
 //--------------------------------------------------------------------------
 #define CERT_REQUEST_V1     0
+
+
+//+-------------------------------------------------------------------------
+// Certificate comparison functions
+//--------------------------------------------------------------------------
+#define CERT_COMPARE_MASK           0xFFFF
+#define CERT_COMPARE_SHIFT          16
+#define CERT_COMPARE_ANY            0
+#define CERT_COMPARE_SHA1_HASH      1
+#define CERT_COMPARE_NAME           2
+#define CERT_COMPARE_ATTR           3
+#define CERT_COMPARE_MD5_HASH       4
+#define CERT_COMPARE_PROPERTY       5
+#define CERT_COMPARE_PUBLIC_KEY     6
+#define CERT_COMPARE_HASH           CERT_COMPARE_SHA1_HASH
+#define CERT_COMPARE_NAME_STR_A     7
+#define CERT_COMPARE_NAME_STR_W     8
+#define CERT_COMPARE_KEY_SPEC       9
+#define CERT_COMPARE_ENHKEY_USAGE   10
+#define CERT_COMPARE_CTL_USAGE      CERT_COMPARE_ENHKEY_USAGE
+#define CERT_COMPARE_SUBJECT_CERT   11
+#define CERT_COMPARE_ISSUER_OF      12
+#define CERT_COMPARE_EXISTING       13
+#define CERT_COMPARE_SIGNATURE_HASH 14
+#define CERT_COMPARE_KEY_IDENTIFIER 15
+#define CERT_COMPARE_CERT_ID        16
+#define CERT_COMPARE_CROSS_CERT_DIST_POINTS 17
+
+#define CERT_COMPARE_PUBKEY_MD5_HASH 18
+
+//+-------------------------------------------------------------------------
+//  dwFindType
+//
+//  The dwFindType definition consists of two components:
+//   - comparison function
+//   - certificate information flag
+//--------------------------------------------------------------------------
+#define CERT_FIND_ANY           (CERT_COMPARE_ANY << CERT_COMPARE_SHIFT)
+#define CERT_FIND_SHA1_HASH     (CERT_COMPARE_SHA1_HASH << CERT_COMPARE_SHIFT)
+#define CERT_FIND_MD5_HASH      (CERT_COMPARE_MD5_HASH << CERT_COMPARE_SHIFT)
+#define CERT_FIND_SIGNATURE_HASH (CERT_COMPARE_SIGNATURE_HASH << CERT_COMPARE_SHIFT)
+#define CERT_FIND_KEY_IDENTIFIER (CERT_COMPARE_KEY_IDENTIFIER << CERT_COMPARE_SHIFT)
+#define CERT_FIND_HASH          CERT_FIND_SHA1_HASH
+#define CERT_FIND_PROPERTY      (CERT_COMPARE_PROPERTY << CERT_COMPARE_SHIFT)
+#define CERT_FIND_PUBLIC_KEY    (CERT_COMPARE_PUBLIC_KEY << CERT_COMPARE_SHIFT)
+#define CERT_FIND_SUBJECT_NAME  (CERT_COMPARE_NAME << CERT_COMPARE_SHIFT | \
+                                 CERT_INFO_SUBJECT_FLAG)
+#define CERT_FIND_SUBJECT_ATTR  (CERT_COMPARE_ATTR << CERT_COMPARE_SHIFT | \
+                                 CERT_INFO_SUBJECT_FLAG)
+#define CERT_FIND_ISSUER_NAME   (CERT_COMPARE_NAME << CERT_COMPARE_SHIFT | \
+                                 CERT_INFO_ISSUER_FLAG)
+#define CERT_FIND_ISSUER_ATTR   (CERT_COMPARE_ATTR << CERT_COMPARE_SHIFT | \
+                                 CERT_INFO_ISSUER_FLAG)
+#define CERT_FIND_SUBJECT_STR_A (CERT_COMPARE_NAME_STR_A << CERT_COMPARE_SHIFT | \
+                                 CERT_INFO_SUBJECT_FLAG)
+#define CERT_FIND_SUBJECT_STR_W (CERT_COMPARE_NAME_STR_W << CERT_COMPARE_SHIFT | \
+                                 CERT_INFO_SUBJECT_FLAG)
+#define CERT_FIND_SUBJECT_STR   CERT_FIND_SUBJECT_STR_W
+#define CERT_FIND_ISSUER_STR_A  (CERT_COMPARE_NAME_STR_A << CERT_COMPARE_SHIFT | \
+                                 CERT_INFO_ISSUER_FLAG)
+#define CERT_FIND_ISSUER_STR_W  (CERT_COMPARE_NAME_STR_W << CERT_COMPARE_SHIFT | \
+                                 CERT_INFO_ISSUER_FLAG)
+#define CERT_FIND_ISSUER_STR    CERT_FIND_ISSUER_STR_W
+#define CERT_FIND_KEY_SPEC      (CERT_COMPARE_KEY_SPEC << CERT_COMPARE_SHIFT)
+#define CERT_FIND_ENHKEY_USAGE  (CERT_COMPARE_ENHKEY_USAGE << CERT_COMPARE_SHIFT)
+#define CERT_FIND_CTL_USAGE     CERT_FIND_ENHKEY_USAGE
+
+#define CERT_FIND_SUBJECT_CERT  (CERT_COMPARE_SUBJECT_CERT << CERT_COMPARE_SHIFT)
+#define CERT_FIND_ISSUER_OF     (CERT_COMPARE_ISSUER_OF << CERT_COMPARE_SHIFT)
+#define CERT_FIND_EXISTING      (CERT_COMPARE_EXISTING << CERT_COMPARE_SHIFT)
+#define CERT_FIND_CERT_ID       (CERT_COMPARE_CERT_ID << CERT_COMPARE_SHIFT)
+#define CERT_FIND_CROSS_CERT_DIST_POINTS \
+                    (CERT_COMPARE_CROSS_CERT_DIST_POINTS << CERT_COMPARE_SHIFT)
+
+
+#define CERT_FIND_PUBKEY_MD5_HASH \
+                    (CERT_COMPARE_PUBKEY_MD5_HASH << CERT_COMPARE_SHIFT)
+
+//+-------------------------------------------------------------------------
+//  CERT_FIND_ANY
+//
+//  Find any certificate.
+//
+//  pvFindPara isn't used.
+//--------------------------------------------------------------------------
+
+//+-------------------------------------------------------------------------
+//  CERT_FIND_HASH
+//
+//  Find a certificate with the specified hash.
+//
+//  pvFindPara points to a CRYPT_HASH_BLOB.
+//--------------------------------------------------------------------------
+
+//+-------------------------------------------------------------------------
+//  CERT_FIND_KEY_IDENTIFIER
+//
+//  Find a certificate with the specified KeyIdentifier. Gets the
+//  CERT_KEY_IDENTIFIER_PROP_ID property and compares with the input
+//  CRYPT_HASH_BLOB.
+//
+//  pvFindPara points to a CRYPT_HASH_BLOB.
+//--------------------------------------------------------------------------
+
+//+-------------------------------------------------------------------------
+//  CERT_FIND_PROPERTY
+//
+//  Find a certificate having the specified property.
+//
+//  pvFindPara points to a DWORD containing the PROP_ID
+//--------------------------------------------------------------------------
+
+//+-------------------------------------------------------------------------
+//  CERT_FIND_PUBLIC_KEY
+//
+//  Find a certificate matching the specified public key.
+//
+//  pvFindPara points to a CERT_PUBLIC_KEY_INFO containing the public key
+//--------------------------------------------------------------------------
+
+//+-------------------------------------------------------------------------
+//  CERT_FIND_SUBJECT_NAME
+//  CERT_FIND_ISSUER_NAME
+//
+//  Find a certificate with the specified subject/issuer name. Does an exact
+//  match of the entire name.
+//
+//  Restricts search to certificates matching the dwCertEncodingType.
+//
+//  pvFindPara points to a CERT_NAME_BLOB.
+//--------------------------------------------------------------------------
 
 //+-------------------------------------------------------------------------
 //  Open the cert store using the specified store provider.
@@ -511,6 +665,6 @@ CertFindCertificateInStore(
     IN DWORD dwCertEncodingType,
     IN DWORD dwFindFlags,
     IN DWORD dwFindType,
-    IN const void *pvFindPara,
+    IN const char *pvFindPara,
     IN PCCERT_CONTEXT pPrevCertContext
     );
