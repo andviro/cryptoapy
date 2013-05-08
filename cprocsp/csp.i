@@ -4,6 +4,18 @@
 %module csp
 %include "typemaps.i"
 
+%define ZEROED_STRUCT(type)
+%extend type {
+_ ## type() {
+    size_t sz = sizeof(type);
+    type *res = malloc(sz);
+    memset(res, 0, sz);
+    res->cbSize = sz;
+    return res;
+}
+};
+%enddef
+
 %{
 #include <stdio.h>
 #ifdef _WIN32
@@ -20,9 +32,11 @@
 
 %include "wintypes.i"
 %include "defines.i"
+%include "common.i"
 %include <WinCryptEx.h>
 %include "errors.i"
 %include "context.i"
 %include "cert.i"
+%include "msg.i"
 /*%include "hash.i"*/
 /*%include "sign.i"*/

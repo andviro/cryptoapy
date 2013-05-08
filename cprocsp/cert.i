@@ -668,3 +668,64 @@ CertFindCertificateInStore(
     IN const char *pvFindPara,
     IN PCCERT_CONTEXT pPrevCertContext
     );
+
+
+//+-------------------------------------------------------------------------
+//  Acquire a HCRYPTPROV handle and dwKeySpec for the specified certificate
+//  context. Uses the certificate's CERT_KEY_PROV_INFO_PROP_ID property.
+//  The returned HCRYPTPROV handle may optionally be cached using the
+//  certificate's CERT_KEY_CONTEXT_PROP_ID property.
+//
+//  If CRYPT_ACQUIRE_CACHE_FLAG is set, then, if an already acquired and
+//  cached HCRYPTPROV exists for the certificate, its returned. Otherwise,
+//  a HCRYPTPROV is acquired and then cached via the certificate's
+//  CERT_KEY_CONTEXT_PROP_ID.
+//
+//  The CRYPT_ACQUIRE_USE_PROV_INFO_FLAG can be set to use the dwFlags field of
+//  the certificate's CERT_KEY_PROV_INFO_PROP_ID property's CRYPT_KEY_PROV_INFO
+//  data structure to determine if the returned HCRYPTPROV should be cached.
+//  HCRYPTPROV caching is enabled if the CERT_SET_KEY_CONTEXT_PROP_ID flag was
+//  set.
+//
+//  If CRYPT_ACQUIRE_COMPARE_KEY_FLAG is set, then,
+//  the public key in the certificate is compared with the public
+//  key returned by the cryptographic provider. If the keys don't match, the
+//  acquire fails and LastError is set to NTE_BAD_PUBLIC_KEY. Note, if
+//  a cached HCRYPTPROV is returned, the comparison isn't done. We assume the
+//  comparison was done on the initial acquire.
+//
+//  The CRYPT_ACQUIRE_SILENT_FLAG can be set to suppress any UI by the CSP.
+//  See CryptAcquireContext's CRYPT_SILENT flag for more details.
+//
+//  *pfCallerFreeProv is returned set to FALSE for:
+//    - Acquire or public key comparison fails.
+//    - CRYPT_ACQUIRE_CACHE_FLAG is set.
+//    - CRYPT_ACQUIRE_USE_PROV_INFO_FLAG is set AND
+//      CERT_SET_KEY_CONTEXT_PROP_ID flag is set in the dwFlags field of the
+//      certificate's CERT_KEY_PROV_INFO_PROP_ID property's
+//      CRYPT_KEY_PROV_INFO data structure.
+//  When *pfCallerFreeProv is FALSE, the caller must not release. The
+//  returned HCRYPTPROV will be released on the last free of the certificate
+//  context.
+//
+//  Otherwise, *pfCallerFreeProv is TRUE and the returned HCRYPTPROV must
+//  be released by the caller by calling CryptReleaseContext.
+//--------------------------------------------------------------------------
+WINCRYPT32API
+BOOL
+WINAPI
+CryptAcquireCertificatePrivateKey(
+    IN PCCERT_CONTEXT pCert,
+    IN DWORD dwFlags,
+    IN void *pvReserved,
+    OUT HCRYPTPROV *OUTPUT,
+    OUT OPTIONAL DWORD *OUTPUT,
+    OUT OPTIONAL BOOL *OUTPUT
+    );
+
+#define CRYPT_ACQUIRE_CACHE_FLAG                0x00000001
+#define CRYPT_ACQUIRE_USE_PROV_INFO_FLAG        0x00000002
+#define CRYPT_ACQUIRE_COMPARE_KEY_FLAG          0x00000004
+
+#define CRYPT_ACQUIRE_SILENT_FLAG               0x00000040
+

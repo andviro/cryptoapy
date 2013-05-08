@@ -9,7 +9,7 @@ CryptCreateHash(
     ALG_ID Algid,
     HCRYPTKEY hKey,
     DWORD dwFlags,
-    HCRYPTHASH *phHash
+    HCRYPTHASH *OUTPUT
     );
 
 
