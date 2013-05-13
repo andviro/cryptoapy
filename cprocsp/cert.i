@@ -36,14 +36,41 @@ typedef void *HCERTSTOREPROV;
 //  CertDuplicateCertificateContext function can be called to make a duplicate
 //  copy (which also must be freed by calling CertFreeCertificateContext).
 //--------------------------------------------------------------------------
-typedef struct _CERT_CONTEXT {
-    DWORD                   dwCertEncodingType;
-    BYTE                    *pbCertEncoded;
-    DWORD                   cbCertEncoded;
-    PCERT_INFO              pCertInfo;
-    HCERTSTORE              hCertStore;
-} CERT_CONTEXT, *PCERT_CONTEXT;
-typedef const CERT_CONTEXT *PCCERT_CONTEXT;
+/*typedef struct _CERT_CONTEXT {*/
+    /*DWORD                   dwCertEncodingType;*/
+    /*BYTE                    *pbCertEncoded;*/
+    /*DWORD                   cbCertEncoded;*/
+    /*PCERT_INFO              pCertInfo;*/
+    /*HCERTSTORE              hCertStore;*/
+/*} CERT_CONTEXT, *PCERT_CONTEXT;*/
+/*typedef const CERT_CONTEXT *PCCERT_CONTEXT;*/
+%cstring_output_allocate_size(char **s, DWORD *slen, free(*$1));
+%inline %{
+class Cert {
+public:
+    PCCERT_CONTEXT pcert;
+    Cert(PCCERT_CONTEXT pc) {
+        pcert = pc;
+    };
+
+    ~Cert() throw(CSPException){
+        if (!CertFreeCertificateContext(pcert)) {
+            throw CSPException("Couldn't free certificate context");
+        }
+    };
+
+    void thumbprint(char **s, DWORD *slen) throw(CSPException) {
+        if(!CertGetCertificateContextProperty(pcert, CERT_HASH_PROP_ID, NULL, slen)) {
+            throw CSPException("Couldn't get certificate hash size");
+        }
+        *s = (char *)malloc(*slen);
+        if(!CertGetCertificateContextProperty(pcert, CERT_HASH_PROP_ID, (void *)*s, slen)) {
+            throw CSPException("Couldn't get certificate thumbprint");
+        }
+    };
+
+};
+%}
 
 //+-------------------------------------------------------------------------
 //  Information stored in a certificate request
@@ -51,13 +78,13 @@ typedef const CERT_CONTEXT *PCCERT_CONTEXT;
 //  The Subject, Algorithm, PublicKey and Attribute BLOBs are the encoded
 //  representation of the information.
 //--------------------------------------------------------------------------
-typedef struct _CERT_REQUEST_INFO {
-    DWORD                   dwVersion;
-    CERT_NAME_BLOB          Subject;
-    CERT_PUBLIC_KEY_INFO    SubjectPublicKeyInfo;
-    DWORD                   cAttribute;
-    PCRYPT_ATTRIBUTE        rgAttribute;
-} CERT_REQUEST_INFO, *PCERT_REQUEST_INFO;
+/*typedef struct _CERT_REQUEST_INFO {*/
+    /*DWORD                   dwVersion;*/
+    /*CERT_NAME_BLOB          Subject;*/
+    /*CERT_PUBLIC_KEY_INFO    SubjectPublicKeyInfo;*/
+    /*DWORD                   cAttribute;*/
+    /*PCRYPT_ATTRIBUTE        rgAttribute;*/
+/*} CERT_REQUEST_INFO, *PCERT_REQUEST_INFO;*/
 
 //+-------------------------------------------------------------------------
 //  Certificate Request versions
@@ -551,7 +578,7 @@ typedef struct _CERT_REQUEST_INFO {
 //
 //--------------------------------------------------------------------------
 
-WINCRYPT32API
+/*WINCRYPT32API
 HCERTSTORE
 WINAPI
 CertOpenStore(
@@ -570,12 +597,96 @@ CertOpenSystemStore(
     IN HCRYPTPROV hProv,
     IN LPCTSTR pszSubsystemProtocol
     );
+    */
 
-//+-------------------------------------------------------------------------
-//  Certificate Store close flags
-//--------------------------------------------------------------------------
-#define CERT_CLOSE_STORE_FORCE_FLAG         0x00000001
-#define CERT_CLOSE_STORE_CHECK_FLAG         0x00000002
+%inline %{
+class CertIter {
+public:
+    HCERTSTORE hstore;
+    bool iter;
+    PCCERT_CONTEXT pcert;
+
+    CertIter(HCERTSTORE hs) {
+        hstore = hs;
+        iter = true;
+        pcert = NULL;
+    };
+
+    CertIter *__iter__() {
+        return this;
+    };
+
+    Cert *next() throw (Stop_Iteration) {
+        if (!iter) {
+            throw Stop_Iteration();
+        }
+        pcert = CertEnumCertificatesInStore(hstore, pcert);
+        if (pcert) {
+            return new Cert(pcert);
+        } else {
+            iter = false;
+            throw Stop_Iteration();
+        }
+    };
+};
+
+class CertFind : public CertIter {
+public:
+    CRYPT_HASH_BLOB chb;
+    DWORD enctype, findtype;
+
+    CertFind(HCERTSTORE hs, DWORD enctype, DWORD findtype, char *STRING, size_t LENGTH) : CertIter(hs) {
+        chb.pbData = (BYTE *)STRING;
+        chb.cbData = LENGTH;
+    };
+
+    Cert *next() throw (Stop_Iteration) {
+        if (!iter) {
+            throw Stop_Iteration();
+        }
+        pcert = CertFindCertificateInStore(hstore, enctype, 0, findtype, &chb, pcert);
+        if (pcert) {
+            return new Cert(pcert);
+        } else {
+            iter = false;
+            throw Stop_Iteration();
+        }
+    };
+};
+
+class CertStore {
+private:
+    HCERTSTORE hstore = NULL;
+public:
+
+    CertStore(const Crypt *ctx, LPCTSTR protocol) throw(CSPException) {
+        HCRYPTPROV hprov = 0;
+        if (ctx) {
+            hprov = ctx->hprov;
+        }
+        hstore = CertOpenSystemStore(hprov, protocol);
+        if (!hstore) {
+            throw CSPException("Couldn't open certificate storage");
+        }
+
+    };
+
+    ~CertStore() throw(CSPException) {
+        if (hstore && !CertCloseStore(hstore, CERT_CLOSE_STORE_CHECK_FLAG)) {
+            throw CSPException("Couldn't properly close certificate storage");
+        }
+    };
+
+    CertIter *__iter__() {
+        return new CertIter(hstore);
+    };
+
+    CertFind *find_by_thumb(char *STRING, size_t LENGTH) {
+        return new CertFind(hstore, X509_ASN_ENCODING | PKCS_7_ASN_ENCODING, CERT_FIND_HASH, STRING, LENGTH);
+    };
+
+};
+%}
 
 //+-------------------------------------------------------------------------
 //  Close a cert store handle.
@@ -601,13 +712,13 @@ CertOpenSystemStore(
 //  LastError is preserved unless CERT_CLOSE_STORE_CHECK_FLAG is set and FALSE
 //  is returned.
 //--------------------------------------------------------------------------
-WINCRYPT32API
-BOOL
-WINAPI
-CertCloseStore(
-    IN HCERTSTORE hCertStore,
-    DWORD dwFlags
-    );
+/*WINCRYPT32API*/
+/*BOOL*/
+/*WINAPI*/
+/*CertCloseStore(*/
+    /*IN HCERTSTORE hCertStore,*/
+    /*DWORD dwFlags*/
+    /*);*/
 
 //+-------------------------------------------------------------------------
 //  Enumerate the certificate contexts in the store.
@@ -625,13 +736,13 @@ CertCloseStore(
 //  NOTE: a NON-NULL pPrevCertContext is always CertFreeCertificateContext'ed by
 //  this function, even for an error.
 //--------------------------------------------------------------------------
-WINCRYPT32API
-PCCERT_CONTEXT
-WINAPI
-CertEnumCertificatesInStore(
-    IN HCERTSTORE hCertStore,
-    IN PCCERT_CONTEXT pPrevCertContext
-    );
+/*WINCRYPT32API*/
+/*PCCERT_CONTEXT*/
+/*WINAPI*/
+/*CertEnumCertificatesInStore(*/
+    /*IN HCERTSTORE hCertStore,*/
+    /*IN PCCERT_CONTEXT pPrevCertContext*/
+    /*);*/
 
 //+-------------------------------------------------------------------------
 //  Find the first or next certificate context in the store.
@@ -657,17 +768,17 @@ CertEnumCertificatesInStore(
 //  NOTE: a NON-NULL pPrevCertContext is always CertFreeCertificateContext'ed by
 //  this function, even for an error.
 //--------------------------------------------------------------------------
-WINCRYPT32API
-PCCERT_CONTEXT
-WINAPI
-CertFindCertificateInStore(
-    IN HCERTSTORE hCertStore,
-    IN DWORD dwCertEncodingType,
-    IN DWORD dwFindFlags,
-    IN DWORD dwFindType,
-    IN const char *pvFindPara,
-    IN PCCERT_CONTEXT pPrevCertContext
-    );
+/*WINCRYPT32API*/
+/*PCCERT_CONTEXT*/
+/*WINAPI*/
+/*CertFindCertificateInStore(*/
+    /*IN HCERTSTORE hCertStore,*/
+    /*IN DWORD dwCertEncodingType,*/
+    /*IN DWORD dwFindFlags,*/
+    /*IN DWORD dwFindType,*/
+    /*IN const char *pvFindPara,*/
+    /*IN PCCERT_CONTEXT pPrevCertContext*/
+    /*);*/
 
 
 //+-------------------------------------------------------------------------
@@ -711,17 +822,17 @@ CertFindCertificateInStore(
 //  Otherwise, *pfCallerFreeProv is TRUE and the returned HCRYPTPROV must
 //  be released by the caller by calling CryptReleaseContext.
 //--------------------------------------------------------------------------
-WINCRYPT32API
-BOOL
-WINAPI
-CryptAcquireCertificatePrivateKey(
-    IN PCCERT_CONTEXT pCert,
-    IN DWORD dwFlags,
-    IN void *pvReserved,
-    OUT HCRYPTPROV *OUTPUT,
-    OUT OPTIONAL DWORD *OUTPUT,
-    OUT OPTIONAL BOOL *OUTPUT
-    );
+/*WINCRYPT32API*/
+/*BOOL*/
+/*WINAPI*/
+/*CryptAcquireCertificatePrivateKey(*/
+    /*IN PCCERT_CONTEXT pCert,*/
+    /*IN DWORD dwFlags,*/
+    /*IN void *pvReserved,*/
+    /*OUT HCRYPTPROV *OUTPUT,*/
+    /*OUT OPTIONAL DWORD *OUTPUT,*/
+    /*OUT OPTIONAL BOOL *OUTPUT*/
+    /*);*/
 
 #define CRYPT_ACQUIRE_CACHE_FLAG                0x00000001
 #define CRYPT_ACQUIRE_USE_PROV_INFO_FLAG        0x00000002

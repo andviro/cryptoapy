@@ -110,11 +110,6 @@
 /* Our silly example sub-id*/
 #define ALG_SID_EXAMPLE                 80
 
-#ifndef ALGIDDEF
-#define ALGIDDEF
-typedef unsigned int ALG_ID;
-#endif
-
 /* algorithm identifier definitions*/
 #define CALG_MD2                (ALG_CLASS_HASH | ALG_TYPE_ANY | ALG_SID_MD2)
 #define CALG_MD4                (ALG_CLASS_HASH | ALG_TYPE_ANY | ALG_SID_MD4)
@@ -154,9 +149,6 @@ typedef unsigned int ALG_ID;
 
 /* resource number for signatures in the CSP*/
 #define	SIGNATURE_RESOURCE_NUMBER	0x29A
-typedef ULONG_PTR HCRYPTPROV;
-typedef ULONG_PTR HCRYPTKEY;
-typedef ULONG_PTR HCRYPTHASH;
 
 /* dwFlags definitions for CryptAcquireContext*/
 #define CRYPT_VERIFYCONTEXT     0xF0000000u

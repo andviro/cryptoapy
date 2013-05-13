@@ -3,18 +3,36 @@
 
 %module csp
 %include "typemaps.i"
+%include "exception.i"
+%include "cstring.i"
 
-%define ZEROED_STRUCT(type)
-%extend type {
-_ ## type() {
-    size_t sz = sizeof(type);
-    type *res = malloc(sz);
-    memset(res, 0, sz);
-    res->cbSize = sz;
-    return res;
-}
+/*%define ZEROED_STRUCT(type)*/
+/*%extend type {*/
+/*_ ## type() {*/
+    /*size_t sz = sizeof(type);*/
+    /*type *res = (type) malloc(sz);*/
+    /*memset(res, 0, sz);*/
+    /*res->cbSize = sz;*/
+    /*return res;*/
+/*}*/
+/*};*/
+/*%enddef*/
+
+%inline %{
+class Stop_Iteration {
 };
-%enddef
+%}
+
+
+%typemap(throws) Stop_Iteration %{
+  PyErr_SetNone(PyExc_StopIteration);
+  SWIG_fail;
+%}
+
+%typemap(throws) CSPException %{
+  PyErr_SetString(PyExc_SystemError, $1.msg);
+  SWIG_fail;
+%}
 
 %{
 #include <stdio.h>

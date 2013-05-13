@@ -1,8 +1,14 @@
 /* vim: ft=swig
 */
-#define WINBASEAPI
+%inline %{
+class CSPException {
+public:
+    int code;
+    char msg[256];
+    CSPException(const char *m) {
+        code = GetLastError();
+        strncpy(msg, m, 256);
+    }
+};
 
-
-WINBASEAPI DWORD WINAPI GetLastError(void);
-
-WINBASEAPI void WINAPI SetLastError(DWORD dwErr);   //Sets error code
+%}
