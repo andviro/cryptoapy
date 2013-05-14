@@ -113,7 +113,7 @@ def test_cert_name_not_found():
 
 
 def test_msg_decode():
-    testdata = open('/home/andrew/devel/cpro-python/tests/logical.cms', 'rb').read()
+    testdata = open('tests/logical.cms', 'rb').read()
     msg = csp.CryptMsg(testdata)
     print msg.num_signers
     assert msg.num_signers
