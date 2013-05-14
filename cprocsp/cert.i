@@ -45,22 +45,28 @@ typedef void *HCERTSTOREPROV;
 /*} CERT_CONTEXT, *PCERT_CONTEXT;*/
 /*typedef const CERT_CONTEXT *PCCERT_CONTEXT;*/
 %cstring_output_allocate_size(char **s, DWORD *slen, free(*$1));
+%newobject Cert::get_name;
+
 %inline %{
 class Cert {
 public:
     PCCERT_CONTEXT pcert;
     Cert(PCCERT_CONTEXT pc) {
-        pcert = pc;
+        pcert = CertDuplicateCertificateContext(pc);
+        /*printf("New cert %x\n", pcert);*/
     };
 
     ~Cert() throw(CSPException){
         if (!CertFreeCertificateContext(pcert)) {
             throw CSPException("Couldn't free certificate context");
         }
+        /*printf("Freed cert %x\n", pcert);*/
     };
 
     void thumbprint(char **s, DWORD *slen) throw(CSPException) {
+        /*puts("Thumb");*/
         if(!CertGetCertificateContextProperty(pcert, CERT_HASH_PROP_ID, NULL, slen)) {
+            /*printf("Error: %x\n", pcert);*/
             throw CSPException("Couldn't get certificate hash size");
         }
         *s = (char *)malloc(*slen);
@@ -69,6 +75,28 @@ public:
         }
     };
 
+    char *get_name() throw(CSPException) {
+        DWORD slen = 0;
+        char *s = NULL;
+        PCERT_NAME_BLOB pNameBlob = &pcert->pCertInfo->Subject;
+
+        /*puts("get_name: start");*/
+        slen = CertNameToStr( X509_ASN_ENCODING, pNameBlob,
+            CERT_X500_NAME_STR | CERT_NAME_STR_NO_PLUS_FLAG, NULL, 0);
+        if (slen <= 1)
+            throw CSPException("get_name(NULL)");
+
+        s = (char *)malloc(slen);
+
+        slen = CertNameToStr(
+        X509_ASN_ENCODING, pNameBlob,
+        CERT_X500_NAME_STR | CERT_NAME_STR_NO_PLUS_FLAG,
+        s, slen);
+        if (slen <= 1)
+            throw CSPException("get_name(pbData)");
+        /*puts("get_name: end");*/
+        return s;
+    };
 };
 %}
 
@@ -598,6 +626,13 @@ CertOpenSystemStore(
     IN LPCTSTR pszSubsystemProtocol
     );
     */
+/*%extend CertIter*/
+/*{*/
+/*%insert("python") %{*/
+    /*def __iter__(self):*/
+        /*return self*/
+/*%}*/
+/*}*/
 
 %inline %{
 class CertIter {
@@ -610,6 +645,7 @@ public:
         hstore = hs;
         iter = true;
         pcert = NULL;
+        /*puts("Started iter");*/
     };
 
     CertIter *__iter__() {
@@ -618,13 +654,16 @@ public:
 
     Cert *next() throw (Stop_Iteration) {
         if (!iter) {
+            /*puts("Stop iter");*/
             throw Stop_Iteration();
         }
         pcert = CertEnumCertificatesInStore(hstore, pcert);
         if (pcert) {
+            /*puts("Next iter");*/
             return new Cert(pcert);
         } else {
             iter = false;
+            /*puts("Stop iter");*/
             throw Stop_Iteration();
         }
     };
@@ -638,17 +677,21 @@ public:
     CertFind(HCERTSTORE hs, DWORD enctype, DWORD findtype, char *STRING, size_t LENGTH) : CertIter(hs) {
         chb.pbData = (BYTE *)STRING;
         chb.cbData = LENGTH;
+        /*puts("Started find");*/
     };
 
     Cert *next() throw (Stop_Iteration) {
         if (!iter) {
+            /*puts("Stopped find");*/
             throw Stop_Iteration();
         }
         pcert = CertFindCertificateInStore(hstore, enctype, 0, findtype, &chb, pcert);
         if (pcert) {
+            /*puts("Next find");*/
             return new Cert(pcert);
         } else {
             iter = false;
+            /*puts("Stopped find");*/
             throw Stop_Iteration();
         }
     };
@@ -668,6 +711,7 @@ public:
         if (!hstore) {
             throw CSPException("Couldn't open certificate storage");
         }
+        /*puts("Opened store");*/
 
     };
 
@@ -675,6 +719,7 @@ public:
         if (hstore && !CertCloseStore(hstore, CERT_CLOSE_STORE_CHECK_FLAG)) {
             throw CSPException("Couldn't properly close certificate storage");
         }
+        /*puts("Freed store");*/
     };
 
     CertIter *__iter__() {
@@ -683,6 +728,10 @@ public:
 
     CertFind *find_by_thumb(char *STRING, size_t LENGTH) {
         return new CertFind(hstore, X509_ASN_ENCODING | PKCS_7_ASN_ENCODING, CERT_FIND_HASH, STRING, LENGTH);
+    };
+
+    CertFind *find_by_name(char *STRING, size_t LENGTH) {
+        return new CertFind(hstore, X509_ASN_ENCODING | PKCS_7_ASN_ENCODING, CERT_FIND_SUBJECT_STR, STRING, LENGTH);
     };
 
 };

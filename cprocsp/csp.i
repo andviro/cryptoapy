@@ -29,11 +29,6 @@ class Stop_Iteration {
   SWIG_fail;
 %}
 
-%typemap(throws) CSPException %{
-  PyErr_SetString(PyExc_SystemError, $1.msg);
-  SWIG_fail;
-%}
-
 %{
 #include <stdio.h>
 #ifdef _WIN32
@@ -55,6 +50,6 @@ class Stop_Iteration {
 %include "errors.i"
 %include "context.i"
 %include "cert.i"
-%include "msg.i"
+/*%include "msg.i"*/
 /*%include "hash.i"*/
 /*%include "sign.i"*/

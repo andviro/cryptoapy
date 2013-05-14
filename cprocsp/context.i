@@ -10,9 +10,11 @@ public:
         if (!res) {
             throw CSPException("Couldn't acquire context");
         }
+        printf("New ctx %x\n", hprov);
     };
     ~Crypt() throw(CSPException) {
         if (hprov) {
+            printf("Free ctx %x\n", hprov);
             bool res = CryptReleaseContext(hprov, 0);
             if (!res) {
                 throw CSPException("Couldn't release context");

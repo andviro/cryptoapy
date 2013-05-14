@@ -1,13 +1,17 @@
 /* vim: ft=swig
 */
+%typemap(throws) CSPException %{
+  PyErr_SetString(PyExc_SystemError, $1.msg);
+  SWIG_fail;
+%}
+
 %inline %{
 class CSPException {
 public:
-    int code;
     char msg[256];
     CSPException(const char *m) {
-        code = GetLastError();
-        strncpy(msg, m, 256);
+        DWORD code = GetLastError();
+        snprintf(msg, 256, "%s (0x%x)", m, code);
     }
 };
 
