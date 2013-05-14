@@ -79,10 +79,11 @@ def _cert_thumb():
     return thumbs[0]
 
 
-def _cert_name():
+def test_cert_dname():
     cs = csp.CertStore(None, "MY")
-    name = list(cert.get_name() for cert in cs)[0]
-    return name
+    names = list(cert.name() for cert in cs)
+    print names
+    assert all(len(name) for name in names)
 
 
 def test_cert_find_by_thumb():
@@ -93,7 +94,27 @@ def test_cert_find_by_thumb():
 
 
 def test_cert_find_by_name():
-    name = _cert_name()
+    name = 'test'
     cs = csp.CertStore(None, "MY")
     res = list(cs.find_by_name(name))
     assert len(res)
+
+
+def test_cert_not_found():
+    cs = csp.CertStore(None, "MY")
+    res = list(cs.find_by_thumb('x' * 20))
+    assert not len(res)
+
+
+def test_cert_name_not_found():
+    cs = csp.CertStore(None, "MY")
+    res = list(cs.find_by_name('some wrong name'))
+    assert not len(res)
+
+
+def test_msg_decode():
+    testdata = open('/home/andrew/devel/cpro-python/tests/logical.cms', 'rb').read()
+    msg = csp.CryptMsg(testdata)
+    print msg.num_signers
+    assert msg.num_signers
+    assert len(list(msg.certs))

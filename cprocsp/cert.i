@@ -75,25 +75,25 @@ public:
         }
     };
 
-    char *get_name() throw(CSPException) {
+    char *name() throw(CSPException) {
         DWORD slen = 0;
         char *s = NULL;
         PCERT_NAME_BLOB pNameBlob = &pcert->pCertInfo->Subject;
 
-        /*puts("get_name: start");*/
+        /*puts("dname: start");*/
         slen = CertNameToStr( X509_ASN_ENCODING, pNameBlob,
             CERT_X500_NAME_STR | CERT_NAME_STR_NO_PLUS_FLAG, NULL, 0);
         if (slen <= 1)
-            throw CSPException("get_name(NULL)");
+            throw CSPException("Wrong size for cert name");
 
         s = (char *)malloc(slen);
 
         slen = CertNameToStr(
-        X509_ASN_ENCODING, pNameBlob,
-        CERT_X500_NAME_STR | CERT_NAME_STR_NO_PLUS_FLAG,
-        s, slen);
+            X509_ASN_ENCODING, pNameBlob,
+            CERT_X500_NAME_STR | CERT_NAME_STR_NO_PLUS_FLAG,
+            s, slen);
         if (slen <= 1)
-            throw CSPException("get_name(pbData)");
+            throw CSPException("Couldn't get cert name");
         /*puts("get_name: end");*/
         return s;
     };
@@ -652,7 +652,7 @@ public:
         return this;
     };
 
-    Cert *next() throw (Stop_Iteration) {
+    virtual Cert *next() throw (Stop_Iteration) {
         if (!iter) {
             /*puts("Stop iter");*/
             throw Stop_Iteration();
@@ -672,22 +672,34 @@ public:
 class CertFind : public CertIter {
 public:
     CRYPT_HASH_BLOB chb;
+    CRYPT_HASH_BLOB *param;
     DWORD enctype, findtype;
 
-    CertFind(HCERTSTORE hs, DWORD enctype, DWORD findtype, char *STRING, size_t LENGTH) : CertIter(hs) {
+    CertFind(HCERTSTORE hs, DWORD et, DWORD ft, char *STRING, size_t LENGTH) : CertIter(hs) {
+        enctype = et;
+        findtype = ft;
         chb.pbData = (BYTE *)STRING;
         chb.cbData = LENGTH;
-        /*puts("Started find");*/
+        param = &chb;
+        /*printf("Started find %i-%i-%i\n", et, ft, LENGTH);*/
     };
 
-    Cert *next() throw (Stop_Iteration) {
+    CertFind(HCERTSTORE hs, DWORD et, char *name) : CertIter(hs) {
+        enctype = et;
+        findtype = CERT_FIND_SUBJECT_STR;
+        param = (CRYPT_HASH_BLOB *)name;
+
+        /*printf("Started find %i-'%s'\n", et, name);*/
+    };
+
+    virtual Cert *next() throw (Stop_Iteration) {
         if (!iter) {
             /*puts("Stopped find");*/
             throw Stop_Iteration();
         }
-        pcert = CertFindCertificateInStore(hstore, enctype, 0, findtype, &chb, pcert);
+        pcert = CertFindCertificateInStore(hstore, enctype, 0, findtype, param, pcert);
         if (pcert) {
-            /*puts("Next find");*/
+            /*printf("Next find %i %i\n", enctype, findtype);*/
             return new Cert(pcert);
         } else {
             iter = false;
@@ -699,8 +711,10 @@ public:
 
 class CertStore {
 private:
-    HCERTSTORE hstore = NULL;
+    HCERTSTORE hstore;
 public:
+
+    CertStore(HCERTSTORE hs) throw(CSPException) : hstore(hs) { };
 
     CertStore(const Crypt *ctx, LPCTSTR protocol) throw(CSPException) {
         HCRYPTPROV hprov = 0;
@@ -709,7 +723,7 @@ public:
         }
         hstore = CertOpenSystemStore(hprov, protocol);
         if (!hstore) {
-            throw CSPException("Couldn't open certificate storage");
+            throw CSPException("Couldn't open certificate store");
         }
         /*puts("Opened store");*/
 
@@ -717,7 +731,7 @@ public:
 
     ~CertStore() throw(CSPException) {
         if (hstore && !CertCloseStore(hstore, CERT_CLOSE_STORE_CHECK_FLAG)) {
-            throw CSPException("Couldn't properly close certificate storage");
+            throw CSPException("Couldn't properly close certificate store");
         }
         /*puts("Freed store");*/
     };
@@ -730,8 +744,8 @@ public:
         return new CertFind(hstore, X509_ASN_ENCODING | PKCS_7_ASN_ENCODING, CERT_FIND_HASH, STRING, LENGTH);
     };
 
-    CertFind *find_by_name(char *STRING, size_t LENGTH) {
-        return new CertFind(hstore, X509_ASN_ENCODING | PKCS_7_ASN_ENCODING, CERT_FIND_SUBJECT_STR, STRING, LENGTH);
+    CertFind *find_by_name(char *name) {
+        return new CertFind(hstore, X509_ASN_ENCODING | PKCS_7_ASN_ENCODING, name);
     };
 
 };
