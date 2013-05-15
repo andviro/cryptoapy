@@ -78,6 +78,10 @@ public:
         }
     };
 
+    char *sign_algorithm() {
+        return pcert->pCertInfo->SignatureAlgorithm.pszObjId;
+    }
+
     char *name() throw(CSPException) {
         DWORD slen = 0;
         char *s = NULL;

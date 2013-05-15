@@ -31,9 +31,11 @@ public:
         para.cbSize = sizeof(para);
         para.dwSignerIndex = n;
         para.dwSignerType = CMSG_VERIFY_SIGNER_CERT;
-        para.pvSigner = (void *)c;
+        para.pvSigner = (void *)c->pcert;
         res = CryptMsgControl(hmsg, 0, CMSG_CTRL_VERIFY_SIGNATURE_EX, &para);
-
+        if (!res) {
+            throw CSPException("Signature error");
+        }
         return res;
     }
 
@@ -101,11 +103,11 @@ CryptMsg::CryptMsg(char *STRING, size_t LENGTH, Crypt *ctx) throw(CSPException) 
         throw CSPException("Couldn't get message signer count");
     }
 
-    temp = sizeof(cai);
-    if (!CryptMsgGetParam(hmsg, CMSG_HASH_ALGORITHM_PARAM, 0, &cai, &temp)) {
-        throw CSPException("Couldn't get message hash algorithm");
-    }
-    puts(cai.pszObjId);
+    /*temp = sizeof(cai);*/
+    /*if (!CryptMsgGetParam(hmsg, CMSG_HASH_ALGORITHM_PARAM, 0, &cai, &temp)) {*/
+        /*throw CSPException("Couldn't get message hash algorithm");*/
+    /*}*/
+    /*puts(cai.pszObjId);*/
 
 
 };
@@ -114,7 +116,6 @@ CryptMsg::~CryptMsg() throw(CSPException) {
     if(hmsg && !CryptMsgClose(hmsg)) {
         throw CSPException("Couldn't close message");
     }
-
 };
 
 PCERT_INFO CryptMsg::get_nth_signer_info(DWORD idx) {

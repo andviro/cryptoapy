@@ -113,6 +113,12 @@ def test_cert_name_not_found():
     assert not len(res)
 
 
+def test_cert_sign_algorithm():
+    cs = csp.CertStore(None, "MY")
+    cert = list(cs)[0]
+    assert cert.sign_algorithm() == '1.2.643.2.2.3'
+
+
 def _msg_decode():
     testdata = open('tests/logical.cms', 'rb').read()
     msg = csp.CryptMsg(testdata)
@@ -121,23 +127,23 @@ def _msg_decode():
 
 def test_msg_signatures():
     testdata = open('tests/logical.cms', 'rb').read()
-    #msg = csp.CryptMsg(testdata, _context_simple())
+    # msg = csp.CryptMsg(testdata, _context_simple())
     ctx = csp.Crypt(
         None,
         csp.PROV_GOST_2001_DH,
         csp.CRYPT_VERIFYCONTEXT,
     )
     msg = csp.CryptMsg(testdata, ctx)
-    print msg.type
-    assert 0
-    #psi = msg.get_nth_signer_info(0)
-    #assert msg.verify_by_info(psi)
-    #c = msg.certs.get_cert_by_info(psi)
-    #print c.name()
-    #assert msg.verify_cert(c)
-    #assert False
-    #cs = list(msg.signer_certs())
-    #assert len(cs)
-    assert msg.verify_nth_sign(0)
-    #print [(msg.verify_cert(c), c.name()) for c in cs]
-    #assert all(msg.verify_cert(c) for c in cs)
+    # print msg.type
+    psi = msg.get_nth_signer_info(0)
+    # assert psi
+    # assert msg.verify_by_info(psi)
+    c = msg.certs.get_cert_by_info(psi)
+    # print c.name()
+    assert msg.verify_cert(c)
+    # assert False
+    # cs = list(msg.signer_certs())
+    # assert len(cs)
+    # assert msg.verify_nth_sign(0)
+    # print [(msg.verify_cert(c), c.name()) for c in cs]
+    # assert all(msg.verify_cert(c) for c in cs)
