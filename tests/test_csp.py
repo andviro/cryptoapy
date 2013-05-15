@@ -18,7 +18,7 @@ def _context_simple():
     return context
 
 
-def test_context_named():
+def _context_named():
     ur''' Работает при наличии в системе контейнера 'test'.
     Необходимо его предварительно создать командой:
 
@@ -31,6 +31,7 @@ def test_context_named():
         0,
     )
     assert context
+    return context
 
 
 @raises(SystemError)
@@ -79,7 +80,7 @@ def _cert_thumb():
     return thumbs[0]
 
 
-def test_cert_dname():
+def test_cert_name():
     cs = csp.CertStore(None, "MY")
     names = list(cert.name() for cert in cs)
     print names
@@ -112,9 +113,31 @@ def test_cert_name_not_found():
     assert not len(res)
 
 
-def test_msg_decode():
+def _msg_decode():
     testdata = open('tests/logical.cms', 'rb').read()
     msg = csp.CryptMsg(testdata)
-    print msg.num_signers
-    assert msg.num_signers
-    assert len(list(msg.certs))
+    return msg
+
+
+def test_msg_signatures():
+    testdata = open('tests/logical.cms', 'rb').read()
+    #msg = csp.CryptMsg(testdata, _context_simple())
+    ctx = csp.Crypt(
+        None,
+        csp.PROV_GOST_2001_DH,
+        csp.CRYPT_VERIFYCONTEXT,
+    )
+    msg = csp.CryptMsg(testdata, ctx)
+    print msg.type
+    assert 0
+    #psi = msg.get_nth_signer_info(0)
+    #assert msg.verify_by_info(psi)
+    #c = msg.certs.get_cert_by_info(psi)
+    #print c.name()
+    #assert msg.verify_cert(c)
+    #assert False
+    #cs = list(msg.signer_certs())
+    #assert len(cs)
+    assert msg.verify_nth_sign(0)
+    #print [(msg.verify_cert(c), c.name()) for c in cs]
+    #assert all(msg.verify_cert(c) for c in cs)

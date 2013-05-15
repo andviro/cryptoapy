@@ -51,8 +51,11 @@ typedef void *HCERTSTOREPROV;
 class Cert {
 public:
     PCCERT_CONTEXT pcert;
-    Cert(PCCERT_CONTEXT pc) {
-        pcert = CertDuplicateCertificateContext(pc);
+    Cert(PCCERT_CONTEXT pc) throw(CSPException) {
+        if (!pc) {
+            throw CSPException("Invalid certificate context");
+        }
+        pcert = pc;
         /*printf("New cert %x\n", pcert);*/
     };
 
@@ -641,11 +644,19 @@ public:
     bool iter;
     PCCERT_CONTEXT pcert;
 
-    CertIter(HCERTSTORE hs) {
-        hstore = hs;
+    CertIter(HCERTSTORE hs) throw (CSPException) {
+        hstore = CertDuplicateStore(hs);
+        if (!hstore)
+            throw CSPException("Couldn't duplicate certificate store");
         iter = true;
         pcert = NULL;
         /*puts("Started iter");*/
+    };
+
+    virtual ~CertIter() throw (CSPException) {
+        if (hstore && !CertCloseStore(hstore, CERT_CLOSE_STORE_CHECK_FLAG)) {
+            throw CSPException("Couldn't properly close certificate store");
+        }
     };
 
     CertIter *__iter__() {
@@ -660,7 +671,7 @@ public:
         pcert = CertEnumCertificatesInStore(hstore, pcert);
         if (pcert) {
             /*puts("Next iter");*/
-            return new Cert(pcert);
+            return new Cert(CertDuplicateCertificateContext(pcert));
         } else {
             iter = false;
             /*puts("Stop iter");*/
@@ -700,7 +711,7 @@ public:
         pcert = CertFindCertificateInStore(hstore, enctype, 0, findtype, param, pcert);
         if (pcert) {
             /*printf("Next find %i %i\n", enctype, findtype);*/
-            return new Cert(pcert);
+            return new Cert(CertDuplicateCertificateContext(pcert));
         } else {
             iter = false;
             /*puts("Stopped find");*/
@@ -713,8 +724,9 @@ class CertStore {
 private:
     HCERTSTORE hstore;
 public:
-
-    CertStore(HCERTSTORE hs) throw(CSPException) : hstore(hs) { };
+    CertStore(HCERTSTORE hs) throw(CSPException) {
+        hstore = CertDuplicateStore(hs);
+    };
 
     CertStore(const Crypt *ctx, LPCTSTR protocol) throw(CSPException) {
         HCRYPTPROV hprov = 0;
@@ -746,6 +758,10 @@ public:
 
     CertFind *find_by_name(char *name) {
         return new CertFind(hstore, X509_ASN_ENCODING | PKCS_7_ASN_ENCODING, name);
+    };
+
+    Cert *get_cert_by_info(PCERT_INFO psi) {
+        return new Cert(CertGetSubjectCertificateFromStore(hstore, MY_ENC_TYPE, psi));
     };
 
 };

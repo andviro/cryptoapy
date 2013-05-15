@@ -1,5 +1,6 @@
 /* vim: ft=swig
 */
+
 typedef ULONG_PTR HCRYPTPROV;
 typedef ULONG_PTR HCRYPTKEY;
 typedef ULONG_PTR HCRYPTHASH;
