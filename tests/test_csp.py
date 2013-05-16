@@ -103,6 +103,16 @@ def test_cert_find_by_name():
     assert len(res)
 
 
+def test_memory_store():
+    my = csp.CertStore(None, "MY")
+    cert = list(my)[0]
+
+    cs = csp.CertStore()
+    cs.add_cert(cert)
+
+    assert len(list(cs))
+
+
 def test_cert_not_found():
     cs = csp.CertStore(None, "MY")
     res = list(cs.find_by_thumb('x' * 20))
@@ -137,13 +147,37 @@ def test_sign_data():
     cert = list(cs)[0]
     mess = csp.CryptMsg(ctx)
     mess.add_signer_cert(cert)
-    data = mess.sign_data('hurblewurble', True)
-    assert len(data)
-    open('testdata.sig', 'wb').write(data)
     data = mess.sign_data('hurblewurble')
     assert len(data)
-    open('testdata.msg', 'wb').write(data)
     return data
+
+
+def test_detached_sign():
+    ctx = csp.Crypt(
+        "test",
+        csp.PROV_GOST_2001_DH,
+        0,
+    )
+    cs = csp.CertStore(ctx, "MY")
+    cert = list(cs)[0]
+    mess = csp.CryptMsg(ctx)
+    mess.add_signer_cert(cert)
+    data = mess.sign_data('hurblewurble', True)
+    assert len(data)
+    return data
+
+
+def test_cert_from_detached():
+    sgn = test_detached_sign()
+    mess = csp.CryptMsg(sgn)
+    assert len(list(mess.certs))
+
+
+def test_verify_with_detached():
+    sgn = test_detached_sign()
+    msg = csp.CryptMsg(sgn)
+    for n in range(msg.num_signers):
+        assert msg.verify_data('hurblewurble', n)
 
 
 def setup_module():
@@ -155,30 +189,28 @@ def setup_module():
 
 
 def test_msg_signatures():
+    ctx = csp.Crypt(
+        None,
+        csp.PROV_GOST_2001_DH,
+        csp.CRYPT_VERIFYCONTEXT,
+    )
     testdata = test_sign_data()
     # testdata = open('tests/logical.cms', 'rb').read()
-    msg = csp.CryptMsg(testdata)
+    msg = csp.CryptMsg(testdata, ctx)
+    del testdata
     print msg.type
     print msg.num_signers
     print len(msg.get_data())
 
     psi = msg.get_nth_signer_info(0)
     assert psi
+    my = msg.certs
+    verify_cert = my.get_cert_by_info(psi)
 
-    #my = csp.CertStore(None, "MY")
-    #my = msg.certs
-    # cert = list(my)[0]
-    # cs = csp.CertStore()
-    # cs.add_cert(cert)
-    #verify_cert = my.get_cert_by_info(psi)
-
-    # assert msg.verify_by_info(psi)
-    # print c.name()
-    #assert msg.verify_cert(verify_cert)
-    # assert False
-    # cs = list(c.name() for c in msg.signer_certs())
-    # assert len(cs)
-    # assert msg.verify_nth_sign(0)
+    print verify_cert.name()
+    assert msg.verify_cert(verify_cert)
+    ns = list(c.name() for c in msg.signer_certs())
+    assert len(ns)
     cs = list(msg.certs)
-    print [(msg.verify_cert(c), c.name()) for c in cs]
+    print [(msg.verify_cert(x), x.name()) for x in cs]
     assert all(msg.verify_cert(c) for c in cs)

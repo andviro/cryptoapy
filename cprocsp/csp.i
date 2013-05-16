@@ -54,5 +54,5 @@ class Stop_Iteration {
 %include "context.i"
 %include "cert.i"
 %include "msg.i"
-/*%include "hash.i"*/
 /*%include "sign.i"*/
+/*%include "hash.i"*/
