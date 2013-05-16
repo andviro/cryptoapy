@@ -36,14 +36,37 @@ typedef void *HCERTSTOREPROV;
 //  CertDuplicateCertificateContext function can be called to make a duplicate
 //  copy (which also must be freed by calling CertFreeCertificateContext).
 //--------------------------------------------------------------------------
-/*typedef struct _CERT_CONTEXT {*/
-    /*DWORD                   dwCertEncodingType;*/
-    /*BYTE                    *pbCertEncoded;*/
-    /*DWORD                   cbCertEncoded;*/
-    /*PCERT_INFO              pCertInfo;*/
-    /*HCERTSTORE              hCertStore;*/
-/*} CERT_CONTEXT, *PCERT_CONTEXT;*/
-/*typedef const CERT_CONTEXT *PCCERT_CONTEXT;*/
+typedef struct _CERT_CONTEXT {
+    DWORD                   dwCertEncodingType;
+    BYTE                    *pbCertEncoded;
+    DWORD                   cbCertEncoded;
+    PCERT_INFO              pCertInfo;
+    HCERTSTORE              hCertStore;
+} CERT_CONTEXT, *PCERT_CONTEXT;
+typedef const CERT_CONTEXT *PCCERT_CONTEXT;
+
+
+//+-------------------------------------------------------------------------
+//  Information stored in a certificate
+//
+//  The Issuer, Subject, Algorithm, PublicKey and Extension BLOBs are the
+//  encoded representation of the information.
+//--------------------------------------------------------------------------
+typedef struct _CERT_INFO {
+    DWORD                       dwVersion;
+    CRYPT_INTEGER_BLOB          SerialNumber;
+    CRYPT_ALGORITHM_IDENTIFIER  SignatureAlgorithm;
+    CERT_NAME_BLOB              Issuer;
+    FILETIME                    NotBefore;
+    FILETIME                    NotAfter;
+    CERT_NAME_BLOB              Subject;
+    CERT_PUBLIC_KEY_INFO        SubjectPublicKeyInfo;
+    CRYPT_BIT_BLOB              IssuerUniqueId;
+    CRYPT_BIT_BLOB              SubjectUniqueId;
+    DWORD                       cExtension;
+    PCERT_EXTENSION             rgExtension;
+} CERT_INFO, *PCERT_INFO;
+
 %cstring_output_allocate_size(char **s, DWORD *slen, free(*$1));
 %newobject Cert::get_name;
 

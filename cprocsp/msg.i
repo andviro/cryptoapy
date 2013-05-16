@@ -3,9 +3,6 @@
 %cstring_output_allocate_size(char **s, DWORD *slen, free(*$1));
 
 %newobject CryptMsg::get_nth_signer_info(DWORD idx);
-%typemap(newfree) PCERT_INFO {
-    free($1);
-};
 
 %inline %{
 
