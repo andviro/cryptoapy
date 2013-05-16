@@ -2,7 +2,9 @@
 
 from cprocsp import csp
 from nose.tools import raises
-from base64 import b64encode
+from uuid import uuid4
+import subprocess as sub
+import os
 
 enc_type = csp.X509_ASN_ENCODING | csp.PKCS_7_ASN_ENCODING
 flags = 0
@@ -125,25 +127,58 @@ def _msg_decode():
     return msg
 
 
-def test_msg_signatures():
-    testdata = open('tests/logical.cms', 'rb').read()
-    # msg = csp.CryptMsg(testdata, _context_simple())
+def test_sign_data():
     ctx = csp.Crypt(
-        None,
+        "test",
         csp.PROV_GOST_2001_DH,
-        csp.CRYPT_VERIFYCONTEXT,
+        0,
     )
-    msg = csp.CryptMsg(testdata, ctx)
-    # print msg.type
+    cs = csp.CertStore(ctx, "MY")
+    cert = list(cs)[0]
+    mess = csp.CryptMsg(ctx)
+    mess.add_signer_cert(cert)
+    data = mess.sign_data('hurblewurble', True)
+    assert len(data)
+    open('testdata.sig', 'wb').write(data)
+    data = mess.sign_data('hurblewurble')
+    assert len(data)
+    open('testdata.msg', 'wb').write(data)
+    return data
+
+
+def setup_module():
+    global signname
+    signname = os.path.join('/tmp', uuid4().hex)
+    open(signname, 'wb').write('hurblewurble')
+    if sub.call(['/opt/cprocsp/bin/ia32/cryptcp', '-dir', '/tmp', '-signf', '-nochain', '-cert', '-der', signname]):
+        assert False
+
+
+def test_msg_signatures():
+    testdata = test_sign_data()
+    # testdata = open('tests/logical.cms', 'rb').read()
+    msg = csp.CryptMsg(testdata)
+    print msg.type
+    print msg.num_signers
+    print len(msg.get_data())
+
     psi = msg.get_nth_signer_info(0)
-    # assert psi
+    assert psi
+
+    #my = csp.CertStore(None, "MY")
+    #my = msg.certs
+    # cert = list(my)[0]
+    # cs = csp.CertStore()
+    # cs.add_cert(cert)
+    #verify_cert = my.get_cert_by_info(psi)
+
     # assert msg.verify_by_info(psi)
-    c = msg.certs.get_cert_by_info(psi)
     # print c.name()
-    assert msg.verify_cert(c)
+    #assert msg.verify_cert(verify_cert)
     # assert False
-    # cs = list(msg.signer_certs())
+    # cs = list(c.name() for c in msg.signer_certs())
     # assert len(cs)
     # assert msg.verify_nth_sign(0)
-    # print [(msg.verify_cert(c), c.name()) for c in cs]
-    # assert all(msg.verify_cert(c) for c in cs)
+    cs = list(msg.certs)
+    print [(msg.verify_cert(c), c.name()) for c in cs]
+    assert all(msg.verify_cert(c) for c in cs)

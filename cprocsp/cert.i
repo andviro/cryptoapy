@@ -730,6 +730,16 @@ private:
 public:
     CertStore(HCERTSTORE hs) throw(CSPException) {
         hstore = CertDuplicateStore(hs);
+        if (!hstore) {
+            throw CSPException("Couldn't duplicate store");
+        }
+    };
+
+    CertStore() throw(CSPException) {
+        hstore = CertOpenStore(CERT_STORE_PROV_MEMORY, MY_ENC_TYPE, 0, CERT_STORE_CREATE_NEW_FLAG,NULL);
+        if (!hstore) {
+            throw CSPException("Couldn't create memory store");
+        }
     };
 
     CertStore(const Crypt *ctx, LPCTSTR protocol) throw(CSPException) {
@@ -764,10 +774,15 @@ public:
         return new CertFind(hstore, X509_ASN_ENCODING | PKCS_7_ASN_ENCODING, name);
     };
 
-    Cert *get_cert_by_info(PCERT_INFO psi) {
+    Cert *get_cert_by_info(PCERT_INFO psi) throw(CSPException) {
         return new Cert(CertGetSubjectCertificateFromStore(hstore, MY_ENC_TYPE, psi));
     };
 
+    bool add_cert(Cert *c) throw(CSPException) {
+        if (c && !CertAddCertificateContextToStore(hstore, c->pcert, CERT_STORE_ADD_ALWAYS, NULL)) {
+            throw CSPException("Couldn't add cert to store");
+        }
+    };
 };
 %}
 
