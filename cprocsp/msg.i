@@ -34,11 +34,7 @@ public:
     SignerIter *signer_certs();
 
     bool verify_cert(Cert *c) throw(CSPException) {
-        bool res = CryptMsgControl(hmsg, 0, CMSG_CTRL_VERIFY_SIGNATURE, c->pcert->pCertInfo);
-        if (!res) {
-            throw CSPException("Signature error");
-        }
-        return res;
+        return CryptMsgControl(hmsg, 0, CMSG_CTRL_VERIFY_SIGNATURE, c->pcert->pCertInfo);
     }
     void get_data(char **s, DWORD *slen) throw(CSPException);
 

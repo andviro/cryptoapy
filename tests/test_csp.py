@@ -180,6 +180,13 @@ def test_verify_with_detached():
         assert msg.verify_data('hurblewurble', n)
 
 
+def test_verify_with_detached_bad():
+    sgn = test_detached_sign()
+    msg = csp.CryptMsg(sgn)
+    for n in range(msg.num_signers):
+        assert not msg.verify_data('hUrbLewUrblE', n)
+
+
 def setup_module():
     global signname
     signname = os.path.join('/tmp', uuid4().hex)
