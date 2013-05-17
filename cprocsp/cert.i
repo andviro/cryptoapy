@@ -68,10 +68,49 @@ typedef struct _CERT_INFO {
 } CERT_INFO, *PCERT_INFO;
 
 %cstring_output_allocate_size(char **s, DWORD *slen, free(*$1));
-%newobject Cert::get_name;
+%newobject Cert::name();
+
+%pythoncode %{
+from .rdn import read_rdn
+%}
+
+%extend Cert
+{
+%insert("python") %{
+    @property
+    def info(self):
+        return dict(read_rdn(self.name()))
+
+    @property
+    def issuer_info(self):
+        return dict(read_rdn(self.issuer()))
+%}
+}
+
 
 %inline %{
 class Cert {
+
+private:
+    char *decode_name_blob(PCERT_NAME_BLOB pNameBlob) {
+        DWORD slen = 0;
+        char *s = NULL;
+        DWORD flags = CERT_X500_NAME_STR | CERT_NAME_STR_NO_PLUS_FLAG;
+
+        slen = CertNameToStr( X509_ASN_ENCODING, pNameBlob, flags, NULL, 0);
+        if (slen <= 1)
+            throw CSPException("Wrong size for blob decoded data");
+
+        s = (char *)malloc(slen);
+
+        slen = CertNameToStr(X509_ASN_ENCODING, pNameBlob, flags, s, slen);
+
+        if (slen <= 1)
+            throw CSPException("Couldn't decode cert blob");
+        /*puts("get_name: end");*/
+        return s;
+    }
+
 public:
     PCCERT_CONTEXT pcert;
     Cert(PCCERT_CONTEXT pc) throw(CSPException) {
@@ -106,26 +145,11 @@ public:
     }
 
     char *name() throw(CSPException) {
-        DWORD slen = 0;
-        char *s = NULL;
-        PCERT_NAME_BLOB pNameBlob = &pcert->pCertInfo->Subject;
+        return decode_name_blob(&pcert->pCertInfo->Subject);
+    };
 
-        /*puts("dname: start");*/
-        slen = CertNameToStr( X509_ASN_ENCODING, pNameBlob,
-            CERT_X500_NAME_STR | CERT_NAME_STR_NO_PLUS_FLAG, NULL, 0);
-        if (slen <= 1)
-            throw CSPException("Wrong size for cert name");
-
-        s = (char *)malloc(slen);
-
-        slen = CertNameToStr(
-            X509_ASN_ENCODING, pNameBlob,
-            CERT_X500_NAME_STR | CERT_NAME_STR_NO_PLUS_FLAG,
-            s, slen);
-        if (slen <= 1)
-            throw CSPException("Couldn't get cert name");
-        /*puts("get_name: end");*/
-        return s;
+    char *issuer() throw(CSPException) {
+        return decode_name_blob(&pcert->pCertInfo->Issuer);
     };
 };
 %}

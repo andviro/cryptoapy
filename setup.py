@@ -40,7 +40,7 @@ setup(name='cprocsp',
       version='0.1',
       ext_modules=[csp],
       packages=['cprocsp'],
-      py_modules=['cprocsp.csp'],
+      py_modules=['cprocsp.csp', 'cprocsp.rdn'],
       test_suite='nose.collector',
       setup_requires=['nose>=1.0'],
       )

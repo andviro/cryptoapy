@@ -1,10 +1,11 @@
 # coding: utf-8
 
-from cprocsp import csp
+from cprocsp import csp, rdn
 from nose.tools import raises
 from uuid import uuid4
 import subprocess as sub
 import os
+from base64 import b64encode
 
 enc_type = csp.X509_ASN_ENCODING | csp.PKCS_7_ASN_ENCODING
 flags = 0
@@ -86,7 +87,14 @@ def test_cert_name():
     cs = csp.CertStore(None, "MY")
     names = list(cert.name() for cert in cs)
     print names
-    assert all(len(name) for name in names)
+    assert all(name for name in names)
+
+
+def test_cert_issuer():
+    cs = csp.CertStore(None, "MY")
+    issuers = list(cert.issuer() for cert in cs)
+    print issuers
+    assert all(s for s in issuers)
 
 
 def test_cert_find_by_thumb():
@@ -221,3 +229,35 @@ def test_msg_signatures():
     cs = list(msg.certs)
     print [(msg.verify_cert(x), x.name()) for x in cs]
     assert all(msg.verify_cert(c) for c in cs)
+
+
+def test_verify_file():
+    names = ('data1', 'data2')
+    for name in names:
+        data = open('tests/{0}.bin'.format(name), 'rb').read()
+        sig = open('tests/{0}.p7s'.format(name), 'rb').read()
+        vrf = csp.CryptMsg(sig)
+        print vrf.num_signers
+        for c in vrf.certs:
+            print unicode(c.name(), 'windows-1251')
+            print unicode(c.issuer(), 'windows-1251')
+            print b64encode(c.thumbprint())
+        assert all(vrf.verify_data(data, x) for x in range(vrf.num_signers))
+
+
+def test_rdn():
+    dn = u'''1.2.643.3.141.1.2 = \\#0C0430303030 , 1.2.643.3.141.1.1="#0C0A30303030303030303030",
+    1.2.643.3.131.1.1="#0C0A36363939303030303030", E=fedotov@skbkontur.ru,
+    C=RU, S=66 Свердловская область + L=Екатеринбург, O=ЗАО ПФ СКБ Контур, OU=0,
+    CN=Федотов Алексей Николаевич,
+    1.2.840.113549.1.9.2="#0C21363639393030303030302D3636393930313030312D363630393033303338363334",
+    T=Инженер-программист, SN=Федотов Алексей Николаевич
+    '''
+    print dict(rdn.read_rdn(dn))
+
+
+def test_cert_rdn():
+    cs = csp.CertStore(None, "MY")
+    for c in cs:
+        assert 'CN' in c.info
+        assert 'CN' in c.issuer_info
