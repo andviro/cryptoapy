@@ -73,6 +73,7 @@ def test_store_iter():
         cryptcp -instcert -cont '\\.\hdimage\test' ИмяФайла.cert'''
 
     cs = csp.CertStore(None, "MY")
+    print cs.__iter__
     assert len(list(cs))
 
 
@@ -259,5 +260,5 @@ def test_rdn():
 def test_cert_rdn():
     cs = csp.CertStore(None, "MY")
     for c in cs:
-        assert 'CN' in c.info
-        assert 'CN' in c.issuer_info
+        assert 'CN' in rdn.RDN(c.name())
+        assert 'CN' in rdn.RDN(c.issuer())

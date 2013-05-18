@@ -45,8 +45,8 @@ class Stop_Iteration {
 
 %include "wintypes.i"
 %include "defines.i"
+%include "extra_defs.i"
 %include "common.i"
-%include <WinCryptEx.h>
 %include "errors.i"
 %{
 #define MY_ENC_TYPE (X509_ASN_ENCODING | PKCS_7_ASN_ENCODING)

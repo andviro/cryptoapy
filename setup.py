@@ -9,6 +9,7 @@ except ImportError:
 csp = Extension('cprocsp._csp',
                 sources=['cprocsp/csp.i'],
                 swig_opts=[
+                    '-builtin',
                     '-c++',
                     '-DUNIX',
                     '-DCP_IOVEC_USE_SYSTEM',

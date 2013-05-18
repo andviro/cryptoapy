@@ -70,24 +70,6 @@ typedef struct _CERT_INFO {
 %cstring_output_allocate_size(char **s, DWORD *slen, free(*$1));
 %newobject Cert::name();
 
-%pythoncode %{
-from .rdn import read_rdn
-%}
-
-%extend Cert
-{
-%insert("python") %{
-    @property
-    def info(self):
-        return dict(read_rdn(self.name()))
-
-    @property
-    def issuer_info(self):
-        return dict(read_rdn(self.issuer()))
-%}
-}
-
-
 %inline %{
 class Cert {
 
@@ -680,13 +662,9 @@ CertOpenSystemStore(
     IN LPCTSTR pszSubsystemProtocol
     );
     */
-/*%extend CertIter*/
-/*{*/
-/*%insert("python") %{*/
-    /*def __iter__(self):*/
-        /*return self*/
-/*%}*/
-/*}*/
+%feature("python:slot", "tp_iter", functype="getiterfunc") CertStore::__iter__;
+%feature("python:slot", "tp_iter", functype="getiterfunc") CertIter::__iter__;
+%feature("python:slot", "tp_iternext", functype="iternextfunc") CertIter::next;
 
 %inline %{
 class CertIter {

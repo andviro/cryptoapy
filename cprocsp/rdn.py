@@ -4,7 +4,6 @@
 import re
 import sys
 
-
 def read_name(s):
     match = re.match(r'\s*(?P<name>[^=]+?)\s*(?P<rest>=([\n]|.)*)', s)
     return match.group('name'), match.group('rest')
@@ -45,3 +44,14 @@ def read_rdn(s, flat=True):
         return p
     extra.insert(0, p)
     return extra
+
+class RDN(dict):
+    """Объектно-ориентированная обертка вокруг парсера РДН"""
+
+    def __init__(self, s):
+        """Превращает строку в формате RDN в словарь
+
+        :s: исходная строка
+
+        """
+        super(RDN, self).__init__(read_rdn(s))
