@@ -7,8 +7,6 @@ import subprocess as sub
 import os
 from base64 import b64encode
 
-enc_type = csp.X509_ASN_ENCODING | csp.PKCS_7_ASN_ENCODING
-flags = 0
 signname = None
 
 
