@@ -9,6 +9,7 @@ from base64 import b64encode
 
 enc_type = csp.X509_ASN_ENCODING | csp.PKCS_7_ASN_ENCODING
 flags = 0
+signname = None
 
 
 def _context_simple():
@@ -202,6 +203,13 @@ def setup_module():
     open(signname, 'wb').write('hurblewurble')
     if sub.call(['/opt/cprocsp/bin/ia32/cryptcp', '-dir', '/tmp', '-signf', '-nochain', '-cert', '-der', signname]):
         assert False
+
+
+def teardown_module():
+    global signname
+    if os.path.exists(signname):
+        os.unlink(signname)
+        os.unlink(signname + '.sgn')
 
 
 def test_msg_signatures():
