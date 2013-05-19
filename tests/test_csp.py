@@ -177,23 +177,23 @@ def test_detached_sign():
 
 
 def test_cert_from_detached():
-    sgn = test_detached_sign()
-    mess = csp.CryptMsg(sgn)
-    assert len(list(mess.certs))
+    data = test_detached_sign()
+    sgn = csp.Signature(data)
+    assert len(list(sgn.certs))
 
 
 def test_verify_with_detached():
-    sgn = test_detached_sign()
-    msg = csp.CryptMsg(sgn)
-    for n in range(msg.num_signers):
-        assert msg.verify_data('hurblewurble', n)
+    data = test_detached_sign()
+    sgn = csp.Signature(data)
+    for n in range(sgn.num_signers):
+        assert sgn.verify_data('hurblewurble', n)
 
 
 def test_verify_with_detached_bad():
-    sgn = test_detached_sign()
-    msg = csp.CryptMsg(sgn)
-    for n in range(msg.num_signers):
-        assert not msg.verify_data('hUrbLewUrblE', n)
+    data = test_detached_sign()
+    sgn = csp.Signature(data)
+    for n in range(sgn.num_signers):
+        assert not sgn.verify_data('hUrblEwurBle', n)
 
 
 def setup_module():
@@ -236,14 +236,14 @@ def test_verify_file():
     names = ('data1', 'data2')
     for name in names:
         data = open('tests/{0}.bin'.format(name), 'rb').read()
-        sig = open('tests/{0}.p7s'.format(name), 'rb').read()
-        vrf = csp.CryptMsg(sig)
-        print vrf.num_signers
-        for c in vrf.certs:
+        sigdata = open('tests/{0}.p7s'.format(name), 'rb').read()
+        sign = csp.Signature(sigdata)
+        print sign.num_signers
+        for c in sign.certs:
             print unicode(c.name(), 'windows-1251')
             print unicode(c.issuer(), 'windows-1251')
             print b64encode(c.thumbprint())
-        assert all(vrf.verify_data(data, x) for x in range(vrf.num_signers))
+        assert all(sign.verify_data(data, x) for x in range(sign.num_signers))
 
 
 def test_rdn():

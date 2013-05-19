@@ -1,5 +1,8 @@
 /* vim: ft=swig
 */
+%{
+#define MY_ENC_TYPE (X509_ASN_ENCODING | PKCS_7_ASN_ENCODING)
+%}
 
 typedef ULONG_PTR HCRYPTPROV;
 typedef ULONG_PTR HCRYPTKEY;

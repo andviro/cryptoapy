@@ -6,23 +6,10 @@
 %include "exception.i"
 %include "cstring.i"
 
-/*%define ZEROED_STRUCT(type)*/
-/*%extend type {*/
-/*_ ## type() {*/
-    /*size_t sz = sizeof(type);*/
-    /*type *res = (type) malloc(sz);*/
-    /*memset(res, 0, sz);*/
-    /*res->cbSize = sz;*/
-    /*return res;*/
-/*}*/
-/*};*/
-/*%enddef*/
-
 %inline %{
 class Stop_Iteration {
 };
 %}
-
 
 %typemap(throws) Stop_Iteration %{
   PyErr_SetNone(PyExc_StopIteration);
@@ -48,11 +35,8 @@ class Stop_Iteration {
 %include "extra_defs.i"
 %include "common.i"
 %include "errors.i"
-%{
-#define MY_ENC_TYPE (X509_ASN_ENCODING | PKCS_7_ASN_ENCODING)
-%}
 %include "context.i"
 %include "cert.i"
 %include "msg.i"
-/*%include "sign.i"*/
+%include "sign.i"
 /*%include "hash.i"*/

@@ -19,8 +19,6 @@ public:
     Crypt *cprov;
     CMSG_SIGNED_ENCODE_INFO *sign_info;
     CRYPT_ALGORITHM_IDENTIFIER  hash_alg;
-    BYTE *raw_msg;
-    DWORD raw_size;
 
     // инициализация сообщения для декодирования
     CryptMsg(char *STRING, size_t LENGTH, Crypt *ctx=NULL) throw(CSPException);
@@ -39,18 +37,6 @@ public:
         return CryptMsgControl(hmsg, 0, CMSG_CTRL_VERIFY_SIGNATURE, c->pcert->pCertInfo);
     }
     void get_data(char **s, DWORD *slen) throw(CSPException);
-
-    bool verify_data(char *STRING, size_t LENGTH, int n) throw(CSPException) {
-        CRYPT_VERIFY_MESSAGE_PARA msg_para;
-        msg_para.cbSize = sizeof(CRYPT_VERIFY_MESSAGE_PARA);
-        msg_para.dwMsgAndCertEncodingType = MY_ENC_TYPE;
-        msg_para.hCryptProv = NULL;
-        msg_para.pfnGetSignerCertificate = NULL;
-        msg_para.pvGetArg = NULL;
-        return CryptVerifyDetachedMessageSignature(&msg_para, n, raw_msg,
-            raw_size, 1, (const BYTE **)&STRING, (DWORD *)&LENGTH, NULL);
-    }
-
     void add_signer_cert(Cert *c) throw(CSPException);
     void sign_data(char *STRING, size_t LENGTH, char **s, DWORD *slen, bool detach=0) throw(CSPException);
 };
@@ -86,9 +72,6 @@ CryptMsg::CryptMsg(Crypt *ctx) throw(CSPException) {
     DWORD hasi = sizeof(hash_alg);
     memset(&hash_alg, 0, hasi);
     hash_alg.pszObjId = szOID_CP_GOST_R3411;  
-
-    raw_msg = NULL;
-    raw_size = 0;
 }
 
 void CryptMsg::add_signer_cert(Cert *c) throw(CSPException) {
@@ -130,8 +113,6 @@ void CryptMsg::add_signer_cert(Cert *c) throw(CSPException) {
     signer_info->dwKeySpec = keytype;
     signer_info->HashAlgorithm = hash_alg;
     signer_info->pvHashAuxInfo = NULL;
-
-    
 }
 
 void CryptMsg::get_data(char **s, DWORD *slen) throw(CSPException) {
@@ -216,15 +197,11 @@ CryptMsg::CryptMsg(char *STRING, size_t LENGTH, Crypt *ctx) throw(CSPException) 
     /*memset(&cai, 0, sizeof(cai));*/
     sign_info = NULL;
 
-    raw_msg = (BYTE *)malloc(LENGTH);
-    memcpy(raw_msg, STRING, LENGTH);
-    raw_size = LENGTH;
-
     hmsg = CryptMsgOpenToDecode(MY_ENC_TYPE, 0, 0, ctx? ctx->hprov : NULL, NULL, NULL);
     if (!hmsg) {
         throw CSPException("Couldn't initialize message");
     }
-    if (!CryptMsgUpdate(hmsg, (const BYTE *)raw_msg, raw_size, 1)) {
+    if (!CryptMsgUpdate(hmsg, (const BYTE *)STRING, LENGTH, 1)) {
         throw CSPException("Couldn't decode message");
     }
 
@@ -252,10 +229,6 @@ CryptMsg::CryptMsg(char *STRING, size_t LENGTH, Crypt *ctx) throw(CSPException) 
 };
 
 CryptMsg::~CryptMsg() throw(CSPException) {
-    if (raw_msg) {
-        free(raw_msg);
-    }
-
     if (sign_info) {
         if(sign_info->rgSigners) {
             for (int i=0; i<sign_info->cSigners; i++) {
