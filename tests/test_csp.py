@@ -202,11 +202,12 @@ def test_verify_with_detached_bad():
 
 
 def setup_module():
-    global signname
-    signname = os.path.join('/tmp', uuid4().hex)
-    open(signname, 'wb').write('hurblewurble')
-    if sub.call(['/opt/cprocsp/bin/ia32/cryptcp', '-dir', '/tmp', '-signf', '-nochain', '-cert', '-der', signname]):
-        assert False
+    pass
+    #global signname
+    #signname = os.path.join('/tmp', uuid4().hex)
+    #open(signname, 'wb').write('hurblewurble')
+    #if sub.call(['/opt/cprocsp/bin/ia32/cryptcp', '-dir', '/tmp', '-signf', '-nochain', '-cert', '-der', signname]):
+        #assert False
 
 
 def teardown_module():
@@ -294,3 +295,16 @@ def test_decrypt_data():
     res = msg.decrypt_data(data)
     print res
     assert res == 'murblehurblewurble'
+
+
+def test_transfer_cert():
+    my = csp.CertStore(None, "MY")
+    n1 = len(list(my))
+    testdata = open('tests/logical.cms', 'rb').read()
+    msg = csp.CryptMsg(testdata)
+    for crt in msg.certs:
+        print crt.name()
+        print crt.issuer()
+        my.add_cert(crt)
+
+    assert len(list(my)) > n1
