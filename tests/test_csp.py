@@ -94,7 +94,9 @@ def test_store_iter():
 def test_duplicate_cert():
     cs = csp.CertStore(None, "MY")
     for c in cs:
-        c.duplicate()
+        cdup = c.duplicate()
+        print b64encode(c.thumbprint())
+        print b64encode(cdup.thumbprint())
 
 
 def _cert_thumb():
@@ -322,10 +324,13 @@ def test_add_remove_cert():
         print crt.name()
         print crt.issuer()
         my.add_cert(crt)
+        my.add_cert(crt.duplicate())
         ids.append(crt.thumbprint())
     assert len(ids)
-    assert len(list(my)) == n1 + len(ids)
+    assert len(list(my)) == n1 + len(ids) * 2
     for cert_id in ids:
-        for cert in my.find_by_thumb(cert_id):
+        cs = list(my.find_by_thumb(cert_id))
+        assert len(cs) == 2
+        for cert in cs:
             cert.remove_from_store()
     assert len(list(my)) == n1
