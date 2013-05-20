@@ -69,11 +69,13 @@ typedef struct _CERT_INFO {
 
 %cstring_output_allocate_size(char **s, DWORD *slen, free(*$1));
 %newobject Cert::name();
+%newobject Cert::duplicate();
+%newobject CertStore::__iter__();
 
 %inline %{
 class Cert {
-
 private:
+    PCCERT_CONTEXT pcert;
     char *decode_name_blob(PCERT_NAME_BLOB pNameBlob) {
         DWORD slen = 0;
         char *s = NULL;
@@ -94,7 +96,11 @@ private:
     }
 
 public:
-    PCCERT_CONTEXT pcert;
+    Cert* duplicate() throw(CSPException) {
+        PCCERT_CONTEXT pc = CertDuplicateCertificateContext(pcert);
+        return new Cert(pc);
+    };
+
     Cert(PCCERT_CONTEXT pc) throw(CSPException) {
         if (!pc) {
             throw CSPException("Invalid certificate context");
@@ -133,6 +139,9 @@ public:
     char *issuer() throw(CSPException) {
         return decode_name_blob(&pcert->pCertInfo->Issuer);
     };
+
+    friend class CryptMsg;
+    friend class CertStore;
 };
 %}
 
@@ -665,6 +674,7 @@ CertOpenSystemStore(
 %feature("python:slot", "tp_iter", functype="getiterfunc") CertStore::__iter__;
 %feature("python:slot", "tp_iter", functype="getiterfunc") CertIter::__iter__;
 %feature("python:slot", "tp_iternext", functype="iternextfunc") CertIter::next;
+%newobject CertIter::next();
 
 %inline %{
 class CertIter {
@@ -692,14 +702,16 @@ public:
         return this;
     };
 
-    virtual Cert *next() throw (Stop_Iteration) {
+    virtual Cert *next() throw (Stop_Iteration, CSPException) {
         if (!iter) {
             /*puts("Stop iter");*/
             throw Stop_Iteration();
         }
         pcert = CertEnumCertificatesInStore(hstore, pcert);
         if (pcert) {
+            /*Cert temp(pcert);*/
             /*puts("Next iter");*/
+            /*return temp.duplicate();*/
             return new Cert(CertDuplicateCertificateContext(pcert));
         } else {
             iter = false;
@@ -732,7 +744,7 @@ public:
         /*printf("Started find %i-'%s'\n", et, name);*/
     };
 
-    virtual Cert *next() throw (Stop_Iteration) {
+    virtual Cert *next() throw (Stop_Iteration, CSPException) {
         if (!iter) {
             /*puts("Stopped find");*/
             throw Stop_Iteration();
@@ -787,15 +799,15 @@ public:
         /*puts("Freed store");*/
     };
 
-    CertIter *__iter__() {
+    CertIter *__iter__() throw(CSPException) {
         return new CertIter(hstore);
     };
 
-    CertFind *find_by_thumb(char *STRING, size_t LENGTH) {
+    CertFind *find_by_thumb(char *STRING, size_t LENGTH) throw(CSPException) {
         return new CertFind(hstore, X509_ASN_ENCODING | PKCS_7_ASN_ENCODING, CERT_FIND_HASH, STRING, LENGTH);
     };
 
-    CertFind *find_by_name(char *name) {
+    CertFind *find_by_name(char *name) throw(CSPException) {
         return new CertFind(hstore, X509_ASN_ENCODING | PKCS_7_ASN_ENCODING, name);
     };
 
@@ -808,6 +820,7 @@ public:
             throw CSPException("Couldn't add cert to store");
         }
     };
+    friend class CryptMsg;
 };
 %}
 

@@ -11,14 +11,20 @@
 class SignerIter;
 
 class CryptMsg {
-public:
+private:
+    Crypt *cprov;
+    CRYPT_ALGORITHM_IDENTIFIER hash_alg;
+    CRYPT_ALGORITHM_IDENTIFIER encrypt_alg;
+    CMSG_SIGNED_ENCODE_INFO *sign_info;
+    CRYPT_ENCRYPT_MESSAGE_PARA *encrypt_para;
+    PCCERT_CONTEXT *recipient_certs;
     HCRYPTMSG hmsg;
+    void msg_init(Crypt *ctx) throw(CSPException);
+public:
     CertStore *certs;
     DWORD num_signers;
+    DWORD num_recipients;
     DWORD type;
-    Crypt *cprov;
-    CMSG_SIGNED_ENCODE_INFO *sign_info;
-    CRYPT_ALGORITHM_IDENTIFIER  hash_alg;
 
     // инициализация сообщения для декодирования
     CryptMsg(char *STRING, size_t LENGTH, Crypt *ctx=NULL) throw(CSPException);
@@ -38,6 +44,9 @@ public:
     }
     void get_data(char **s, DWORD *slen) throw(CSPException);
     void add_signer_cert(Cert *c) throw(CSPException);
+    void add_recipient_cert(Cert *c) throw(CSPException);
+    void encrypt_data(char *STRING, size_t LENGTH, char **s, DWORD *slen) throw(CSPException);
+    void decrypt_data(char *STRING, size_t LENGTH, char **s, DWORD *slen) throw(CSPException);
     void sign_data(char *STRING, size_t LENGTH, char **s, DWORD *slen, bool detach=0) throw(CSPException);
 };
 
@@ -57,21 +66,109 @@ public:
 %}
 
 %{
-CryptMsg::CryptMsg(Crypt *ctx) throw(CSPException) {
+void CryptMsg::msg_init(Crypt *ctx) throw(CSPException) {
     hmsg = NULL;
     certs = NULL;
     num_signers = 0;
     type = 0;
     cprov = ctx;
-    size_t szi = sizeof(CMSG_SIGNED_ENCODE_INFO);
-
-    sign_info = (CMSG_SIGNED_ENCODE_INFO *)malloc(szi);
-    memset(sign_info, 0, szi);
-    sign_info->cbSize = szi;
 
     DWORD hasi = sizeof(hash_alg);
     memset(&hash_alg, 0, hasi);
     hash_alg.pszObjId = szOID_CP_GOST_R3411;  
+
+    DWORD esi = sizeof(encrypt_alg);
+    memset(&encrypt_alg, 0, esi);
+    encrypt_alg.pszObjId = szOID_CP_GOST_28147;  
+
+    recipient_certs = NULL;
+    num_recipients = 0;
+    encrypt_para = NULL;
+    sign_info = NULL;
+
+}
+
+CryptMsg::CryptMsg(Crypt *ctx) throw(CSPException) {
+    msg_init(ctx);
+}
+
+void CryptMsg::add_recipient_cert(Cert *c) throw(CSPException) {
+    recipient_certs = (PCCERT_CONTEXT *) realloc(recipient_certs, sizeof(PCCERT_CONTEXT) * (num_recipients + 1));
+    recipient_certs[num_recipients] = c->pcert;
+    num_recipients ++;
+}
+
+void CryptMsg::encrypt_data(char *STRING, size_t LENGTH, char **s, DWORD *slen) throw(CSPException) {
+    if (!encrypt_para) {
+        size_t szp = sizeof(CRYPT_ENCRYPT_MESSAGE_PARA);
+        encrypt_para = (CRYPT_ENCRYPT_MESSAGE_PARA *)malloc(szp);
+        memset(encrypt_para, 0, szp);
+        encrypt_para->cbSize = szp;
+        encrypt_para->dwMsgEncodingType = MY_ENC_TYPE;
+        encrypt_para->hCryptProv = cprov? cprov->hprov : 0;
+        encrypt_para->ContentEncryptionAlgorithm = encrypt_alg;
+    }
+
+    if(!CryptEncryptMessage(
+        encrypt_para,
+        num_recipients,
+        recipient_certs,
+        (BYTE *)STRING,
+        LENGTH,
+        NULL,
+        slen))
+    {
+        throw CSPException("Cannot acquire encrypted blob size");
+    }
+
+    *s = (char *) malloc(*slen);
+
+    if(!CryptEncryptMessage(
+        encrypt_para,
+        num_recipients,
+        recipient_certs,
+        (BYTE *)STRING,
+        LENGTH,
+        (BYTE *)*s,
+        slen))
+    {
+        throw CSPException("Encryption failed");
+    }
+}
+
+void CryptMsg::decrypt_data(char *STRING, size_t LENGTH, char **s, DWORD *slen) throw(CSPException) {
+    CRYPT_DECRYPT_MESSAGE_PARA  decrypt_para;
+    CertStore store(cprov, "MY");
+
+    memset(&decrypt_para, 0, sizeof(CRYPT_DECRYPT_MESSAGE_PARA));
+    decrypt_para.cbSize = sizeof(CRYPT_DECRYPT_MESSAGE_PARA);
+    decrypt_para.dwMsgAndCertEncodingType = MY_ENC_TYPE;
+    decrypt_para.cCertStore = 1;
+    decrypt_para.rghCertStore = &store.hstore;
+
+    if(!CryptDecryptMessage(
+        &decrypt_para,
+        (BYTE *)STRING,
+        LENGTH,
+        NULL,
+        slen,
+        NULL))
+    {
+        throw CSPException("Cannot acquire decrypted blob size");
+    }
+
+    *s = (char *) malloc(*slen);
+
+    if(!CryptDecryptMessage(
+        &decrypt_para,
+        (BYTE *)STRING,
+        LENGTH,
+        (BYTE *)*s,
+        slen,
+        NULL))
+    {
+        throw CSPException("Decryption failed");
+    }
 }
 
 void CryptMsg::add_signer_cert(Cert *c) throw(CSPException) {
@@ -93,6 +190,12 @@ void CryptMsg::add_signer_cert(Cert *c) throw(CSPException) {
         throw CSPException("Cannot acquire signer certificate private key");
     }
 
+    if (!sign_info) {
+        size_t szi = sizeof(CMSG_SIGNED_ENCODE_INFO);
+        sign_info = (CMSG_SIGNED_ENCODE_INFO *)malloc(szi);
+        memset(sign_info, 0, szi);
+        sign_info->cbSize = szi;
+    }
 
     sign_info->cSigners += 1;
     sign_info->cCertEncoded = sign_info->cSigners;
@@ -193,9 +296,8 @@ void CryptMsg::sign_data(char *STRING, size_t LENGTH, char **s, DWORD *slen, boo
 CryptMsg::CryptMsg(char *STRING, size_t LENGTH, Crypt *ctx) throw(CSPException) {
     HCERTSTORE hstore = NULL;
     DWORD temp = sizeof(DWORD);
-    /*CRYPT_ALGORITHM_IDENTIFIER cai;*/
-    /*memset(&cai, 0, sizeof(cai));*/
-    sign_info = NULL;
+
+    msg_init(ctx);
 
     hmsg = CryptMsgOpenToDecode(MY_ENC_TYPE, 0, 0, ctx? ctx->hprov : NULL, NULL, NULL);
     if (!hmsg) {

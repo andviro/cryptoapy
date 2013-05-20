@@ -72,8 +72,14 @@ def test_store_iter():
         cryptcp -instcert -cont '\\.\hdimage\test' ИмяФайла.cert'''
 
     cs = csp.CertStore(None, "MY")
-    print cs.__iter__
-    assert len(list(cs))
+    for c in cs:
+        assert c
+
+
+def test_duplicate_cert():
+    cs = csp.CertStore(None, "MY")
+    for c in cs:
+        c.duplicate()
 
 
 def _cert_thumb():
@@ -268,3 +274,24 @@ def test_cert_rdn():
     for c in cs:
         assert 'CN' in rdn.RDN(c.name())
         assert 'CN' in rdn.RDN(c.issuer())
+
+
+def test_encrypt_data():
+    cs = csp.CertStore(None, "MY")
+    re_cert = list(cs)[0]
+    msg = csp.CryptMsg()
+    msg.add_recipient_cert(re_cert)
+    data = msg.encrypt_data('murblehurblewurble')
+    assert data
+    return data
+
+
+def test_decrypt_data():
+    data = test_encrypt_data()
+    print data
+    msg = csp.CryptMsg()
+    assert msg
+    res = msg.decrypt_data(data)
+    print res
+    assert res == 'murblehurblewurble'
+    assert 0
