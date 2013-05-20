@@ -10,6 +10,21 @@ from base64 import b64encode
 signname = None
 
 
+def setup_module():
+    global signname
+    signname = os.path.join('/tmp', uuid4().hex)
+    open(signname, 'wb').write(os.urandom(1024))
+    if sub.call(['/opt/cprocsp/bin/ia32/cryptcp', '-dir', '/tmp', '-signf', '-nochain', '-cert', '-der', signname]):
+        assert False
+
+
+def teardown_module():
+    global signname
+    if os.path.exists(signname):
+        os.unlink(signname)
+        os.unlink(signname + '.sgn')
+
+
 def _context_simple():
     context = csp.Crypt(
         None,
@@ -194,6 +209,14 @@ def test_verify_with_detached():
         assert sgn.verify_data('hurblewurble', n)
 
 
+def test_verify_with_detached2():
+    data = open(signname, 'rb').read()
+    signdata = open(signname + '.sgn', 'rb').read()
+    sgn = csp.Signature(signdata)
+    for n in range(sgn.num_signers):
+        assert sgn.verify_data(data, n)
+
+
 def test_verify_with_detached_bad():
     data = test_detached_sign()
     sgn = csp.Signature(data)
@@ -201,19 +224,12 @@ def test_verify_with_detached_bad():
         assert not sgn.verify_data('hUrblEwurBle', n)
 
 
-def setup_module():
-    global signname
-    signname = os.path.join('/tmp', uuid4().hex)
-    open(signname, 'wb').write('hurblewurble')
-    if sub.call(['/opt/cprocsp/bin/ia32/cryptcp', '-dir', '/tmp', '-signf', '-nochain', '-cert', '-der', signname]):
-        assert False
-
-
-def teardown_module():
-    global signname
-    if os.path.exists(signname):
-        os.unlink(signname)
-        os.unlink(signname + '.sgn')
+def test_verify_with_detached_bad2():
+    data = os.urandom(1024)
+    signdata = open(signname + '.sgn', 'rb').read()
+    sgn = csp.Signature(signdata)
+    for n in range(sgn.num_signers):
+        assert not sgn.verify_data(data, n)
 
 
 def test_msg_signatures():
