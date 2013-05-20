@@ -101,6 +101,18 @@ public:
         return new Cert(pc);
     };
 
+
+    void remove_from_store() throw(CSPException) {
+        PCCERT_CONTEXT pc = CertDuplicateCertificateContext(pcert);
+        if (!pc) {
+            throw CSPException("Couldn't duplicate cert context");
+        }
+        if(!CertDeleteCertificateFromStore(pc))   
+        {
+            throw CSPException("Couldn't remove certificate");
+        }
+    }
+
     Cert(PCCERT_CONTEXT pc) throw(CSPException) {
         if (!pc) {
             throw CSPException("Invalid certificate context");

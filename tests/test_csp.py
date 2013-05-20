@@ -202,12 +202,11 @@ def test_verify_with_detached_bad():
 
 
 def setup_module():
-    pass
-    #global signname
-    #signname = os.path.join('/tmp', uuid4().hex)
-    #open(signname, 'wb').write('hurblewurble')
-    #if sub.call(['/opt/cprocsp/bin/ia32/cryptcp', '-dir', '/tmp', '-signf', '-nochain', '-cert', '-der', signname]):
-        #assert False
+    global signname
+    signname = os.path.join('/tmp', uuid4().hex)
+    open(signname, 'wb').write('hurblewurble')
+    if sub.call(['/opt/cprocsp/bin/ia32/cryptcp', '-dir', '/tmp', '-signf', '-nochain', '-cert', '-der', signname]):
+        assert False
 
 
 def teardown_module():
@@ -256,7 +255,7 @@ def test_verify_file():
             print unicode(c.name(), 'windows-1251')
             print unicode(c.issuer(), 'windows-1251')
             print b64encode(c.thumbprint())
-        assert all(sign.verify_data(data, x) for x in range(sign.num_signers))
+        assert all(sign.verify_data(data, n) for n in range(sign.num_signers))
 
 
 def test_rdn():
@@ -267,7 +266,7 @@ def test_rdn():
     1.2.840.113549.1.9.2="#0C21363639393030303030302D3636393930313030312D363630393033303338363334",
     T=Инженер-программист, SN=Федотов Алексей Николаевич
     '''
-    print dict(rdn.read_rdn(dn))
+    assert len(dict(rdn.read_rdn(dn))) == 13
 
 
 def test_cert_rdn():
@@ -297,14 +296,20 @@ def test_decrypt_data():
     assert res == 'murblehurblewurble'
 
 
-def test_transfer_cert():
+def test_add_remove_cert():
     my = csp.CertStore(None, "MY")
     n1 = len(list(my))
     testdata = open('tests/logical.cms', 'rb').read()
     msg = csp.CryptMsg(testdata)
+    ids = []
     for crt in msg.certs:
         print crt.name()
         print crt.issuer()
         my.add_cert(crt)
-
-    assert len(list(my)) > n1
+        ids.append(crt.thumbprint())
+    assert len(ids)
+    assert len(list(my)) == n1 + len(ids)
+    for cert_id in ids:
+        for cert in my.find_by_thumb(cert_id):
+            cert.remove_from_store()
+    assert len(list(my)) == n1
