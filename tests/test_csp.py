@@ -294,4 +294,3 @@ def test_decrypt_data():
     res = msg.decrypt_data(data)
     print res
     assert res == 'murblehurblewurble'
-    assert 0
