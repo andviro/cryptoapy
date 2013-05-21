@@ -6,15 +6,22 @@ from uuid import uuid4
 import subprocess as sub
 import os
 from base64 import b64encode
+from platform import architecture
 
 signname = None
+
+if architecture()[0] == '32bit':
+    arch = 'ia32'
+else:
+    arch = 'amd64'
 
 
 def setup_module():
     global signname
     signname = os.path.join('/tmp', uuid4().hex)
     open(signname, 'wb').write(os.urandom(1024))
-    if sub.call(['/opt/cprocsp/bin/ia32/cryptcp', '-dir', '/tmp', '-signf', '-nochain', '-cert', '-der', signname]):
+    if sub.call(['/opt/cprocsp/bin/{0}/cryptcp'.format(arch),
+                 '-dir', '/tmp', '-signf', '-nochain', '-cert', '-der', signname]):
         assert False
 
 

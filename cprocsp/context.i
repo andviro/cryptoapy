@@ -4,7 +4,7 @@
 %inline %{
 class Crypt {
 public:
-    HCRYPTPROV hprov = 0;
+    HCRYPTPROV hprov;
     Crypt(LPCSTR container, DWORD type, DWORD flags) throw(CSPException) {
         bool res = CryptAcquireContext(&hprov, container, NULL, type, flags);
         if (!res) {

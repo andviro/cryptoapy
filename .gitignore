@@ -6,6 +6,7 @@ test
 csp.py
 *_wrap.c
 *_wrap.cpp
+*_wrap.cxx
 .ropeproject
 *.py[cow]
 *.so
