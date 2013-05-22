@@ -1,4 +1,6 @@
+doc/_*
 build
+dist
 wiki
 *.egg
 *.egg-info

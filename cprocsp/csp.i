@@ -1,10 +1,17 @@
 /* vim: ft=swig
 */
+%define DOCSTRING
+"
 
-%module csp
+"
+%enddef
+
+%module(docstring=DOCSTRING) csp
 %include "typemaps.i"
 %include "exception.i"
 %include "cstring.i"
+%feature("autodoc", "2");
+
 
 %inline %{
 class Stop_Iteration {
