@@ -1,7 +1,5 @@
 // vim: ft=swig
 
-%cstring_output_allocate_size(char **s, DWORD *slen, free(*$1));
-
 %newobject CryptMsg::get_nth_signer_info(DWORD idx);
 %feature("python:slot", "tp_iter", functype="getiterfunc") SignerIter::__iter__;
 %feature("python:slot", "tp_iternext", functype="iternextfunc") SignerIter::next;

@@ -40,7 +40,7 @@ def swig(size):
 
 def test():
     with lcd(project_dir):
-        local("nosetests -v")
+        local("python setup.py test -v")
 
 
 def prepare():

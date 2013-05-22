@@ -11,6 +11,7 @@
 %include "exception.i"
 %include "cstring.i"
 %feature("autodoc", "2");
+%cstring_output_allocate_size(char **s, DWORD *slen, free(*$1));
 
 
 %inline %{
@@ -22,6 +23,8 @@ class Stop_Iteration {
   PyErr_SetNone(PyExc_StopIteration);
   SWIG_fail;
 %}
+
+
 
 %{
 #include <stdio.h>
@@ -43,7 +46,7 @@ class Stop_Iteration {
 %include "common.i"
 %include "errors.i"
 %include "context.i"
+%include "key.i"
 %include "cert.i"
 %include "msg.i"
 %include "sign.i"
-/*%include "hash.i"*/
