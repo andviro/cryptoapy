@@ -5,6 +5,8 @@
 #define WINVER 0x0500
 #endif /* WINVER */
 
+#define WINCRYPT32API
+
 /*
  * BASETYPES is defined in ntdef.h if these types are already defined
  */

@@ -11,12 +11,11 @@ public:
         parent = pctx;
         parent->ref();
         hkey = hk;
-        /*puts("release key");*/
+        LOG("new key\n");
     };
     ~Key() throw(CSPException) {
-        /*puts("release key");*/
+        LOG("release key\n");
         if (hkey) {
-            /*printf("Free ctx %x\n", hprov);*/
             bool res = CryptDestroyKey(hkey);
             if (!res) {
                 throw CSPException("Couldn't destroy key");

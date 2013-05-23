@@ -1,6 +1,27 @@
 // vim: ft=swig
 
-%newobject CryptMsg::get_nth_signer_info(DWORD idx);
+%newobject CryptMsg::get_nth_signer_info;
+
+typedef struct _CERT_INFO {
+    DWORD                       dwVersion;
+    CRYPT_INTEGER_BLOB          SerialNumber;
+    CRYPT_ALGORITHM_IDENTIFIER  SignatureAlgorithm;
+    CERT_NAME_BLOB              Issuer;
+    FILETIME                    NotBefore;
+    FILETIME                    NotAfter;
+    CERT_NAME_BLOB              Subject;
+    CERT_PUBLIC_KEY_INFO        SubjectPublicKeyInfo;
+    CRYPT_BIT_BLOB              IssuerUniqueId;
+    CRYPT_BIT_BLOB              SubjectUniqueId;
+    DWORD                       cExtension;
+    PCERT_EXTENSION             rgExtension;
+} CERT_INFO, *PCERT_INFO;
+
+%extend _CERT_INFO {
+    ~_CERT_INFO() {
+        free($self);
+    }
+}
 %newobject SignerIter::next;
 %feature("python:slot", "tp_iter", functype="getiterfunc") SignerIter::__iter__;
 %feature("python:slot", "tp_iternext", functype="iternextfunc") SignerIter::next;
@@ -37,7 +58,7 @@ public:
 
     ~CryptMsg() throw(CSPException);
 
-    PCERT_INFO get_nth_signer_info(DWORD idx);
+    CERT_INFO *get_nth_signer_info(DWORD idx);
 
     SignerIter *signer_certs();
 
@@ -52,6 +73,7 @@ public:
     void sign_data(char *STRING, size_t LENGTH, char **s, DWORD *slen, bool detach=0) throw(CSPException);
 
     friend class SignerIter;
+    friend class CertStore;
 };
 
 class SignerIter {
@@ -75,7 +97,7 @@ public:
 
 %{
 void CryptMsg::msg_init(Crypt *ctx) throw(CSPException) {
-    puts("init msg");
+    LOG("init msg\n");
     hmsg = NULL;
     certs = NULL;
     num_signers = 0;
@@ -315,7 +337,6 @@ void CryptMsg::sign_data(char *STRING, size_t LENGTH, char **s, DWORD *slen, boo
 }
 
 CryptMsg::CryptMsg(char *STRING, size_t LENGTH, Crypt *ctx) throw(CSPException) {
-    HCERTSTORE hstore = NULL;
     DWORD temp = sizeof(DWORD);
 
     msg_init(ctx);
@@ -332,11 +353,7 @@ CryptMsg::CryptMsg(char *STRING, size_t LENGTH, Crypt *ctx) throw(CSPException) 
         throw CSPException("Couldn't get message type");
     }
 
-    hstore = CertOpenStore(CERT_STORE_PROV_MSG, MY_ENC_TYPE, NULL, 0, hmsg);
-    if (!hstore) {
-        throw CSPException("Couldn't open message certificate store");
-    }
-    certs = new CertStore(hstore);
+    certs = new CertStore(this);
 
     if (!CryptMsgGetParam(hmsg, CMSG_SIGNER_COUNT_PARAM, 0, &num_signers, &temp)) {
         throw CSPException("Couldn't get message signer count");
@@ -352,7 +369,9 @@ CryptMsg::CryptMsg(char *STRING, size_t LENGTH, Crypt *ctx) throw(CSPException) 
 };
 
 CryptMsg::~CryptMsg() throw(CSPException) {
-    puts("close msg");
+    LOG("close msg\n");
+    if (cprov)
+        cprov->unref();
     if (sign_info) {
         if(sign_info->rgSigners) {
             for (int i=0; i<sign_info->cSigners; i++) {
@@ -373,20 +392,18 @@ CryptMsg::~CryptMsg() throw(CSPException) {
         throw CSPException("Couldn't close message");
     }
 
-    if (cprov)
-        cprov->unref();
 
 };
 
-PCERT_INFO CryptMsg::get_nth_signer_info(DWORD idx) {
+CERT_INFO *CryptMsg::get_nth_signer_info(DWORD idx) {
     DWORD spsi;
-    PCERT_INFO psi;
+    CERT_INFO *psi;
 
     if (!CryptMsgGetParam(hmsg, CMSG_SIGNER_CERT_INFO_PARAM, idx, NULL, &spsi)) {
         throw CSPException("Couldn't get signer info size");
     }
-    psi = (PCERT_INFO) malloc(spsi);
-    /*printf("psi:%i\n", spsi);*/
+    psi = (CERT_INFO *) malloc(spsi);
+    /*LOG("psi:%i\n", spsi);*/
     if (!CryptMsgGetParam(hmsg, CMSG_SIGNER_CERT_INFO_PARAM, idx, psi, &spsi)) {
         throw CSPException("Couldn't get signer info data");
     }
@@ -408,7 +425,7 @@ SignerIter::SignerIter(CryptMsg* o) {
 };
 
 Cert *SignerIter::next() throw (Stop_Iteration, CSPException) {
-    PCERT_INFO psi;
+    CERT_INFO *psi;
     Cert *res = NULL;
 
     if (idx >= owner->num_signers) {
@@ -426,6 +443,34 @@ Cert *SignerIter::next() throw (Stop_Iteration, CSPException) {
     idx++;
     free(psi);
     return res;
+};
+
+CertStore::CertStore(CryptMsg *parent) throw(CSPException) {
+    init();
+    if (!parent) {
+        throw CSPException("Invalid message for cert store");
+    }
+    msg = parent;
+    msg->ref();
+    hstore = CertOpenStore(CERT_STORE_PROV_MSG, MY_ENC_TYPE, NULL, 0, msg->hmsg);
+    if (!hstore) {
+        throw CSPException("Couldn't open message certificate store");
+    }
+};
+
+CertStore::~CertStore() throw(CSPException) {
+    if (hstore && !CertCloseStore(hstore, CERT_CLOSE_STORE_CHECK_FLAG)) {
+        throw CSPException("Couldn't properly close certificate store");
+    }
+    if (msg) {
+        LOG("msg free: %p\n", msg);
+        msg->unref();
+    }
+    if (ctx) {
+        LOG("ctx free: %p\n", ctx);
+        ctx->unref();
+    }
+    LOG("Freed store\n");
 };
 
 

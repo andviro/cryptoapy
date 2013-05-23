@@ -2,28 +2,35 @@
 */
 %{
 #define MY_ENC_TYPE (X509_ASN_ENCODING | PKCS_7_ASN_ENCODING)
+/*#define LOG printf*/
+#define LOG(...)
 %}
 
 %inline %{
 class RCObj {
 protected:
-    int refcount;
+    signed int refcount;
 public:
     RCObj() {
         refcount = 0;
     }
 
+    virtual ~RCObj() {};
+
     int ref() {
-        refcount++;
+        refcount ++;
+        LOG("ref %i\n", refcount);
         return refcount;
     }
 
     int unref() {
-        refcount--;
+        refcount --;
         if (refcount <= 0) {
+            LOG("delete \n");
             delete this;
             return 0;
         }
+        LOG("unref %i\n", refcount);
         return refcount;
     }
 };

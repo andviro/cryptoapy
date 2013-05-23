@@ -2,9 +2,11 @@
 */
 %feature("ref") Crypt "if ($this) $this->ref();"
 %feature("unref") Crypt "if ($this) $this->unref();"
-%newobject Crypt::get_sign_key;
+%newobject Crypt::get_key;
 %newobject Crypt::import_key;
-%newobject Context;
+%newobject Crypt::create_key;
+%newobject Crypt::name;
+%newobject ::Context;
 
 %inline %{
 class Key;
@@ -14,15 +16,16 @@ class Crypt : public RCObj {
 
     Crypt(HCRYPTPROV hp) throw(CSPException) {
         hprov = hp;
-        printf("New ctx %x\n", hprov);
+        LOG("New ctx %i\n", hprov);
     };
 public:
 
     ~Crypt() throw(CSPException) {
-        printf("Free ctx %x\n", hprov);
+        LOG("Free ctx %i\n", hprov);
         if (hprov) {
             bool res = CryptReleaseContext(hprov, 0);
             if (!res) {
+                LOG("error ctx %x\n", GetLastError());
                 throw CSPException("Couldn't release context");
             }
         }
