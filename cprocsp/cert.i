@@ -71,6 +71,8 @@ typedef struct _CERT_INFO {
 %newobject Cert::name();
 %newobject Cert::duplicate();
 %newobject CertStore::__iter__();
+%feature("ref") CertStore "$this->ref();"
+%feature("unref") CertStore "$this->unref();"
 
 %inline %{
 class Cert {
@@ -89,8 +91,10 @@ private:
 
         slen = CertNameToStr(X509_ASN_ENCODING, pNameBlob, flags, s, slen);
 
-        if (slen <= 1)
+        if (slen <= 1) {
+            free((void *)*s);
             throw CSPException("Couldn't decode cert blob");
+        }
         /*puts("get_name: end");*/
         return s;
     }
@@ -136,6 +140,7 @@ public:
         }
         *s = (char *)malloc(*slen);
         if(!CertGetCertificateContextProperty(pcert, CERT_HASH_PROP_ID, (void *)*s, slen)) {
+            free((void *)*s);
             throw CSPException("Couldn't get certificate thumbprint");
         }
     };
@@ -689,48 +694,21 @@ CertOpenSystemStore(
 %newobject CertIter::next();
 
 %inline %{
+class CertStore;
+
 class CertIter {
 public:
-    HCERTSTORE hstore;
+    CertStore *parent;
     bool iter;
     PCCERT_CONTEXT pcert;
 
-    CertIter(HCERTSTORE hs) throw (CSPException) {
-        hstore = CertDuplicateStore(hs);
-        if (!hstore)
-            throw CSPException("Couldn't duplicate certificate store");
-        iter = true;
-        pcert = NULL;
-        /*puts("Started iter");*/
-    };
+    CertIter(CertStore *p) throw (CSPException);
 
-    virtual ~CertIter() throw (CSPException) {
-        if (hstore && !CertCloseStore(hstore, CERT_CLOSE_STORE_CHECK_FLAG)) {
-            throw CSPException("Couldn't properly close certificate store");
-        }
-    };
+    CertIter *__iter__() { return this; }
 
-    CertIter *__iter__() {
-        return this;
-    };
+    virtual ~CertIter() throw (CSPException);
 
-    virtual Cert *next() throw (Stop_Iteration, CSPException) {
-        if (!iter) {
-            /*puts("Stop iter");*/
-            throw Stop_Iteration();
-        }
-        pcert = CertEnumCertificatesInStore(hstore, pcert);
-        if (pcert) {
-            /*Cert temp(pcert);*/
-            /*puts("Next iter");*/
-            /*return temp.duplicate();*/
-            return new Cert(CertDuplicateCertificateContext(pcert));
-        } else {
-            iter = false;
-            /*puts("Stop iter");*/
-            throw Stop_Iteration();
-        }
-    };
+    virtual Cert *next() throw (Stop_Iteration, CSPException);
 };
 
 class CertFind : public CertIter {
@@ -739,7 +717,7 @@ public:
     CRYPT_HASH_BLOB *param;
     DWORD enctype, findtype;
 
-    CertFind(HCERTSTORE hs, DWORD et, DWORD ft, char *STRING, size_t LENGTH) : CertIter(hs) {
+    CertFind(CertStore *p, DWORD et, DWORD ft, char *STRING, size_t LENGTH) : CertIter(p) {
         enctype = et;
         findtype = ft;
         chb.pbData = (BYTE *)STRING;
@@ -748,7 +726,7 @@ public:
         /*printf("Started find %i-%i-%i\n", et, ft, LENGTH);*/
     };
 
-    CertFind(HCERTSTORE hs, DWORD et, char *name) : CertIter(hs) {
+    CertFind(CertStore *p, DWORD et, char *name) : CertIter(p) {
         enctype = et;
         findtype = CERT_FIND_SUBJECT_STR;
         param = (CRYPT_HASH_BLOB *)name;
@@ -756,25 +734,12 @@ public:
         /*printf("Started find %i-'%s'\n", et, name);*/
     };
 
-    virtual Cert *next() throw (Stop_Iteration, CSPException) {
-        if (!iter) {
-            /*puts("Stopped find");*/
-            throw Stop_Iteration();
-        }
-        pcert = CertFindCertificateInStore(hstore, enctype, 0, findtype, param, pcert);
-        if (pcert) {
-            /*printf("Next find %i %i\n", enctype, findtype);*/
-            return new Cert(CertDuplicateCertificateContext(pcert));
-        } else {
-            iter = false;
-            /*puts("Stopped find");*/
-            throw Stop_Iteration();
-        }
-    };
+    virtual Cert *next() throw (Stop_Iteration, CSPException);
 };
 
-class CertStore {
+class CertStore : public RCObj {
 private:
+    Crypt *parent;
     HCERTSTORE hstore;
 public:
     CertStore(HCERTSTORE hs) throw(CSPException) {
@@ -791,16 +756,18 @@ public:
         }
     };
 
-    CertStore(const Crypt *ctx, LPCTSTR protocol) throw(CSPException) {
+    CertStore(Crypt *ctx, LPCTSTR protocol) throw(CSPException) {
         HCRYPTPROV hprov = 0;
         if (ctx) {
+            parent = ctx;
+            parent->ref();
             hprov = ctx->hprov;
         }
         hstore = CertOpenSystemStore(hprov, protocol);
         if (!hstore) {
             throw CSPException("Couldn't open certificate store");
         }
-        /*puts("Opened store");*/
+        puts("Opened store");
 
     };
 
@@ -808,32 +775,85 @@ public:
         if (hstore && !CertCloseStore(hstore, CERT_CLOSE_STORE_CHECK_FLAG)) {
             throw CSPException("Couldn't properly close certificate store");
         }
-        /*puts("Freed store");*/
+        if (parent) {
+            parent->unref();
+        }
+        puts("Freed store");
     };
 
     CertIter *__iter__() throw(CSPException) {
-        return new CertIter(hstore);
+        return new CertIter(this);
     };
 
     CertFind *find_by_thumb(char *STRING, size_t LENGTH) throw(CSPException) {
-        return new CertFind(hstore, X509_ASN_ENCODING | PKCS_7_ASN_ENCODING, CERT_FIND_HASH, STRING, LENGTH);
+        return new CertFind(this, X509_ASN_ENCODING | PKCS_7_ASN_ENCODING, CERT_FIND_HASH, STRING, LENGTH);
     };
 
     CertFind *find_by_name(char *name) throw(CSPException) {
-        return new CertFind(hstore, X509_ASN_ENCODING | PKCS_7_ASN_ENCODING, name);
+        return new CertFind(this, X509_ASN_ENCODING | PKCS_7_ASN_ENCODING, name);
     };
 
     Cert *get_cert_by_info(PCERT_INFO psi) throw(CSPException) {
         return new Cert(CertGetSubjectCertificateFromStore(hstore, MY_ENC_TYPE, psi));
     };
 
-    bool add_cert(Cert *c) throw(CSPException) {
+    void add_cert(Cert *c) throw(CSPException) {
         if (c && !CertAddCertificateContextToStore(hstore, c->pcert, CERT_STORE_ADD_ALWAYS, NULL)) {
             throw CSPException("Couldn't add cert to store");
         }
     };
     friend class CryptMsg;
+    friend class CertIter;
+    friend class CertFind;
 };
+
+
+CertIter::CertIter(CertStore *p) throw (CSPException) {
+    parent = p;
+    parent->ref();
+    iter = true;
+    pcert = NULL;
+    /*puts("Started iter");*/
+};
+
+CertIter::~CertIter() throw (CSPException) {
+    parent->unref();
+};
+
+Cert *CertIter::next() throw (Stop_Iteration, CSPException) {
+    if (!iter) {
+        /*puts("Stop iter");*/
+        throw Stop_Iteration();
+    }
+    pcert = CertEnumCertificatesInStore(parent->hstore, pcert);
+    if (pcert) {
+        /*Cert temp(pcert);*/
+        /*puts("Next iter");*/
+        /*return temp.duplicate();*/
+        return new Cert(CertDuplicateCertificateContext(pcert));
+    } else {
+        iter = false;
+        /*puts("Stop iter");*/
+        throw Stop_Iteration();
+    }
+};
+
+Cert *CertFind::next() throw (Stop_Iteration, CSPException) {
+    if (!iter) {
+        /*puts("Stopped find");*/
+        throw Stop_Iteration();
+    }
+    pcert = CertFindCertificateInStore(parent->hstore, enctype, 0, findtype, param, pcert);
+    if (pcert) {
+        /*printf("Next find %i %i\n", enctype, findtype);*/
+        return new Cert(CertDuplicateCertificateContext(pcert));
+    } else {
+        iter = false;
+        /*puts("Stopped find");*/
+        throw Stop_Iteration();
+    }
+};
+
 %}
 
 //+-------------------------------------------------------------------------

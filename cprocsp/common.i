@@ -4,6 +4,31 @@
 #define MY_ENC_TYPE (X509_ASN_ENCODING | PKCS_7_ASN_ENCODING)
 %}
 
+%inline %{
+class RCObj {
+protected:
+    int refcount;
+public:
+    RCObj() {
+        refcount = 0;
+    }
+
+    int ref() {
+        refcount++;
+        return refcount;
+    }
+
+    int unref() {
+        refcount--;
+        if (refcount <= 0) {
+            delete this;
+            return 0;
+        }
+        return refcount;
+    }
+};
+%}
+
 typedef ULONG_PTR HCRYPTPROV;
 typedef ULONG_PTR HCRYPTKEY;
 typedef ULONG_PTR HCRYPTHASH;

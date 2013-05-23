@@ -1,14 +1,17 @@
 // vim: ft=swig
 
 %newobject CryptMsg::get_nth_signer_info(DWORD idx);
+%newobject SignerIter::next;
 %feature("python:slot", "tp_iter", functype="getiterfunc") SignerIter::__iter__;
 %feature("python:slot", "tp_iternext", functype="iternextfunc") SignerIter::next;
+%feature("ref") CryptMsg "$this->ref();"
+%feature("unref") CryptMsg "$this->unref();"
 
 %inline %{
 
 class SignerIter;
 
-class CryptMsg {
+class CryptMsg : public RCObj {
 private:
     Crypt *cprov;
     CRYPT_ALGORITHM_IDENTIFIER hash_alg;
@@ -17,6 +20,7 @@ private:
     CRYPT_ENCRYPT_MESSAGE_PARA *encrypt_para;
     PCCERT_CONTEXT *recipient_certs;
     HCRYPTMSG hmsg;
+    bool *release_flags;
     void msg_init(Crypt *ctx) throw(CSPException);
 public:
     CertStore *certs;
@@ -46,6 +50,8 @@ public:
     void encrypt_data(char *STRING, size_t LENGTH, char **s, DWORD *slen) throw(CSPException);
     void decrypt_data(char *STRING, size_t LENGTH, char **s, DWORD *slen) throw(CSPException);
     void sign_data(char *STRING, size_t LENGTH, char **s, DWORD *slen, bool detach=0) throw(CSPException);
+
+    friend class SignerIter;
 };
 
 class SignerIter {
@@ -56,6 +62,10 @@ public:
 
     SignerIter(CryptMsg* o);
 
+    ~SignerIter() {
+        if (owner) owner->unref();
+    }
+
     SignerIter *__iter__();
 
     virtual Cert *next() throw (Stop_Iteration, CSPException);
@@ -65,11 +75,16 @@ public:
 
 %{
 void CryptMsg::msg_init(Crypt *ctx) throw(CSPException) {
+    puts("init msg");
     hmsg = NULL;
     certs = NULL;
     num_signers = 0;
+    release_flags = NULL;
     type = 0;
     cprov = ctx;
+    if (ctx) {
+        ctx->ref();
+    }
 
     DWORD hasi = sizeof(hash_alg);
     memset(&hash_alg, 0, hasi);
@@ -130,6 +145,7 @@ void CryptMsg::encrypt_data(char *STRING, size_t LENGTH, char **s, DWORD *slen) 
         (BYTE *)*s,
         slen))
     {
+        free((void *)*s);
         throw CSPException("Encryption failed");
     }
 }
@@ -165,6 +181,7 @@ void CryptMsg::decrypt_data(char *STRING, size_t LENGTH, char **s, DWORD *slen) 
         slen,
         NULL))
     {
+        free((void *)*s);
         throw CSPException("Decryption failed");
     }
 }
@@ -199,6 +216,8 @@ void CryptMsg::add_signer_cert(Cert *c) throw(CSPException) {
     sign_info->cCertEncoded = sign_info->cSigners;
     sign_info->rgSigners = (PCMSG_SIGNER_ENCODE_INFO) realloc(sign_info->rgSigners, ssi * sign_info->cSigners);
     sign_info->rgCertEncoded = (CERT_BLOB *) realloc(sign_info->rgCertEncoded, ssb * sign_info->cCertEncoded);;
+    release_flags = (bool *) realloc(release_flags, sizeof(bool) * sign_info->cSigners);
+    release_flags[sign_info->cSigners - 1] = do_release;
 
     signer_info = &(sign_info->rgSigners[sign_info->cSigners - 1]);
     memset(signer_info, 0, ssi);
@@ -234,6 +253,7 @@ void CryptMsg::get_data(char **s, DWORD *slen) throw(CSPException) {
                 *s,             /* Pointer to the blob*/
                 slen))
     {          /* Size of the blob*/
+        free((void *)*s);
         throw CSPException("Couldn't get decoded data");
     }
 }
@@ -254,6 +274,7 @@ void CryptMsg::sign_data(char *STRING, size_t LENGTH, char **s, DWORD *slen, boo
         (DWORD)LENGTH);                /* Size of content*/
 
     if (! *slen) {
+        free((void *)*s);
         throw CSPException("Getting cbEncodedBlob length failed.");
     }
 
@@ -268,6 +289,7 @@ void CryptMsg::sign_data(char *STRING, size_t LENGTH, char **s, DWORD *slen, boo
                 NULL);                  /* Stream information (not used)*/
 
     if(!hmsg) {
+        free((void *)*s);
         throw CSPException("Couldn't initialize message");
     }
 
@@ -287,6 +309,7 @@ void CryptMsg::sign_data(char *STRING, size_t LENGTH, char **s, DWORD *slen, boo
                 *s,             /* Pointer to the blob*/
                 slen))
     {          /* Size of the blob*/
+        free((void *)*s);
         throw CSPException("Couldn't get signed data");
     }
 }
@@ -329,22 +352,30 @@ CryptMsg::CryptMsg(char *STRING, size_t LENGTH, Crypt *ctx) throw(CSPException) 
 };
 
 CryptMsg::~CryptMsg() throw(CSPException) {
+    puts("close msg");
     if (sign_info) {
         if(sign_info->rgSigners) {
             for (int i=0; i<sign_info->cSigners; i++) {
                 PCMSG_SIGNER_ENCODE_INFO ssi = &(sign_info->rgSigners[i]);
-                if (ssi) {
+                if (ssi && release_flags[i]) {
                     CryptReleaseContext(ssi->hCryptProv, 0);
                 }
             }
             free(sign_info->rgSigners);
         }
         free(sign_info);
+        if (release_flags) {
+            free(release_flags);
+        }
     }
 
     if(hmsg && !CryptMsgClose(hmsg)) {
         throw CSPException("Couldn't close message");
     }
+
+    if (cprov)
+        cprov->unref();
+
 };
 
 PCERT_INFO CryptMsg::get_nth_signer_info(DWORD idx) {
@@ -372,6 +403,7 @@ SignerIter *SignerIter::__iter__() { return this; };
 
 SignerIter::SignerIter(CryptMsg* o) {
     owner = o;
+    owner->ref();
     idx = 0;
 };
 

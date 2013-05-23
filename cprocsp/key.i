@@ -47,6 +47,7 @@ public:
         *s = (char *)malloc(*slen);
 
         if(!CryptExportKey( hkey, expkey, blobtype, 0, (BYTE *)*s, slen)) {
+            free((void *)*s);
             throw CSPException("Error exporting key blob");
         }
     };
@@ -57,10 +58,22 @@ public:
 %}
 
 %{
-Key *Crypt::get_sign_key() throw(CSPException) {
+Key *Crypt::get_key(DWORD keyspec) throw(CSPException) {
     HCRYPTKEY hkey = 0;
-    if(!CryptGetUserKey(hprov, AT_SIGNATURE, &hkey)) { 
-        throw CSPException("Couldn't acquire user pub key");
+    if(!CryptGetUserKey(hprov, keyspec, &hkey)) { 
+        if (GetLastError() == NTE_NO_KEY) {
+            return NULL;
+        } else {
+            throw CSPException("Couldn't acquire user pub key");
+        }
+    }
+    return new Key(this, hkey);
+}
+
+Key *Crypt::create_key(DWORD flags, DWORD keyspec) throw(CSPException) {
+    HCRYPTKEY hkey = 0;
+    if(!CryptGenKey(hprov, keyspec, flags, &hkey)) { 
+        throw CSPException("Couldn't create key pair");
     }
     return new Key(this, hkey);
 }
