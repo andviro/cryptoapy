@@ -357,10 +357,9 @@ def test_export_import_pubkey():
     assert pk
 
 
-'''def test_create_named_container():
-    try:
-        ctx = csp.Context(r'\\.\hdimage\new', csp.PROV_GOST_2001_DH, 0)
-    except SystemError:
+def test_create_named_container():
+    ctx = csp.Context(r'\\.\hdimage\new', csp.PROV_GOST_2001_DH, 0)
+    if ctx is None:
         ctx = csp.Context(r'\\.\hdimage\new', csp.PROV_GOST_2001_DH, csp.CRYPT_NEWKEYSET)
     assert ctx
     name = ctx.name()
@@ -373,26 +372,22 @@ def test_export_import_pubkey():
     if ekey is None:
         ekey = ctx.create_key(csp.CRYPT_EXPORTABLE, csp.AT_KEYEXCHANGE)
     assert ekey
-'''
+    return name
 
 
 def test_export_import_private_key():
-    u''' Работает при наличии дополнительного контейнера "receiver"
+    name = test_create_named_container()
+    sender = csp.Context(name, csp.PROV_GOST_2001_DH, 0)
+    receiver = csp.Context("test", csp.PROV_GOST_2001_DH, 0)
 
-    '''
-    """# pass
-    sender = csp.Context("test", csp.PROV_GOST_2001_DH, 0)
-    receiver = csp.Context("receiver", csp.PROV_GOST_2001_DH, 0)
-    rec_key = receiver.get_key()
+    rec_key = receiver.get_key(csp.AT_KEYEXCHANGE)
     assert rec_key
-    sender_key = sender.get_key()
+    sender_key = sender.get_key(csp.AT_KEYEXCHANGE)
     assert sender_key
 
-    receiver_pub = sender.import_key(str(rec_key))
+    receiver_pub = sender.import_key(str(rec_key), sender_key)
     assert receiver_pub
-    # sender_priv = sender_key.encode_key(receiver_pub)
+    #sender_priv = sender_key.encode_key(receiver_pub)
 
-    # receiver_new_key = receiver.import_key(sender_priv, rec_key)
-    # assert receiver_new_key
-    """
-    pass
+    #receiver_new_key = receiver.import_key(sender_priv, rec_key)
+    #assert receiver_new_key

@@ -33,7 +33,7 @@ public:
         DWORD blobtype;
         if (cryptkey) {
             expkey = cryptkey -> hkey;
-            blobtype = PRIVATEKEYBLOB;
+            blobtype = SIMPLEBLOB;
         } else {
             expkey = 0;
             blobtype = PUBLICKEYBLOB;
