@@ -25,7 +25,7 @@ private:
         slen = CertNameToStr(X509_ASN_ENCODING, pNameBlob, flags, s, slen);
 
         if (slen <= 1) {
-            free((void *)*s);
+            free(s);
             throw CSPException("Couldn't decode cert blob");
         }
         return s;

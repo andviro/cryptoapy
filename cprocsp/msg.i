@@ -84,7 +84,7 @@ public:
 
     SignerIter(CryptMsg* o);
 
-    ~SignerIter() {
+    virtual ~SignerIter() {
         if (owner) owner->unref();
     }
 
@@ -110,11 +110,11 @@ void CryptMsg::msg_init(Crypt *ctx) throw(CSPException) {
 
     DWORD hasi = sizeof(hash_alg);
     memset(&hash_alg, 0, hasi);
-    hash_alg.pszObjId = szOID_CP_GOST_R3411;  
+    hash_alg.pszObjId = (char *)szOID_CP_GOST_R3411;  
 
     DWORD esi = sizeof(encrypt_alg);
     memset(&encrypt_alg, 0, esi);
-    encrypt_alg.pszObjId = szOID_CP_GOST_28147;  
+    encrypt_alg.pszObjId = (char *)szOID_CP_GOST_28147;  
 
     recipient_certs = NULL;
     num_recipients = 0;
@@ -341,7 +341,7 @@ CryptMsg::CryptMsg(char *STRING, size_t LENGTH, Crypt *ctx) throw(CSPException) 
 
     msg_init(ctx);
 
-    hmsg = CryptMsgOpenToDecode(MY_ENC_TYPE, 0, 0, ctx? ctx->hprov : NULL, NULL, NULL);
+    hmsg = CryptMsgOpenToDecode(MY_ENC_TYPE, 0, 0, ctx? ctx->hprov : 0, NULL, NULL);
     if (!hmsg) {
         throw CSPException("Couldn't initialize message");
     }
@@ -374,7 +374,7 @@ CryptMsg::~CryptMsg() throw(CSPException) {
         cprov->unref();
     if (sign_info) {
         if(sign_info->rgSigners) {
-            for (int i=0; i<sign_info->cSigners; i++) {
+            for (unsigned i=0; i<sign_info->cSigners; i++) {
                 PCMSG_SIGNER_ENCODE_INFO ssi = &(sign_info->rgSigners[i]);
                 if (ssi && release_flags[i]) {
                     CryptReleaseContext(ssi->hCryptProv, 0);
@@ -452,7 +452,7 @@ CertStore::CertStore(CryptMsg *parent) throw(CSPException) {
     }
     msg = parent;
     msg->ref();
-    hstore = CertOpenStore(CERT_STORE_PROV_MSG, MY_ENC_TYPE, NULL, 0, msg->hmsg);
+    hstore = CertOpenStore(CERT_STORE_PROV_MSG, MY_ENC_TYPE, 0, 0, msg->hmsg);
     if (!hstore) {
         throw CSPException("Couldn't open message certificate store");
     }

@@ -18,7 +18,7 @@ public:
         CRYPT_VERIFY_MESSAGE_PARA msg_para;
         msg_para.cbSize = sizeof(CRYPT_VERIFY_MESSAGE_PARA);
         msg_para.dwMsgAndCertEncodingType = MY_ENC_TYPE;
-        msg_para.hCryptProv = NULL;
+        msg_para.hCryptProv = 0;
         msg_para.pfnGetSignerCertificate = NULL;
         msg_para.pvGetArg = NULL;
         return CryptVerifyDetachedMessageSignature(&msg_para, n, raw_msg,
