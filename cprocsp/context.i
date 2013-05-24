@@ -10,7 +10,9 @@
 
 %inline %{
 class Key;
+%}
 
+%inline %{
 class Crypt : public RCObj {
     HCRYPTPROV hprov;
 
@@ -58,6 +60,13 @@ public:
 };
 
 %}
+%define CryptDOC
+"
+Функция `Context` возвращает криптографический контекст, в виде экземпляра
+класса `Crypt`.
+"
+%enddef
+%feature("docstring", CryptDOC);
 
 %{
 Crypt *Context(LPCSTR container, DWORD type, DWORD flags) throw(CSPException) {
