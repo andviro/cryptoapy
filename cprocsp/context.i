@@ -51,7 +51,7 @@ public:
 
     Key *create_key(DWORD flags, DWORD keyspec=AT_SIGNATURE) throw(CSPException);
     Key *get_key(DWORD keyspec=AT_SIGNATURE) throw(CSPException);
-    Key *import_key(char *STRING, size_t LENGTH, Key *decrypt=NULL) throw(CSPException);
+    Key *import_key(BYTE *STRING, DWORD LENGTH, Key *decrypt=NULL) throw(CSPException);
     friend class CryptMsg;
     friend class CertStore;
     friend Crypt *Context(LPCSTR ,DWORD , DWORD) throw (CSPException);
@@ -64,6 +64,7 @@ Crypt *Context(LPCSTR container, DWORD type, DWORD flags) throw(CSPException) {
     HCRYPTPROV hp;
     Crypt *res;
 
+    /*printf("%x\n", flags);*/
     if (!CryptAcquireContext(&hp, container, NULL, type, flags)) {
         switch (GetLastError()) {
             case NTE_BAD_KEYSET_PARAM: return NULL;

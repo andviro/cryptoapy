@@ -1,12 +1,19 @@
 # coding: utf-8
 
 from cprocsp import csp, rdn
-from nose.tools import raises
+#from nose.tools import raises
 from uuid import uuid4
 import subprocess as sub
 import os
+import sys
 from base64 import b64encode
 from platform import architecture
+
+if sys.version_info >= (3,):
+        unicode = str
+else:
+        unicode = unicode
+
 
 signname = None
 
@@ -19,7 +26,8 @@ else:
 def setup_module():
     global signname
     signname = os.path.join('/tmp', uuid4().hex)
-    open(signname, 'wb').write(os.urandom(1024))
+    with open(signname, 'wb') as f:
+        f.write(os.urandom(1024))
     if sub.call(['/opt/cprocsp/bin/{0}/cryptcp'.format(arch),
                  '-dir', '/tmp', '-signf', '-nochain', '-cert', '-der', signname]):
         assert False
@@ -43,12 +51,6 @@ def test_context_simple():
 
 
 def test_context_named():
-    ur''' Работает при наличии в системе контейнера 'test'.
-    Необходимо его предварительно создать командой:
-
-    csptestf -keyset -newkeyset -cont '\\.\hdimage\test'
-
-    '''
     context = csp.Context(
         "test",
         csp.PROV_GOST_2001_DH,
@@ -79,19 +81,6 @@ def test_store_in_context():
 
 
 def test_store_iter():
-    ur''' Работает при наличии в системе как минимум одного сертификата.
-
-    Тестовый сертификат создается следующим образом:
-
-    Запрос на сертификат
-
-        cryptcp -creatrqst -cont '\\.\hdimage\test' -provtype 75 -nokeygen -dn 'E=test@localhost.localdomain,CN=test' -both ~/req
-
-    Затем следует получить сертификат вручную от тестового УЦ по адресу: http://www.cryptopro.ru/certsrv
-
-    И установить сохраненный сертификат в хранилище:
-
-        cryptcp -instcert -cont '\\.\hdimage\test' ИмяФайла.cert'''
 
     cs = csp.CertStore(None, "MY")
     for c in cs:
@@ -102,8 +91,8 @@ def test_duplicate_cert():
     cs = csp.CertStore(None, "MY")
     for c in cs:
         cdup = c.duplicate()
-        print b64encode(c.thumbprint())
-        print b64encode(cdup.thumbprint())
+        print((b64encode(c.thumbprint())))
+        print((b64encode(cdup.thumbprint())))
 
 
 def _cert_thumb():
@@ -116,14 +105,14 @@ def _cert_thumb():
 def test_cert_name():
     cs = csp.CertStore(None, "MY")
     names = list(cert.name() for cert in cs)
-    print names
+    print((names))
     assert all(name for name in names)
 
 
 def test_cert_issuer():
     cs = csp.CertStore(None, "MY")
     issuers = list(cert.issuer() for cert in cs)
-    print issuers
+    print((issuers))
     assert all(s for s in issuers)
 
 
@@ -135,7 +124,7 @@ def test_cert_find_by_thumb():
 
 
 def test_cert_find_by_name():
-    name = 'test'
+    name = b'test'
     cs = csp.CertStore(None, "MY")
     res = list(cs.find_by_name(name))
     assert len(res)
@@ -153,13 +142,13 @@ def test_memory_store():
 
 def test_cert_not_found():
     cs = csp.CertStore(None, "MY")
-    res = list(cs.find_by_thumb('x' * 20))
+    res = list(cs.find_by_thumb(b'x' * 20))
     assert not len(res)
 
 
 def test_cert_name_not_found():
     cs = csp.CertStore(None, "MY")
-    res = list(cs.find_by_name('some wrong name'))
+    res = list(cs.find_by_name(b'some wrong name'))
     assert not len(res)
 
 
@@ -170,7 +159,8 @@ def test_cert_sign_algorithm():
 
 
 def _msg_decode():
-    testdata = open('tests/logical.cms', 'rb').read()
+    with open('tests/logical.cms', 'rb') as f:
+        testdata = f.read()
     msg = csp.CryptMsg(testdata)
     return msg
 
@@ -185,7 +175,7 @@ def test_sign_data():
     cert = list(cs)[0]
     mess = csp.CryptMsg(ctx)
     mess.add_signer_cert(cert)
-    data = mess.sign_data('hurblewurble')
+    data = mess.sign_data(b'hurblewurble')
     assert len(data)
     return data
 
@@ -201,7 +191,7 @@ def test_detached_sign():
     cert = list(cs)[0]
     mess = csp.CryptMsg(ctx)
     mess.add_signer_cert(cert)
-    data = mess.sign_data('hurblewurble', True)
+    data = mess.sign_data(b'hurblewurble', True)
     assert len(data)
     return data
 
@@ -217,12 +207,14 @@ def test_verify_with_detached():
     data = test_detached_sign()
     sgn = csp.Signature(data)
     for n in range(sgn.num_signers):
-        assert sgn.verify_data('hurblewurble', n)
+        assert sgn.verify_data(b'hurblewurble', n)
 
 
 def test_verify_with_detached2():
-    data = open(signname, 'rb').read()
-    signdata = open(signname + '.sgn', 'rb').read()
+    with open(signname, 'rb') as f:
+        data = f.read()
+    with open(signname + '.sgn', 'rb') as f:
+        signdata = f.read()
     sgn = csp.Signature(signdata)
     for n in range(sgn.num_signers):
         assert sgn.verify_data(data, n)
@@ -232,12 +224,13 @@ def test_verify_with_detached_bad():
     data = test_detached_sign()
     sgn = csp.Signature(data)
     for n in range(sgn.num_signers):
-        assert not sgn.verify_data('hUrblEwurBle', n)
+        assert not sgn.verify_data(b'hUrblEwurBle', n)
 
 
 def test_verify_with_detached_bad2():
     data = os.urandom(1024)
-    signdata = open(signname + '.sgn', 'rb').read()
+    with open(signname + '.sgn', 'rb') as f:
+        signdata = f.read()
     sgn = csp.Signature(signdata)
     for n in range(sgn.num_signers):
         assert not sgn.verify_data(data, n)
@@ -253,35 +246,37 @@ def test_msg_signatures():
     # testdata = open('tests/logical.cms', 'rb').read()
     msg = csp.CryptMsg(testdata, ctx)
     del testdata
-    print msg.type
-    print msg.num_signers
-    print len(msg.get_data())
+    print(msg.type)
+    print(msg.num_signers)
+    print(len(msg.get_data()))
 
     psi = msg.get_nth_signer_info(0)
     assert psi
     my = csp.CertStore(msg)
     verify_cert = my.get_cert_by_info(psi)
 
-    print verify_cert.name()
+    print(verify_cert.name())
     assert msg.verify_cert(verify_cert)
     ns = list(c.name() for c in msg.signer_certs())
     assert len(ns)
     cs = list(csp.CertStore(msg))
-    print [(msg.verify_cert(x), x.name()) for x in cs]
+    print([(msg.verify_cert(x), x.name()) for x in cs])
     assert all(msg.verify_cert(c) for c in cs)
 
 
 def test_verify_file():
     names = ('data1', 'data2')
     for name in names:
-        data = open('tests/{0}.bin'.format(name), 'rb').read()
-        sigdata = open('tests/{0}.p7s'.format(name), 'rb').read()
+        with open('tests/{0}.bin'.format(name), 'rb') as f:
+            data = f.read()
+        with open('tests/{0}.p7s'.format(name), 'rb') as f:
+            sigdata = f.read()
         sign = csp.Signature(sigdata)
-        print sign.num_signers
+        print(sign.num_signers)
         for c in csp.CertStore(sign):
-            print unicode(c.name(), 'windows-1251')
-            print unicode(c.issuer(), 'windows-1251')
-            print b64encode(c.thumbprint())
+            print(unicode(c.name(), 'windows-1251'))
+            print(unicode(c.issuer(), 'windows-1251'))
+            print(b64encode(c.thumbprint()))
         assert all(sign.verify_data(data, n) for n in range(sign.num_signers))
 
 
@@ -299,8 +294,8 @@ def test_rdn():
 def test_cert_rdn():
     cs = csp.CertStore(None, "MY")
     for c in cs:
-        assert 'CN' in rdn.RDN(c.name())
-        assert 'CN' in rdn.RDN(c.issuer())
+        assert 'CN' in rdn.RDN(unicode(c.name(), 'windows-1251'))
+        assert 'CN' in rdn.RDN(unicode(c.issuer(), 'windows-1251'))
 
 
 def test_encrypt_data():
@@ -308,30 +303,31 @@ def test_encrypt_data():
     re_cert = list(cs)[0]
     msg = csp.CryptMsg()
     msg.add_recipient_cert(re_cert)
-    data = msg.encrypt_data('murblehurblewurble')
+    data = msg.encrypt_data(b'murblehurblewurble')
     assert data
     return data
 
 
 def test_decrypt_data():
     data = test_encrypt_data()
-    print data
+    print(data)
     msg = csp.CryptMsg()
     assert msg
     res = msg.decrypt_data(data)
-    print res
-    assert res == 'murblehurblewurble'
+    print(res)
+    assert res == b'murblehurblewurble'
 
 
 def test_add_remove_cert():
     my = csp.CertStore(None, "MY")
     n1 = len(list(my))
-    testdata = open('tests/logical.cms', 'rb').read()
+    with open('tests/logical.cms', 'rb') as f:
+        testdata = f.read()
     msg = csp.CryptMsg(testdata)
     ids = []
     for crt in csp.CertStore(msg):
-        print crt.name()
-        print crt.issuer()
+        print(crt.name())
+        print(crt.issuer())
         my.add_cert(crt)
         my.add_cert(crt.duplicate())
         ids.append(crt.thumbprint())
@@ -353,7 +349,7 @@ def test_export_import_pubkey():
     sk = context.get_key()
     assert sk
 
-    pk = recipient.import_key(str(sk))
+    pk = recipient.import_key(sk.encode())
     assert pk
 
 
@@ -385,9 +381,9 @@ def test_export_import_private_key():
     sender_key = sender.get_key(csp.AT_KEYEXCHANGE)
     assert sender_key
 
-    receiver_pub = sender.import_key(str(rec_key), sender_key)
+    receiver_pub = sender.import_key(rec_key.encode(), sender_key)
     assert receiver_pub
-    #sender_priv = sender_key.encode_key(receiver_pub)
+    # sender_priv = sender_key.encode_key(receiver_pub)
 
-    #receiver_new_key = receiver.import_key(sender_priv, rec_key)
-    #assert receiver_new_key
+    # receiver_new_key = receiver.import_key(sender_priv, rec_key)
+    # assert receiver_new_key

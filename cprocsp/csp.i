@@ -7,12 +7,11 @@
 %enddef
 
 %module(docstring=DOCSTRING) csp
-%include "typemaps.i"
+/*%include "typemaps.i"*/
 %include "exception.i"
-%include "cstring.i"
+/*%include "cstring.i"*/
+%include "bytes.i"
 %feature("autodoc", "2");
-%cstring_output_allocate_size(char **s, DWORD *slen, free(*$1));
-
 
 %inline %{
 class Stop_Iteration {
