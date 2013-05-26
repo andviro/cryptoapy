@@ -24,6 +24,10 @@ else:
 
 
 def setup_module():
+    u'''
+    Создание тестового блока данных и его отсоединенной подписи с помощью
+    командной строки.
+    '''
     global signname
     signname = os.path.join('/tmp', uuid4().hex)
     with open(signname, 'wb') as f:
@@ -34,6 +38,9 @@ def setup_module():
 
 
 def teardown_module():
+    u'''
+    Прибиение временных файлов.
+    '''
     global signname
     if os.path.exists(signname):
         os.unlink(signname)
@@ -41,6 +48,11 @@ def teardown_module():
 
 
 def test_context_simple():
+    u'''
+    Контест создается функцией `Context()`. Первым параметром передается
+    строка-имя контейнера ключей. Второй параметр -- тип провайдера, третий --
+    флаги. Контейнер без имени является контейнером пользователя по умолчанию.
+    '''
     context = csp.Context(
         None,
         csp.PROV_GOST_2001_DH,
@@ -51,6 +63,10 @@ def test_context_simple():
 
 
 def test_context_named():
+    u'''
+    Подключение к именованному контейнеру. Если контейнер с данным именем не
+    найден, будет возвращено `None`.
+    '''
     context = csp.Context(
         "test",
         csp.PROV_GOST_2001_DH,
@@ -70,24 +86,36 @@ def test_context_not_found():
 
 
 def test_store():
+    u'''
+    Открытие системного хранилища сертификатов.
+    '''
     cs = csp.CertStore(None, "MY")
     assert cs
 
 
 def test_store_in_context():
+    u'''
+    Первый параметр позволяет связать хранилище с контекстом провайдера.
+    '''
     context = test_context_simple()
     cs = csp.CertStore(context, "MY")
     assert cs
 
 
 def test_store_iter():
-
+    u'''
+    Итерация по контейнеру перебирает все хранящиеся в нем сертификаты.
+    '''
     cs = csp.CertStore(None, "MY")
     for c in cs:
         assert c
 
 
 def test_duplicate_cert():
+    u'''
+    Метод `Cert.duplicate()` создает веременную копию серта, не сохраняемую в
+    хранилище.
+    '''
     cs = csp.CertStore(None, "MY")
     for c in cs:
         cdup = c.duplicate()
@@ -96,6 +124,11 @@ def test_duplicate_cert():
 
 
 def _cert_thumb():
+    u'''
+    Метод `Cert.thumb()` возвращает отпечаток сертификата в виде бинарной
+    строки. Для перевода в обычную строку, может потребоваться кодирование в
+    base64.
+    '''
     cs = csp.CertStore(None, "MY")
     thumbs = [cert.thumbprint() for cert in cs]
     assert thumbs
@@ -103,6 +136,11 @@ def _cert_thumb():
 
 
 def test_cert_name():
+    u'''
+    Метод `Cert.name()` возвращает строку с RDN сертификата в виде бинарной
+    строки. Для дальнейшей работы с ней может потребоваться модуль `RDN` и ее
+    перекодирование в unicode.
+    '''
     cs = csp.CertStore(None, "MY")
     names = list(cert.name() for cert in cs)
     print((names))
@@ -110,6 +148,10 @@ def test_cert_name():
 
 
 def test_cert_issuer():
+    u'''
+    Метод `Cert.issuer()` возвращает информацию о том, кто выдал сертификат,
+    работает аналогично `Cert.name()`.
+    '''
     cs = csp.CertStore(None, "MY")
     issuers = list(cert.issuer() for cert in cs)
     print((issuers))
@@ -117,6 +159,10 @@ def test_cert_issuer():
 
 
 def test_cert_find_by_thumb():
+    u'''
+    Метод `CertStore.find_by_thumb(s)` перечисляет все сертификаты с
+    отпечатком, равным байтовой строке `s`.
+    '''
     thumb = _cert_thumb()
     cs = csp.CertStore(None, "MY")
     res = list(cs.find_by_thumb(thumb))
@@ -124,6 +170,10 @@ def test_cert_find_by_thumb():
 
 
 def test_cert_find_by_name():
+    u'''
+    Метод `CertStore.find_by_name(s)` перечисляет все сертификаты, в RDN которых
+    так или иначе встречается байтовая строка `s`.
+    '''
     name = b'test'
     cs = csp.CertStore(None, "MY")
     res = list(cs.find_by_name(name))
@@ -131,10 +181,16 @@ def test_cert_find_by_name():
 
 
 def test_memory_store():
+    u'''
+    Хранилище сертификатов может быть создано в памяти вызовом конструктора
+    `CertStore()` без параметров.
+    '''
     my = csp.CertStore(None, "MY")
     cert = list(my)[0]
 
     cs = csp.CertStore()
+
+    # метод `CertStore.add_cert(c)` добавляет сертификат `c` в хранилище.
     cs.add_cert(cert)
 
     assert len(list(cs))
@@ -153,12 +209,21 @@ def test_cert_name_not_found():
 
 
 def test_cert_sign_algorithm():
+    u'''
+    Метод `Cert.sign_algorithm()` возвращает идентификатор алгоритма ЭЦП.
+    '''
     cs = csp.CertStore(None, "MY")
     cert = list(cs)[0]
     assert cert.sign_algorithm() == '1.2.643.2.2.3'
 
 
 def _msg_decode():
+    u'''
+    Конструктор сообщения `CryptMsg(s[, c])` инициализируется бинарной строкой с
+    PKCS7 или DER сообщением. При создании сообщение автоматически
+    декодируется. Второй, необязательный, параметр `c` задает контекст
+    криптопровайдера. По умолчанию, неявно создается контекст для проверки ЭЦП.
+    '''
     with open('tests/logical.cms', 'rb') as f:
         testdata = f.read()
     msg = csp.CryptMsg(testdata)
@@ -166,6 +231,18 @@ def _msg_decode():
 
 
 def test_sign_data():
+    u'''
+    При создании нового пустого сообщения, конструктору передается либо
+    контекст, либо конструктор вызывается без параметров.
+
+    Метод `CryptMsg.add_signer_cert(c)` сохраняет в сообщении сертификат `c`,
+    которым будет подписано сообщение. Таким образом можно добавлять несколько
+    подписантов и их сертификатов.
+
+    Метод `CryptMsg.sign_data(s)` создает сообщение, закодированное в PKCS7,
+    подписанное всеми сертификатами из списка. Подписи и сертификаты входят в
+    байтовую строку, которая возвращается функцией.
+    '''
     ctx = csp.Context(
         "test",
         csp.PROV_GOST_2001_DH,
@@ -181,6 +258,12 @@ def test_sign_data():
 
 
 def test_detached_sign():
+    u'''
+    Второй необязательный параметр `detach` функции CryptMsg.sign_data()`
+    управляет режимом подписывания. При вызове со значение `True` функция
+    подписи вернет не полное подписанное сообщение, а только подпись, которую
+    можно хранить отдельно от подписанных ей данных.
+    '''
     ctx = csp.Context(
         "test",
         csp.PROV_GOST_2001_DH,
@@ -197,6 +280,8 @@ def test_detached_sign():
 
 
 def test_cert_from_detached():
+    u'''
+    '''
     data = test_detached_sign()
     sgn = csp.Signature(data)
     cs = csp.CertStore(sgn)
