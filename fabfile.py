@@ -45,33 +45,41 @@ def swig(size=void_size):
                 f.write(content)
 
 
-def test():
+def test(pyversion=''):
     with lcd(project_dir):
-        local("python setup.py test -v")
+        local("python{0} setup.py test -v".format(pyversion))
 
 
-def prepare():
+def build(pyversion=''):
     with lcd(project_dir):
-        test()
+        local("python{0} setup.py build".format(pyversion))
+
+
+def build_rpm(pyversion=''):
+    with lcd(project_dir):
+        local("python{0} setup.py bdist --format=rpm".format(pyversion))
+
+
+def prepare(pyversion=''):
+    with lcd(project_dir):
+        test(pyversion)
         swig(remote_void_size)
         local("tar -cvzf {0} {1}".format(archive, files))
 
 
-def deploy(pyversion=2):
+def deploy(pyversion=''):
+    prepare(pyversion)
     with settings(warn_only=True):
         if run("test -d {0}".format(remote_dir)).failed:
             run("mkdir -p {0}".format(remote_dir))
     put(archive, '/tmp/')
     with cd(remote_dir):
         run("tar -xvzf {0}".format(archive))
-        if pyversion == 2:
-            run("python setup.py bdist --format=rpm")
-        else:
-            run("python3 setup.py bdist --format=rpm")
+        run("python{ver} setup.py bdist --format=rpm".format(ver=pyversion))
 
 
-def rebuild():
-    with lcd(project_dir):
-        swig(void_size)
-        local("python setup.py build")
-        test()
+def rebuild(pyversion=''):
+    swig(void_size)
+    build(pyversion)
+    test(pyversion)
+    build_rpm(pyversion)
