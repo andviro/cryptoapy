@@ -1,6 +1,5 @@
 /* vim: ft=swig
 */
-%feature("python:slot", "tp_str", functype="reprfunc") Key::to_string;
 
 %inline %{
 class Key {
@@ -24,11 +23,7 @@ public:
         parent->unref();
     };
 
-    void to_string(char **s, DWORD *slen) throw(CSPException) {
-        encode_key(s, slen, NULL);
-    }
-
-    void encode_key(char **s, DWORD *slen, Key *cryptkey=NULL) throw(CSPException) {
+    void encode(BYTE **s, DWORD *slen, Key *cryptkey=NULL) throw(CSPException) {
         HCRYPTKEY expkey;
         DWORD blobtype;
         if (cryptkey) {
@@ -43,7 +38,7 @@ public:
             throw CSPException("Error computing key blob length");
         }
 
-        *s = (char *)malloc(*slen);
+        *s = (BYTE *)malloc(*slen);
 
         if(!CryptExportKey( hkey, expkey, blobtype, 0, (BYTE *)*s, slen)) {
             free((void *)*s);
@@ -77,11 +72,11 @@ Key *Crypt::create_key(DWORD flags, DWORD keyspec) throw(CSPException) {
     return new Key(this, hkey);
 }
 
-Key *Crypt::import_key(char *STRING, size_t LENGTH, Key *decrypt) throw(CSPException) {
+Key *Crypt::import_key(BYTE *STRING, DWORD LENGTH, Key *decrypt) throw(CSPException) {
     HCRYPTKEY hkey = 0;
     HCRYPTKEY decrkey = decrypt? decrypt->hkey : 0;
 
-    if(!CryptImportKey(hprov, (BYTE *)STRING, LENGTH, decrkey, 0, &hkey)) {
+    if(!CryptImportKey(hprov, STRING, LENGTH, decrkey, 0, &hkey)) {
         throw CSPException("Couldn't import public key blob");
     }
     return new Key(this, hkey);

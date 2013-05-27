@@ -1,6 +1,5 @@
 /* vim: ft=swig
 */
-%cstring_output_allocate_size(char **s, DWORD *slen, free(*$1));
 %newobject Cert::name();
 %newobject Cert::duplicate();
 %newobject CertStore::__iter__();
@@ -11,24 +10,21 @@
 class Cert {
 private:
     PCCERT_CONTEXT pcert;
-    char *decode_name_blob(PCERT_NAME_BLOB pNameBlob) {
-        DWORD slen = 0;
-        char *s = NULL;
+    void decode_name_blob(PCERT_NAME_BLOB pNameBlob, BYTE **s, DWORD *slen) {
         DWORD flags = CERT_X500_NAME_STR | CERT_NAME_STR_NO_PLUS_FLAG;
 
-        slen = CertNameToStr( X509_ASN_ENCODING, pNameBlob, flags, NULL, 0);
-        if (slen <= 1)
+        *slen = CertNameToStr( X509_ASN_ENCODING, pNameBlob, flags, NULL, 0);
+        if (*slen <= 1)
             throw CSPException("Wrong size for blob decoded data");
 
-        s = (char *)malloc(slen);
+        *s = (BYTE *)malloc(*slen);
 
-        slen = CertNameToStr(X509_ASN_ENCODING, pNameBlob, flags, s, slen);
+        *slen = CertNameToStr(X509_ASN_ENCODING, pNameBlob, flags, (char *)*s, *slen);
 
-        if (slen <= 1) {
-            free(s);
+        if (*slen <= 1) {
+            free(*s);
             throw CSPException("Couldn't decode cert blob");
         }
-        return s;
     }
 
 public:
@@ -64,12 +60,12 @@ public:
         LOG("Freed cert %x\n", pcert);
     };
 
-    void thumbprint(char **s, DWORD *slen) throw(CSPException) {
+    void thumbprint(BYTE **s, DWORD *slen) throw(CSPException) {
         if(!CertGetCertificateContextProperty(pcert, CERT_HASH_PROP_ID, NULL, slen)) {
             LOG("Error: %x\n", pcert);
             throw CSPException("Couldn't get certificate hash size");
         }
-        *s = (char *)malloc(*slen);
+        *s = (BYTE *)malloc(*slen);
         if(!CertGetCertificateContextProperty(pcert, CERT_HASH_PROP_ID, (void *)*s, slen)) {
             free((void *)*s);
             throw CSPException("Couldn't get certificate thumbprint");
@@ -80,12 +76,12 @@ public:
         return pcert->pCertInfo->SignatureAlgorithm.pszObjId;
     }
 
-    char *name() throw(CSPException) {
-        return decode_name_blob(&pcert->pCertInfo->Subject);
+    void name(BYTE **s, DWORD *slen) throw(CSPException) {
+        decode_name_blob(&pcert->pCertInfo->Subject, s, slen);
     };
 
-    char *issuer() throw(CSPException) {
-        return decode_name_blob(&pcert->pCertInfo->Issuer);
+    void issuer(BYTE **s, DWORD *slen) throw(CSPException) {
+        decode_name_blob(&pcert->pCertInfo->Issuer, s, slen);
     };
 
     friend class CryptMsg;
@@ -122,16 +118,16 @@ public:
     CRYPT_HASH_BLOB *param;
     DWORD enctype, findtype;
 
-    CertFind(CertStore *p, DWORD et, DWORD ft, char *STRING, size_t LENGTH) : CertIter(p) {
+    CertFind(CertStore *p, DWORD et, DWORD ft, BYTE *STRING, DWORD LENGTH) : CertIter(p) {
         enctype = et;
         findtype = ft;
-        chb.pbData = (BYTE *)STRING;
+        chb.pbData = STRING;
         chb.cbData = LENGTH;
         param = &chb;
         LOG("Started find %i-%i-%i\n", et, ft, LENGTH);
     };
 
-    CertFind(CertStore *p, DWORD et, char *name) : CertIter(p) {
+    CertFind(CertStore *p, DWORD et, BYTE *name) : CertIter(p) {
         enctype = et;
         findtype = CERT_FIND_SUBJECT_STR;
         param = (CRYPT_HASH_BLOB *)name;
@@ -198,12 +194,12 @@ public:
         return new CertIter(this);
     };
 
-    CertFind *find_by_thumb(char *STRING, size_t LENGTH) throw(CSPException) {
+    CertFind *find_by_thumb(BYTE *STRING, DWORD LENGTH) throw(CSPException) {
         return new CertFind(this, X509_ASN_ENCODING | PKCS_7_ASN_ENCODING, CERT_FIND_HASH, STRING, LENGTH);
     };
 
-    CertFind *find_by_name(char *name) throw(CSPException) {
-        return new CertFind(this, X509_ASN_ENCODING | PKCS_7_ASN_ENCODING, name);
+    CertFind *find_by_name(BYTE *STRING, DWORD LENGTH) throw(CSPException) {
+        return new CertFind(this, X509_ASN_ENCODING | PKCS_7_ASN_ENCODING, STRING);
     };
 
     Cert *get_cert_by_info(CERT_INFO *psi) throw(CSPException) {

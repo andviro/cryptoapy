@@ -50,7 +50,7 @@ public:
     DWORD type;
 
     // инициализация сообщения для декодирования
-    CryptMsg(char *STRING, size_t LENGTH, Crypt *ctx=NULL) throw(CSPException);
+    CryptMsg(BYTE *STRING, DWORD LENGTH, Crypt *ctx=NULL) throw(CSPException);
 
     // инициализация сообщения для кодирования
     // данные добавляются потом методом .update
@@ -65,12 +65,12 @@ public:
     bool verify_cert(Cert *c) throw(CSPException) {
         return CryptMsgControl(hmsg, 0, CMSG_CTRL_VERIFY_SIGNATURE, c->pcert->pCertInfo);
     }
-    void get_data(char **s, DWORD *slen) throw(CSPException);
+    void get_data(BYTE **s, DWORD *slen) throw(CSPException);
     void add_signer_cert(Cert *c) throw(CSPException);
     void add_recipient_cert(Cert *c) throw(CSPException);
-    void encrypt_data(char *STRING, size_t LENGTH, char **s, DWORD *slen) throw(CSPException);
-    void decrypt_data(char *STRING, size_t LENGTH, char **s, DWORD *slen) throw(CSPException);
-    void sign_data(char *STRING, size_t LENGTH, char **s, DWORD *slen, bool detach=0) throw(CSPException);
+    void encrypt_data(BYTE *STRING, DWORD LENGTH, BYTE **s, DWORD *slen) throw(CSPException);
+    void decrypt_data(BYTE *STRING, DWORD LENGTH, BYTE **s, DWORD *slen) throw(CSPException);
+    void sign_data(BYTE *STRING, DWORD LENGTH, BYTE **s, DWORD *slen, bool detach=0) throw(CSPException);
 
     friend class SignerIter;
     friend class CertStore;
@@ -133,9 +133,9 @@ void CryptMsg::add_recipient_cert(Cert *c) throw(CSPException) {
     num_recipients ++;
 }
 
-void CryptMsg::encrypt_data(char *STRING, size_t LENGTH, char **s, DWORD *slen) throw(CSPException) {
+void CryptMsg::encrypt_data(BYTE *STRING, DWORD LENGTH, BYTE **s, DWORD *slen) throw(CSPException) {
     if (!encrypt_para) {
-        size_t szp = sizeof(CRYPT_ENCRYPT_MESSAGE_PARA);
+        DWORD szp = sizeof(CRYPT_ENCRYPT_MESSAGE_PARA);
         encrypt_para = (CRYPT_ENCRYPT_MESSAGE_PARA *)malloc(szp);
         memset(encrypt_para, 0, szp);
         encrypt_para->cbSize = szp;
@@ -148,7 +148,7 @@ void CryptMsg::encrypt_data(char *STRING, size_t LENGTH, char **s, DWORD *slen) 
         encrypt_para,
         num_recipients,
         recipient_certs,
-        (BYTE *)STRING,
+        STRING,
         LENGTH,
         NULL,
         slen))
@@ -156,15 +156,15 @@ void CryptMsg::encrypt_data(char *STRING, size_t LENGTH, char **s, DWORD *slen) 
         throw CSPException("Cannot acquire encrypted blob size");
     }
 
-    *s = (char *) malloc(*slen);
+    *s = (BYTE *) malloc(*slen);
 
     if(!CryptEncryptMessage(
         encrypt_para,
         num_recipients,
         recipient_certs,
-        (BYTE *)STRING,
+        STRING,
         LENGTH,
-        (BYTE *)*s,
+        *s,
         slen))
     {
         free((void *)*s);
@@ -172,7 +172,7 @@ void CryptMsg::encrypt_data(char *STRING, size_t LENGTH, char **s, DWORD *slen) 
     }
 }
 
-void CryptMsg::decrypt_data(char *STRING, size_t LENGTH, char **s, DWORD *slen) throw(CSPException) {
+void CryptMsg::decrypt_data(BYTE *STRING, DWORD LENGTH, BYTE **s, DWORD *slen) throw(CSPException) {
     CRYPT_DECRYPT_MESSAGE_PARA  decrypt_para;
     CertStore store(cprov, "MY");
 
@@ -184,7 +184,7 @@ void CryptMsg::decrypt_data(char *STRING, size_t LENGTH, char **s, DWORD *slen) 
 
     if(!CryptDecryptMessage(
         &decrypt_para,
-        (BYTE *)STRING,
+        STRING,
         LENGTH,
         NULL,
         slen,
@@ -193,13 +193,13 @@ void CryptMsg::decrypt_data(char *STRING, size_t LENGTH, char **s, DWORD *slen) 
         throw CSPException("Cannot acquire decrypted blob size");
     }
 
-    *s = (char *) malloc(*slen);
+    *s = (BYTE *) malloc(*slen);
 
     if(!CryptDecryptMessage(
         &decrypt_para,
-        (BYTE *)STRING,
+        STRING,
         LENGTH,
-        (BYTE *)*s,
+        *s,
         slen,
         NULL))
     {
@@ -211,8 +211,8 @@ void CryptMsg::decrypt_data(char *STRING, size_t LENGTH, char **s, DWORD *slen) 
 void CryptMsg::add_signer_cert(Cert *c) throw(CSPException) {
     CMSG_SIGNER_ENCODE_INFO *signer_info = NULL;
     CERT_BLOB *signer_cert = NULL;
-    size_t ssi = sizeof(CMSG_SIGNER_ENCODE_INFO);
-    size_t ssb = sizeof(CERT_BLOB);
+    DWORD ssi = sizeof(CMSG_SIGNER_ENCODE_INFO);
+    DWORD ssb = sizeof(CERT_BLOB);
     HCRYPTPROV      hprov = 0;
     DWORD keytype = AT_KEYEXCHANGE;
     BOOL do_release;
@@ -228,7 +228,7 @@ void CryptMsg::add_signer_cert(Cert *c) throw(CSPException) {
     }
 
     if (!sign_info) {
-        size_t szi = sizeof(CMSG_SIGNED_ENCODE_INFO);
+        DWORD szi = sizeof(CMSG_SIGNED_ENCODE_INFO);
         sign_info = (CMSG_SIGNED_ENCODE_INFO *)malloc(szi);
         memset(sign_info, 0, szi);
         sign_info->cbSize = szi;
@@ -257,7 +257,7 @@ void CryptMsg::add_signer_cert(Cert *c) throw(CSPException) {
     signer_info->pvHashAuxInfo = NULL;
 }
 
-void CryptMsg::get_data(char **s, DWORD *slen) throw(CSPException) {
+void CryptMsg::get_data(BYTE **s, DWORD *slen) throw(CSPException) {
     if(!CryptMsgGetParam(
                 hmsg,                      /* Handle to the message*/
                 CMSG_CONTENT_PARAM,        /* Parameter type*/
@@ -267,7 +267,7 @@ void CryptMsg::get_data(char **s, DWORD *slen) throw(CSPException) {
     {          /* Size of the blob*/
         throw CSPException("Couldn't get decoded data size");
     }
-    *s = (char *) malloc(*slen);
+    *s = (BYTE *) malloc(*slen);
     if(!CryptMsgGetParam(
                 hmsg,                      /* Handle to the message*/
                 CMSG_CONTENT_PARAM,        /* Parameter type*/
@@ -280,7 +280,7 @@ void CryptMsg::get_data(char **s, DWORD *slen) throw(CSPException) {
     }
 }
 
-void CryptMsg::sign_data(char *STRING, size_t LENGTH, char **s, DWORD *slen, bool detach) throw(CSPException) {
+void CryptMsg::sign_data(BYTE *STRING, DWORD LENGTH, BYTE **s, DWORD *slen, bool detach) throw(CSPException) {
     if (hmsg) {
         if (!CryptMsgClose(hmsg)) {
             throw CSPException("Couldn't close previous message");
@@ -300,7 +300,7 @@ void CryptMsg::sign_data(char *STRING, size_t LENGTH, char **s, DWORD *slen, boo
         throw CSPException("Getting cbEncodedBlob length failed.");
     }
 
-    *s = (char *) malloc(*slen);
+    *s = (BYTE *) malloc(*slen);
 
     hmsg = CryptMsgOpenToEncode(
                 MY_ENC_TYPE,                     /* Encoding type*/
@@ -317,7 +317,7 @@ void CryptMsg::sign_data(char *STRING, size_t LENGTH, char **s, DWORD *slen, boo
 
     if(!CryptMsgUpdate(
         hmsg,               /* Handle to the message*/
-        (BYTE *)STRING,            /* Pointer to the content*/
+        STRING,            /* Pointer to the content*/
         LENGTH,     /* Size of the content*/
         1))
     {            /* Last call*/
@@ -336,7 +336,7 @@ void CryptMsg::sign_data(char *STRING, size_t LENGTH, char **s, DWORD *slen, boo
     }
 }
 
-CryptMsg::CryptMsg(char *STRING, size_t LENGTH, Crypt *ctx) throw(CSPException) {
+CryptMsg::CryptMsg(BYTE *STRING, DWORD LENGTH, Crypt *ctx) throw(CSPException) {
     DWORD temp = sizeof(DWORD);
 
     msg_init(ctx);

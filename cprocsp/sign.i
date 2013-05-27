@@ -6,7 +6,7 @@ class Signature : public CryptMsg {
     BYTE *raw_msg;
     DWORD raw_size;
 public:
-    Signature(char *STRING, size_t LENGTH, Crypt *ctx=NULL)
+    Signature(BYTE *STRING, DWORD LENGTH, Crypt *ctx=NULL)
         throw(CSPException) : CryptMsg(STRING, LENGTH, ctx)
     {
         raw_msg = (BYTE *)malloc(LENGTH);
@@ -14,7 +14,7 @@ public:
         raw_size = LENGTH;
     }
 
-    bool verify_data(char *STRING, size_t LENGTH, int n) throw(CSPException) {
+    bool verify_data(BYTE *STRING, DWORD LENGTH, int n) throw(CSPException) {
         CRYPT_VERIFY_MESSAGE_PARA msg_para;
         msg_para.cbSize = sizeof(CRYPT_VERIFY_MESSAGE_PARA);
         msg_para.dwMsgAndCertEncodingType = MY_ENC_TYPE;

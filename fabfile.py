@@ -23,6 +23,7 @@ def swig(size):
         swig_binary = 'swig'
         swig_opts = [
             '-python',
+            '-py3',
             '-builtin',
             '-c++',
             '-DUNIX',
