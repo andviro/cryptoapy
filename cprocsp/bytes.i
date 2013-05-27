@@ -56,9 +56,9 @@
 %#endif
   {
 %#if PY_VERSION_HEX>=0x03000000
-    PyBytes_AsStringAndSize($input, (char **)&$1, (int *)&$2);
+    PyBytes_AsStringAndSize($input, (char **)&$1, (Py_ssize_t *)&$2);
 %#else
-    PyString_AsStringAndSize($input, (char **)&$1, (int *)&$2);
+    PyString_AsStringAndSize($input, (char **)&$1, (Py_ssize_t *)&$2);
 %#endif
 /*%#if PY_VERSION_HEX>=0x03000000*/
     /*Py_XDECREF($input);*/

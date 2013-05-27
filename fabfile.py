@@ -17,7 +17,7 @@ remote_void_size = 8
 void_size = 4 if architecture()[0] == '32bit' else 8
 
 
-def swig(size):
+def swig(size=void_size):
     with lcd(project_dir):
         sources = ['cprocsp/csp.i']
         swig_binary = 'swig'
@@ -39,9 +39,9 @@ def swig(size):
         local(swig_binary + ' ' + ' '.join(swig_opts) + ' ' + ' '.join(sources))
         if (os.path.exists('cprocsp/csp.py')):
             content = open('cprocsp/csp.py').read()
-            content = '# coding: utf-8\n{0}'.format(content)
-            open('cprocsp/csp.py', 'w').write(content)
-
+            with open('cprocsp/csp.py', 'w') as f:
+                f.write('# coding: utf-8\n')
+                f.write(content)
 
 
 def test():
@@ -56,14 +56,17 @@ def prepare():
         local("tar -cvzf {0} {1}".format(archive, files))
 
 
-def deploy():
+def deploy(pyversion=2):
     with settings(warn_only=True):
         if run("test -d {0}".format(remote_dir)).failed:
             run("mkdir -p {0}".format(remote_dir))
     put(archive, '/tmp/')
     with cd(remote_dir):
         run("tar -xvzf {0}".format(archive))
-        run("python setup.py bdist --format=rpm")
+        if pyversion == 2:
+            run("python setup.py bdist --format=rpm")
+        else:
+            run("python3 setup.py bdist --format=rpm")
 
 
 def rebuild():

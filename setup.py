@@ -2,11 +2,14 @@
 #-*- coding: utf-8 -*-
 from setuptools import setup, Extension
 from platform import architecture
+import sys
 
 try:
     import multiprocessing
 except ImportError:
     pass
+
+major, minor = sys.version_info[:2]
 
 if architecture()[0] == '32bit':
     arch = 'ia32'
@@ -36,7 +39,7 @@ csp = Extension('cprocsp._csp',
                     '-DCP_IOVEC_USE_SYSTEM',
                 ],)
 
-setup(name='cprocsp',
+setup(name='python{major}.{minor}-cprocsp'.format(major=major, minor=minor),
       version='0.1',
       ext_modules=[csp],
       packages=['cprocsp'],
