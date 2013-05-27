@@ -79,7 +79,5 @@ def deploy(pyversion=''):
 
 
 def rebuild(pyversion=''):
-    swig(void_size)
-    build(pyversion)
-    test(pyversion)
+    swig()
     build_rpm(pyversion)
