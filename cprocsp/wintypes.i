@@ -124,7 +124,7 @@ typedef short SHORT;
 #ifndef LONG
 typedef int LONG;
 #endif
-typedef unsigned long       DWORD;	/* XXXX icc говорит, что с этим типом есть проблемы ???? */
+typedef unsigned int       DWORD;	/* XXXX icc говорит, что с этим типом есть проблемы ???? */
 #ifndef _HRESULT_DEFINED
 #define _HRESULT_DEFINED
 typedef LONG HRESULT;

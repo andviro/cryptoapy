@@ -6,13 +6,12 @@ from timeit import Timer
 import os
 from uuid import uuid4
 import subprocess as sub
-from io import BytesIO
 
 data = os.urandom(1024 * 10)
 signname = os.path.join('/tmp', uuid4().hex)
 bufname = os.path.join('/tmp', uuid4().hex)
 
-ctx = csp.Crypt(
+ctx = csp.Context(
     "test",
     csp.PROV_GOST_2001_DH,
     0,

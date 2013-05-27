@@ -23,7 +23,7 @@ else:
     arch = 'amd64'
 
 
-def setup_module():
+def setup():
     '''
     Создание тестового блока данных и его отсоединенной подписи с помощью
     командной строки.
@@ -37,7 +37,7 @@ def setup_module():
         assert False
 
 
-def teardown_module():
+def teardown():
     '''
     Прибиение временных файлов.
     '''

@@ -74,8 +74,6 @@ class Stop_Iteration {
   SWIG_fail;
 %}
 
-
-
 %{
 #include <stdio.h>
 #ifdef _WIN32

@@ -1,13 +1,9 @@
 #!/usr/bin/env python
 #-*- coding: utf-8 -*-
-from setuptools import setup, Extension
+from distutils.core import setup, Extension, Command
 from platform import architecture
 import sys
-
-try:
-    import multiprocessing
-except ImportError:
-    pass
+import os
 
 major, minor = sys.version_info[:2]
 
@@ -17,6 +13,33 @@ if architecture()[0] == '32bit':
 else:
     arch = 'amd64'
     size = '8'
+
+try:
+    import nose
+except ImportError:
+    nose = None
+
+
+class TestCommand(Command):
+    """Custom distutils command to run the test suite."""
+
+    user_options = []
+
+    def initialize_options(self):
+        self._dir = os.getcwd()
+
+    def finalize_options(self):
+        pass
+
+    def run(self):
+        """Run the test suite with nose."""
+        if not nose:
+            print('W: nose package not found')
+            return True
+        return nose.core.run(argv=['-v', os.path.join(self._dir, 'tests')])
+
+cmdclass = {'test': TestCommand}
+
 
 csp = Extension('cprocsp._csp',
                 sources=['cprocsp/csp_wrap.cxx'],
@@ -44,6 +67,5 @@ setup(name='python{major}.{minor}-cprocsp'.format(major=major, minor=minor),
       ext_modules=[csp],
       packages=['cprocsp'],
       py_modules=['cprocsp.csp', 'cprocsp.rdn'],
-      test_suite='nose.collector',
-      setup_requires=['nose>=1.0'],
+      cmdclass=cmdclass,
       )

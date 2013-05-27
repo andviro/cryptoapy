@@ -47,7 +47,8 @@ def swig(size=void_size):
 
 def test(pyversion=''):
     with lcd(project_dir):
-        local("python{0} setup.py test -v".format(pyversion))
+        local("python{0} setup.py build_ext --inplace".format(pyversion))
+        local("python{0} setup.py test".format(pyversion))
 
 
 def build(pyversion=''):
@@ -67,6 +68,11 @@ def prepare(pyversion=''):
         local("tar -cvzf {0} {1}".format(archive, files))
 
 
+def cleanup():
+    with lcd(project_dir):
+        local("rm -rf dist build *.egg-info")
+
+
 def deploy(pyversion=''):
     prepare(pyversion)
     with settings(warn_only=True):
@@ -79,5 +85,6 @@ def deploy(pyversion=''):
 
 
 def rebuild(pyversion=''):
+    cleanup()
     swig()
-    build_rpm(pyversion)
+    test(pyversion)

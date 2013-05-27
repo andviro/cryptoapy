@@ -9,6 +9,15 @@
 %#endif
 }                                      
 
+%typemap(typecheck, precedence=SWIG_TYPECHECK_UINT32) DWORD {
+%#if PY_VERSION_HEX >= 0x03000000
+    $1 = PyLong_Check($input) ? 1 : 0;
+%#else
+    int res = SWIG_AsVal_unsigned_SS_int($input, NULL);
+    $1 = SWIG_CheckState(res);
+%#endif
+}
+
 %typemap(in, noblock=1, numinputs=0) (BYTE **s, DWORD *slen)
 (BYTE *carray = 0, DWORD size = 0) {    
   $1 = &carray;
@@ -39,8 +48,13 @@
     }
 }
 
+%typemap(typecheck, precedence=SWIG_TYPECHECK_STRING) char * {
+    int res = (PyString_Check($input) || Py_None == $input) ? 1 : 0;
+    $1 = SWIG_CheckState(res);
+}
 
-%typemap(typecheck, numinputs=1) (BYTE *STRING, DWORD LENGTH) {
+
+%typemap(typecheck, precedence=SWIG_TYPECHECK_STRING) (BYTE *STRING, DWORD LENGTH) {
 %#if py_version_hex>=0x03000000
    $1 = PyBytes_Check($input) ? 1 : 0;
 %#else  

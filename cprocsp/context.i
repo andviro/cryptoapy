@@ -11,7 +11,7 @@
 %inline %{
 class Key;
 class Crypt;
-Crypt *Context(LPCSTR container, DWORD type, DWORD flags, char *name=NULL) throw(CSPException);
+Crypt *Context(char *container, DWORD type, DWORD flags, char *name=NULL) throw(CSPException);
 %}
 
 %inline %{
@@ -58,7 +58,7 @@ public:
     Key *import_key(BYTE *STRING, DWORD LENGTH, Key *decrypt=NULL) throw(CSPException);
     friend class CryptMsg;
     friend class CertStore;
-    friend Crypt *Context(LPCSTR ,DWORD , DWORD, char*) throw (CSPException);
+    friend Crypt *Context(char *, DWORD , DWORD, char*) throw (CSPException);
 };
 
 %}
@@ -71,7 +71,7 @@ public:
 %feature("docstring", CryptDOC);
 
 %{
-Crypt *Context(LPCSTR container, DWORD type, DWORD flags, char *name) throw(CSPException) {
+Crypt *Context(char *container, DWORD type, DWORD flags, char *name) throw(CSPException) {
     HCRYPTPROV hp;
     Crypt *res;
 
