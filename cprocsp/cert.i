@@ -203,7 +203,15 @@ public:
     };
 
     Cert *get_cert_by_info(CERT_INFO *psi) throw(CSPException) {
-        return new Cert(CertGetSubjectCertificateFromStore(hstore, MY_ENC_TYPE, psi));
+        PCCERT_CONTEXT res;
+        res = CertGetSubjectCertificateFromStore(hstore, MY_ENC_TYPE, psi);
+        if (!res) {
+            if (GetLastError() == (DWORD) CRYPT_E_NOT_FOUND) {
+                return NULL;
+            }
+            throw CSPException("Error gettin subject certificate from store");
+        }
+        return new Cert(res);
     };
 
     void add_cert(Cert *c) throw(CSPException) {

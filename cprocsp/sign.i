@@ -6,6 +6,13 @@ class Signature : public CryptMsg {
     BYTE *raw_msg;
     DWORD raw_size;
 public:
+    Signature(Crypt *ctx=NULL)
+        throw(CSPException) : CryptMsg(ctx)
+    {
+        raw_size = 0;
+        raw_msg = NULL;
+    }
+
     Signature(BYTE *STRING, DWORD LENGTH, Crypt *ctx=NULL)
         throw(CSPException) : CryptMsg(STRING, LENGTH, ctx)
     {
@@ -23,6 +30,10 @@ public:
         msg_para.pvGetArg = NULL;
         return CryptVerifyDetachedMessageSignature(&msg_para, n, raw_msg,
             raw_size, 1, (const BYTE **)&STRING, (DWORD *)&LENGTH, NULL);
+    }
+
+    void sign_data(BYTE *STRING, DWORD LENGTH, BYTE **s, DWORD *slen, bool detach=1) throw(CSPException) {
+        CryptMsg::sign_data(STRING, LENGTH, s, slen, detach);
     }
 
     ~Signature() throw(CSPException) {

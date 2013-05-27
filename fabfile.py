@@ -37,9 +37,10 @@ def swig(size=void_size):
             '-I/opt/cprocsp/include/asn1data',
         ]
         local(swig_binary + ' ' + ' '.join(swig_opts) + ' ' + ' '.join(sources))
-        if (os.path.exists('cprocsp/csp.py')):
-            content = open('cprocsp/csp.py').read()
-            with open('cprocsp/csp.py', 'w') as f:
+        target = os.path.join(project_dir, 'cprocsp/csp.py')
+        if (os.path.exists(target)):
+            content = open(target).read()
+            with open(target, 'w') as f:
                 f.write('# coding: utf-8\n')
                 f.write(content)
 

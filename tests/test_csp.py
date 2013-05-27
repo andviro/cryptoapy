@@ -1,7 +1,7 @@
 # coding: utf-8
 
 from cprocsp import csp, rdn
-#from nose.tools import raises
+# from nose.tools import raises
 from uuid import uuid4
 import subprocess as sub
 import os
@@ -52,6 +52,9 @@ def test_context_simple():
     Контест создается функцией `Context()`. Первым параметром передается
     строка-имя контейнера ключей. Второй параметр -- тип провайдера, третий --
     флаги. Контейнер без имени является контейнером пользователя по умолчанию.
+    Результатом функции является экземпляр класса `Crypt()` или `None`, если
+    именованный контейнер не найден.
+
     '''
     context = csp.Context(
         None,
@@ -83,6 +86,88 @@ def test_context_not_found():
         0,
     )
     assert not ctx
+
+
+def test_export_import_pubkey():
+    u'''
+    Функция `Crypt.get_key(keytype=csp.AT_SIGNATURE)` возвращает одну из двух пар открытый/закрытый
+    ключ, связанных с контекстом. Необязательный параметр `keytype` по
+    умолчанию обеспечивает извлечение ключей подписи. Может также принимать
+    значение `csp.AT_KEYEXCHANGE`, для извлечения ключей обмена. Результатом
+    функции является либо экземпляр класса `Key()` либо `None`, если хранилище
+    не содержит ключей.
+
+    Функция `Key.encode(cryptkey=None)` экспортирует ключ во внутренний
+    бинарный формат для передачи по каналам данных. Необязательный параметр
+    `cryptkey` задает открытый ключ получателя. При его использовании
+    экспортируется закрытая половина ключа в зашифрованном для получателя виде.
+    Без этого параметра экспортируется незашифрованный открытый ключ.
+
+    Функция `Crypt.import_key(k, decrypt)` связывает ключ `k` с контекстом
+    криптопровайдера. Параметр `k` содержит блоб для передачи ключа во
+    внутреннем формате. Необязательный второй параметр `decrypt` задает объект
+    `Key` для расшифровки закрытого ключа.
+
+    '''
+    context = csp.Context("test", csp.PROV_GOST_2001_DH, 0)
+
+    recipient = csp.Context(None, csp.PROV_GOST_2001_DH, csp.CRYPT_VERIFYCONTEXT)
+
+    sk = context.get_key()
+    assert sk
+
+    pk = recipient.import_key(sk.encode())
+    assert pk
+
+
+def test_create_named_container():
+    u'''
+    Новый контейнер ключей может быть создан вызовом функции `Context` с
+    флагом `csp.CRYPT_NEWKEYSET`. Первый параметр должен при этом содержать
+    полное имя создаваемого контейнера. Хранилище ключей создается пустым.
+
+    Идентифицирует контейнер имя, которое возвращается функцией `Crypt.name()`.
+
+    Создать ключ в новом хранилище можно функцией `Crypt.create_key(flags, keyspec)`.
+    Параметр `flags` может принимать значение `csp.CRYPT_EXPORTABLE`, что
+    делает ключ извлекаемым или `0`, тогда ключ нельзя будет экспортировать
+    функцией `Key.encode()`. Параметр `keyspec` принимает значение
+    `csp.AT_KEYEXCHANGE` или `csp.AT_SIGNATURE`.
+
+    '''
+    ctx = csp.Context(r'\\.\hdimage\new', csp.PROV_GOST_2001_DH, 0)
+    if ctx is None:
+        ctx = csp.Context(r'\\.\hdimage\new', csp.PROV_GOST_2001_DH, csp.CRYPT_NEWKEYSET)
+    assert ctx
+    name = ctx.name()
+    assert name == 'new'
+
+    key = ctx.get_key()
+    if key is None:
+        key = ctx.create_key(csp.CRYPT_EXPORTABLE)
+    ekey = ctx.get_key(csp.AT_KEYEXCHANGE)
+    if ekey is None:
+        ekey = ctx.create_key(csp.CRYPT_EXPORTABLE, csp.AT_KEYEXCHANGE)
+    assert ekey
+    return name
+
+
+def test_export_import_private_key():
+    name = test_create_named_container()
+    sender = csp.Context(name, csp.PROV_GOST_2001_DH, 0)
+    receiver = csp.Context("test", csp.PROV_GOST_2001_DH, 0)
+
+    rec_key = receiver.get_key(csp.AT_KEYEXCHANGE)
+    assert rec_key
+    sender_key = sender.get_key(csp.AT_KEYEXCHANGE)
+    assert sender_key
+
+    receiver_pub = sender.import_key(rec_key.encode(), sender_key)
+    assert receiver_pub
+    # sender_priv = sender_key.encode_key(receiver_pub)
+
+    # receiver_new_key = receiver.import_key(sender_priv, rec_key)
+    # assert receiver_new_key
 
 
 def test_store():
@@ -184,6 +269,7 @@ def test_memory_store():
     u'''
     Хранилище сертификатов может быть создано в памяти вызовом конструктора
     `CertStore()` без параметров.
+
     '''
     my = csp.CertStore(None, "MY")
     cert = list(my)[0]
@@ -194,6 +280,8 @@ def test_memory_store():
     cs.add_cert(cert)
 
     assert len(list(cs))
+    # хранилище в памяти не сохраняется в постоянной памяти после уничтожения
+    # объекта.
 
 
 def test_cert_not_found():
@@ -279,8 +367,100 @@ def test_detached_sign():
     return data
 
 
+def test_msg_signatures():
+    u'''
+
+    Поле `CryptMsg.num_signers` содержит количество подписантов сообщения.
+
+    Функция `CryptMsg.get_nth_signer_info(n)` возвращает структуру, уникально
+    идентифицирующую сертификат `n`-го подписанта. По ней можно получить
+    сертификат подписанта, либо из хранилища в сообщении, либо из системного
+    хранилища.  Для этого служит функция `CertStore.get_cert_by_info()`. Если
+    сертификата нет в хранилище, функция возвращает `None`.
+
+    Полученный таким образом сертификат `c` можно использовать для проверки
+    подписи под сообщением с помощью функции `CryptMsg.verify_cert(c)`. Функция
+    возвращает `True`, если для данного сертификата соответствующая ему подпись
+    верна.
+
+    Для упрощения обработки сертификатов, функция `CryptMsg.signer_certs()`
+    перечисляет сертификаты всех подписантов сообщения.
+
+    '''
+    ctx = csp.Context(
+        None,
+        csp.PROV_GOST_2001_DH,
+        csp.CRYPT_VERIFYCONTEXT,
+    )
+    testdata = test_sign_data()
+    # testdata = open('tests/logical.cms', 'rb').read()
+
+    # загрузка сообщения из блоба данных
+    msg = csp.CryptMsg(testdata, ctx)
+    del testdata
+    # сведения о раскодированном сообщении
+    print(msg.type)
+    print(msg.num_signers)
+    print(len(msg.get_data()))
+
+    # Идентификационная информация для 1-го подписанта.
+    psi = msg.get_nth_signer_info(0)
+    assert psi
+    my = csp.CertStore(msg)
+    sys_my = csp.CertStore(None, "MY")
+
+    # Из сообщения можно извлечь сертификат по этой информации
+    verify_cert = my.get_cert_by_info(psi)
+    t1 = verify_cert.thumbprint()
+    verify_cert = my.get_cert_by_info(psi)
+
+    # Сертификат можно извлечь так же из системного хранилища, если он там
+    # есть.
+    same_cert = sys_my.get_cert_by_info(psi)
+    t2 = same_cert.thumbprint()
+    assert t1 == t2
+
+    # разнообразные проверки подписей через сертификаты
+    print(verify_cert.name())
+    assert msg.verify_cert(verify_cert)
+    ns = list(c.name() for c in msg.signer_certs())
+    assert len(ns)
+    cs = list(csp.CertStore(msg))
+    print([(msg.verify_cert(x), x.name()) for x in cs])
+    assert all(msg.verify_cert(c) for c in cs)
+
+
+def test_detached_sign2():
+    u'''
+    Класс `Signature` наследует всю функциональность `CryptMsg`, но
+    ориентирован на работу с отсоединенными подписями. Поэтому метод
+    `Signature.sign_data()` по умолчанию возвращает отсоединенную подпись.
+    '''
+    ctx = csp.Context(
+        "test",
+        csp.PROV_GOST_2001_DH,
+        0,
+    )
+    assert ctx
+    cs = csp.CertStore(ctx, "MY")
+    cert = list(cs)[0]
+
+    # создание новой (пустой) отсоединенной подписи
+    sgn = csp.Signature(ctx)
+    sgn.add_signer_cert(cert)
+
+    # подписывание данных экземпляром `Signature` по умолчанию дает
+    # отсоединенную подпись.
+    data = sgn.sign_data(b'hurblewurble')
+    assert len(data)
+    return data
+
+
 def test_cert_from_detached():
     u'''
+    Конструктору хранилища сертификатов `CertStore(msg)` можно передать экземпляр
+    класса `CryptMsg` или `Signature`. Через это хранилище можно извлекать
+    хранящиеся в сообщении или подписи сертификаты.
     '''
     data = test_detached_sign()
     sgn = csp.Signature(data)
@@ -289,13 +469,23 @@ def test_cert_from_detached():
 
 
 def test_verify_with_detached():
-    data = test_detached_sign()
+    u'''
+    Поле `Signature.num_signers`, также как и `CryptMsg.num_signers` содержит
+    количество подписантов сообщения.
+
+    Метод `Signature.verify_data(d, n)` проверяет для отсоединенных данных `d`
+    подпись `n`-го подписанта.
+    '''
+    data = test_detached_sign2()
     sgn = csp.Signature(data)
     for n in range(sgn.num_signers):
         assert sgn.verify_data(b'hurblewurble', n)
 
 
 def test_verify_with_detached2():
+    u'''
+    Проверка отсоединенной подписи, созданной через командную строку.
+    '''
     with open(signname, 'rb') as f:
         data = f.read()
     with open(signname + '.sgn', 'rb') as f:
@@ -306,6 +496,10 @@ def test_verify_with_detached2():
 
 
 def test_verify_with_detached_bad():
+    u'''
+    Если для `n`-го подписанта подпись под данными не бьется, функция
+    `Signature.verify_data()` возвращает `False`.
+    '''
     data = test_detached_sign()
     sgn = csp.Signature(data)
     for n in range(sgn.num_signers):
@@ -319,34 +513,6 @@ def test_verify_with_detached_bad2():
     sgn = csp.Signature(signdata)
     for n in range(sgn.num_signers):
         assert not sgn.verify_data(data, n)
-
-
-def test_msg_signatures():
-    ctx = csp.Context(
-        None,
-        csp.PROV_GOST_2001_DH,
-        csp.CRYPT_VERIFYCONTEXT,
-    )
-    testdata = test_sign_data()
-    # testdata = open('tests/logical.cms', 'rb').read()
-    msg = csp.CryptMsg(testdata, ctx)
-    del testdata
-    print(msg.type)
-    print(msg.num_signers)
-    print(len(msg.get_data()))
-
-    psi = msg.get_nth_signer_info(0)
-    assert psi
-    my = csp.CertStore(msg)
-    verify_cert = my.get_cert_by_info(psi)
-
-    print(verify_cert.name())
-    assert msg.verify_cert(verify_cert)
-    ns = list(c.name() for c in msg.signer_certs())
-    assert len(ns)
-    cs = list(csp.CertStore(msg))
-    print([(msg.verify_cert(x), x.name()) for x in cs])
-    assert all(msg.verify_cert(c) for c in cs)
 
 
 def test_verify_file():
@@ -377,6 +543,13 @@ def test_rdn():
 
 
 def test_cert_rdn():
+    u'''
+    В модуле `cprocsp.rdn` определен класс для парсинга записей в формате RDN
+    для облегчения доступа к данным о сертификате. Конструктор `rdn.RDN`
+    инициализируется строкой и возвращает словарь. Для Python 3 необходимо
+    предварительно преобразовать строку в unicode.
+
+    '''
     cs = csp.CertStore(None, "MY")
     for c in cs:
         assert 'CN' in rdn.RDN(unicode(c.name(), 'windows-1251'))
@@ -384,6 +557,13 @@ def test_cert_rdn():
 
 
 def test_encrypt_data():
+    u'''
+    Шифрование сообщения представлено методом `CryptMsg.encrypt_data(s)`, где
+    `s` -- бинарная строка. Результатом является шифрованный блок бинарных
+    данных. Предварительно необходимо задать один или более сертификатов
+    получателя функцией `CryptMsg.add_recipient_cert(cert)`. В Python 3
+    необходимо перевести шифруемую строку в какую-нибудь 8-битную кодировку.
+    '''
     cs = csp.CertStore(None, "MY")
     re_cert = list(cs)[0]
     msg = csp.CryptMsg()
@@ -394,6 +574,16 @@ def test_encrypt_data():
 
 
 def test_decrypt_data():
+    u'''
+    Зашифрованный блок данных можно передавать по незащищенному каналу.
+    Расшифровка производится созданием пустого экземпляра `CryptMsg` и вызовом
+    от него функции `CryptMsg.decrypt_data(data)`, где `data` -- бинарная
+    строка с шифрованными данными. Пустое сообщение можно создать вызовом
+    коструктора без параметрое, либо передать конструктору контекст
+    криптопровайдера. Тогда ключи расшифровки будут извлекаться из хранилища
+    ключей для этого контекста.
+
+    '''
     data = test_encrypt_data()
     print(data)
     msg = csp.CryptMsg()
@@ -404,6 +594,16 @@ def test_decrypt_data():
 
 
 def test_add_remove_cert():
+    u'''
+    Метод `CertStore.add_cert(cert) добавляет сертификат `cert` в хранилище.
+    Объект сертификата может быть загружен из сообщения, взят из другого
+    хранилища или получен дублированием с помощью функции `Cert.duplicate()`.
+
+    Если экземпляр сертификата привязан к хранилищу, его можно удалить оттуда
+    вызовом метода `Cert.remove_from_store()`. При этом им можно продолжать
+    пользоваться, пока он не будет удален из памяти.
+
+    '''
     my = csp.CertStore(None, "MY")
     n1 = len(list(my))
     with open('tests/logical.cms', 'rb') as f:
@@ -420,55 +620,9 @@ def test_add_remove_cert():
     assert len(list(my)) == n1 + len(ids) * 2
     for cert_id in ids:
         cs = list(my.find_by_thumb(cert_id))
+        # копии хранятся в хранилище и удаляются независимо друг от друга, хотя
+        # имеют одинаковый отпечаток
         assert len(cs) == 2
         for cert in cs:
             cert.remove_from_store()
     assert len(list(my)) == n1
-
-
-def test_export_import_pubkey():
-    context = csp.Context("test", csp.PROV_GOST_2001_DH, 0)
-
-    recipient = csp.Context(None, csp.PROV_GOST_2001_DH, csp.CRYPT_VERIFYCONTEXT)
-
-    sk = context.get_key()
-    assert sk
-
-    pk = recipient.import_key(sk.encode())
-    assert pk
-
-
-def test_create_named_container():
-    ctx = csp.Context(r'\\.\hdimage\new', csp.PROV_GOST_2001_DH, 0)
-    if ctx is None:
-        ctx = csp.Context(r'\\.\hdimage\new', csp.PROV_GOST_2001_DH, csp.CRYPT_NEWKEYSET)
-    assert ctx
-    name = ctx.name()
-    assert name == 'new'
-
-    key = ctx.get_key()
-    if key is None:
-        key = ctx.create_key(csp.CRYPT_EXPORTABLE)
-    ekey = ctx.get_key(csp.AT_KEYEXCHANGE)
-    if ekey is None:
-        ekey = ctx.create_key(csp.CRYPT_EXPORTABLE, csp.AT_KEYEXCHANGE)
-    assert ekey
-    return name
-
-
-def test_export_import_private_key():
-    name = test_create_named_container()
-    sender = csp.Context(name, csp.PROV_GOST_2001_DH, 0)
-    receiver = csp.Context("test", csp.PROV_GOST_2001_DH, 0)
-
-    rec_key = receiver.get_key(csp.AT_KEYEXCHANGE)
-    assert rec_key
-    sender_key = sender.get_key(csp.AT_KEYEXCHANGE)
-    assert sender_key
-
-    receiver_pub = sender.import_key(rec_key.encode(), sender_key)
-    assert receiver_pub
-    # sender_priv = sender_key.encode_key(receiver_pub)
-
-    # receiver_new_key = receiver.import_key(sender_priv, rec_key)
-    # assert receiver_new_key

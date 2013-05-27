@@ -70,7 +70,7 @@ public:
     void add_recipient_cert(Cert *c) throw(CSPException);
     void encrypt_data(BYTE *STRING, DWORD LENGTH, BYTE **s, DWORD *slen) throw(CSPException);
     void decrypt_data(BYTE *STRING, DWORD LENGTH, BYTE **s, DWORD *slen) throw(CSPException);
-    void sign_data(BYTE *STRING, DWORD LENGTH, BYTE **s, DWORD *slen, bool detach=0) throw(CSPException);
+    virtual void sign_data(BYTE *STRING, DWORD LENGTH, BYTE **s, DWORD *slen, bool detach=0) throw(CSPException);
 
     friend class SignerIter;
     friend class CertStore;
