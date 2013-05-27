@@ -10,6 +10,8 @@
 
 %inline %{
 class Key;
+class Crypt;
+Crypt *Context(LPCSTR container, DWORD type, DWORD flags, char *name=NULL) throw(CSPException);
 %}
 
 %inline %{
@@ -56,7 +58,7 @@ public:
     Key *import_key(BYTE *STRING, DWORD LENGTH, Key *decrypt=NULL) throw(CSPException);
     friend class CryptMsg;
     friend class CertStore;
-    friend Crypt *Context(LPCSTR ,DWORD , DWORD) throw (CSPException);
+    friend Crypt *Context(LPCSTR ,DWORD , DWORD, char*) throw (CSPException);
 };
 
 %}
@@ -69,12 +71,12 @@ public:
 %feature("docstring", CryptDOC);
 
 %{
-Crypt *Context(LPCSTR container, DWORD type, DWORD flags) throw(CSPException) {
+Crypt *Context(LPCSTR container, DWORD type, DWORD flags, char *name) throw(CSPException) {
     HCRYPTPROV hp;
     Crypt *res;
 
     /*printf("%x\n", flags);*/
-    if (!CryptAcquireContext(&hp, container, NULL, type, flags)) {
+    if (!CryptAcquireContext(&hp, container, name, type, flags)) {
         switch (GetLastError()) {
             case NTE_BAD_KEYSET_PARAM: return NULL;
             default: throw CSPException("Couldn't acquire context");

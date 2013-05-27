@@ -2,6 +2,7 @@
 */
 %newobject Cert::name();
 %newobject Cert::duplicate();
+%newobject Cert::extract();
 %newobject CertStore::__iter__();
 %feature("ref") CertStore "$this->ref();"
 %feature("unref") CertStore "$this->unref();"
@@ -53,12 +54,25 @@ public:
         LOG("New cert %x\n", pcert);
     };
 
+    Cert(BYTE* STRING, DWORD LENGTH) throw(CSPException) {
+        pcert = CertCreateCertificateContext(MY_ENC_TYPE, STRING, LENGTH);
+        if (!pcert) {
+            throw CSPException("Couldn't decode certificate blob");
+        }
+    };
+
     ~Cert() throw(CSPException){
         if (!CertFreeCertificateContext(pcert)) {
             throw CSPException("Couldn't free certificate context");
         }
         LOG("Freed cert %x\n", pcert);
     };
+
+    void extract(BYTE **s, DWORD *slen) throw(CSPException) {
+        *slen = pcert->cbCertEncoded;
+        *s = (BYTE *)malloc(*slen);
+        memcpy(*s, pcert->pbCertEncoded, *slen);
+    }
 
     void thumbprint(BYTE **s, DWORD *slen) throw(CSPException) {
         if(!CertGetCertificateContextProperty(pcert, CERT_HASH_PROP_ID, NULL, slen)) {

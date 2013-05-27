@@ -65,7 +65,7 @@ def test_context_simple():
     return context
 
 
-def test_context_named():
+def test_context_named_keystore():
     '''
     Подключение к именованному контейнеру. Если контейнер с данным именем не
     найден, будет возвращено `None`.
@@ -77,6 +77,22 @@ def test_context_named():
     )
     assert context
     return context
+
+
+#def test_context_named_provider():
+    #'''
+    #Подключение к криптопровайдеру по идентификатору имени. Использует
+    #необязательный четвертый параметр функции `Context()`, в котором передается
+    #строка с именем провайдера.
+    #'''
+    #context = csp.Context(
+        #None,
+        #csp.PROV_GOST_2001_DH,
+        #0,
+        #'Crypto-Pro HSM CSP'
+    #)
+    #assert context
+    #return context
 
 
 def test_context_not_found():
@@ -206,6 +222,31 @@ def test_duplicate_cert():
         cdup = c.duplicate()
         print((b64encode(c.thumbprint())))
         print((b64encode(cdup.thumbprint())))
+
+
+def test_extract_cert():
+    '''
+    Метод `Cert.extract()` возвращает закодированный сертификат в виде байтовой строки.
+    '''
+    cs = csp.CertStore(None, "MY")
+    cert = list(cs)[0]
+    cdata = cert.extract()
+    assert len(cdata)
+    return cdata
+
+
+def test_cert_from_data():
+    '''
+    Конструктор `Cert(s)`, при передаче ему байтовой строки `s`, декодирует и
+    загружает из нее новый экземпляр сертификата, не сохраненный в хранилище.
+    При необходимости его можно туда добавить функцией `CertStore.add_cert()`.
+    '''
+    cdata = test_extract_cert()
+    newc = csp.Cert(cdata)
+    assert newc
+    memstore = csp.CertStore()
+    memstore.add_cert(newc)
+    assert len(list(memstore)) == 1
 
 
 def _cert_thumb():
