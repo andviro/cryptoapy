@@ -151,12 +151,12 @@ def test_create_named_container():
     `csp.AT_KEYEXCHANGE` или `csp.AT_SIGNATURE`.
 
     '''
-    ctx = csp.Context(r'\\.\hdimage\new', csp.PROV_GOST_2001_DH, 0)
+    ctx = csp.Context('new_test', csp.PROV_GOST_2001_DH, 0)
     if ctx is None:
-        ctx = csp.Context(r'\\.\hdimage\new', csp.PROV_GOST_2001_DH, csp.CRYPT_NEWKEYSET)
+        ctx = csp.Context(r'\\.\hdimage\new_test', csp.PROV_GOST_2001_DH, csp.CRYPT_NEWKEYSET)
     assert ctx
     name = ctx.name()
-    assert name == 'new'
+    assert name == 'new_test'
 
     key = ctx.get_key()
     if key is None:
@@ -184,6 +184,12 @@ def test_export_import_private_key():
 
     # receiver_new_key = receiver.import_key(sender_priv, rec_key)
     # assert receiver_new_key
+
+    # Для удаления ключевого контейнера функции `csp.Context()` в числе флагов
+    # передается `csp.CRYPT_DELETEKEYSET`. При этом она возвращает `None`, т.к.
+    # контекст не с чем связывать.
+    res = csp.Context(name, csp.PROV_GOST_2001_DH, csp.CRYPT_DELETEKEYSET)
+    assert res is None
 
 
 def test_store():
@@ -242,6 +248,7 @@ def test_cert_from_data():
     При необходимости его можно туда добавить функцией `CertStore.add_cert()`.
     '''
     cdata = test_extract_cert()
+    print(len(cdata))
     newc = csp.Cert(cdata)
     assert newc
     memstore = csp.CertStore()
@@ -566,8 +573,8 @@ def test_verify_file():
         sign = csp.Signature(sigdata)
         print(sign.num_signers)
         for c in csp.CertStore(sign):
-            print(unicode(c.name(), 'windows-1251'))
-            print(unicode(c.issuer(), 'windows-1251'))
+            print(unicode(c.name()))
+            print(unicode(c.issuer()))
             print(b64encode(c.thumbprint()))
         assert all(sign.verify_data(data, n) for n in range(sign.num_signers))
 

@@ -62,7 +62,8 @@
 %#endif
 }
 
-%typemap(in, numinputs=1, noblock=1) (BYTE *STRING, DWORD LENGTH) {
+%typemap(in, numinputs=1, noblock=1) (BYTE *STRING, DWORD LENGTH)
+(char *cstr=NULL, Py_ssize_t len=0, int res=1) {
 %#if py_version_hex>=0x03000000
   if (PyBytes_Check($input))
 %#else  
@@ -70,15 +71,23 @@
 %#endif
   {
 %#if PY_VERSION_HEX>=0x03000000
-    PyBytes_AsStringAndSize($input, (char **)&$1, (Py_ssize_t *)&$2);
+    res = PyBytes_AsStringAndSize($input, &cstr, &len);
 %#else
-    PyString_AsStringAndSize($input, (char **)&$1, (Py_ssize_t *)&$2);
+    res = PyString_AsStringAndSize($input, &cstr, &len);
 %#endif
+    if (!cstr) {
+        res = 1;
+    }
 /*%#if PY_VERSION_HEX>=0x03000000*/
     /*Py_XDECREF($input);*/
 /*%#endif*/
-  } else {
+  } 
+  
+  if(res){
     %argument_fail(SWIG_TypeError, "$type", $symname, $argnum);
+  } else {
+    $1 = (BYTE *) cstr;
+    $2 = (DWORD) len;
   }
 };
 

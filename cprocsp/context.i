@@ -78,11 +78,16 @@ Crypt *Context(char *container, DWORD type, DWORD flags, char *name) throw(CSPEx
     /*printf("%x\n", flags);*/
     if (!CryptAcquireContext(&hp, container, name, type, flags)) {
         switch (GetLastError()) {
-            case NTE_BAD_KEYSET_PARAM: return NULL;
+            case NTE_BAD_KEYSET_PARAM:
+                return NULL;
             default: throw CSPException("Couldn't acquire context");
         }
     }
-    res = new Crypt(hp);
+    if (flags & CRYPT_DELETEKEYSET) {
+        res = NULL;
+    } else {
+        res = new Crypt(hp);
+    }
     return res;
 };
 

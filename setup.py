@@ -36,7 +36,7 @@ class TestCommand(Command):
         if not nose:
             print('W: nose package not found')
             return True
-        return nose.core.run(argv=['-v', os.path.join(self._dir, 'tests')])
+        return nose.core.run(argv=["", '-v', os.path.join(self._dir, 'tests')])
 
 cmdclass = {'test': TestCommand}
 
