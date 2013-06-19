@@ -4,6 +4,7 @@ from distutils.core import setup, Extension, Command
 from platform import architecture
 import sys
 import os
+import platform
 
 major, minor = sys.version_info[:2]
 
@@ -40,28 +41,41 @@ class TestCommand(Command):
 
 cmdclass = {'test': TestCommand}
 
+if platform.system() == 'Windows':
+    include_dirs = [
+        './',
+        './cprocsp/',
+    ]
+    library_dirs = []
+    libraries = ['crypt32']
+    extra_compile_args = ['-DSIZEOF_VOID_P={0}'.format(size)]
+else:
+    include_dirs = [
+        '/opt/cprocsp/include',
+        '/opt/cprocsp/include/cpcsp',
+        '/opt/cprocsp/include/asn1c/rtsrc',
+        '/opt/cprocsp/include/asn1data',
+    ]
+    library_dirs = ['/opt/cprocsp/lib/{0}'.format(arch)]
+    libraries = ['pthread',
+                 'asn1data',
+                 'ssp',
+                 'capi20']
+    extra_compile_args = [
+        '-DUNIX',
+        '-DHAVE_LIMITS_H',
+        '-DHAVE_STDINT_H',
+        '-DSIZEOF_VOID_P={0}'.format(size),
+        '-DCP_IOVEC_USE_SYSTEM',
+    ]
+
 
 csp = Extension('cprocsp._csp',
                 sources=['cprocsp/csp_wrap.cxx'],
-                include_dirs=[
-                    '/opt/cprocsp/include',
-                    '/opt/cprocsp/include/cpcsp',
-                    '/opt/cprocsp/include/asn1c/rtsrc',
-                    '/opt/cprocsp/include/asn1data',
-                ],
-                library_dirs=['/opt/cprocsp/lib/{0}'.format(arch)],
-                libraries=['pthread',
-                           'asn1data',
-                           'ssp',
-                           'capi20'],
-                extra_compile_args=[
-                    '-DUNIX',
-                    '-DHAVE_LIMITS_H',
-                    '-DHAVE_STDINT_H',
-                    '-DSIZEOF_VOID_P={0}'.format(size),
-                    '-DCP_IOVEC_USE_SYSTEM',
-                ],)
-
+                include_dirs=include_dirs,
+                library_dirs=library_dirs,
+                libraries=libraries,
+                extra_compile_args=extra_compile_args,)
 setup(name='python{major}.{minor}-cprocsp'.format(major=major, minor=minor),
       version='0.1',
       ext_modules=[csp],
