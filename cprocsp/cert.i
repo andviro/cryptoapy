@@ -8,9 +8,15 @@
 %feature("unref") CertStore "$this->unref();"
 
 %inline %{
+class CertStore;
 class Cert {
 private:
     PCCERT_CONTEXT pcert;
+    CertStore *parent;
+    void init() {
+        parent = NULL;
+    }
+
     void decode_name_blob(PCERT_NAME_BLOB pNameBlob, BYTE **s, DWORD *slen) {
         DWORD flags = CERT_X500_NAME_STR | CERT_NAME_STR_NO_PLUS_FLAG;
 
@@ -26,6 +32,7 @@ private:
             free(*s);
             throw CSPException("Couldn't decode cert blob");
         }
+        (*slen)--;
     }
 
 public:
@@ -46,13 +53,7 @@ public:
         }
     }
 
-    Cert(PCCERT_CONTEXT pc) throw(CSPException) {
-        if (!pc) {
-            throw CSPException("Invalid certificate context");
-        }
-        pcert = pc;
-        LOG("New cert %x\n", pcert);
-    };
+    Cert(PCCERT_CONTEXT pc, CertStore *parent=NULL) throw(CSPException);
 
     Cert(BYTE* STRING, DWORD LENGTH) throw(CSPException) {
         pcert = CertCreateCertificateContext(MY_ENC_TYPE, STRING, LENGTH);
@@ -61,12 +62,63 @@ public:
         }
     };
 
-    ~Cert() throw(CSPException){
-        if (!CertFreeCertificateContext(pcert)) {
-            throw CSPException("Couldn't free certificate context");
+    static Cert *self_sign(Crypt *ctx, BYTE *STRING, DWORD LENGTH)  throw(CSPException) {
+        CERT_NAME_BLOB issuer;
+        bool res;
+
+        res = CertStrToName(
+            MY_ENC_TYPE,
+            (LPSTR)STRING,
+            CERT_OID_NAME_STR | CERT_NAME_STR_REVERSE_FLAG,
+            NULL,
+            NULL,
+            &issuer.cbData,
+            NULL );
+
+        if (!res) {
+            throw CSPException("Couldn't determine encoded info size");
         }
-        LOG("Freed cert %x\n", pcert);
-    };
+
+        issuer.pbData = (BYTE*) malloc(issuer.cbData);
+
+        res = CertStrToName( 
+            MY_ENC_TYPE,
+            (LPSTR)STRING,
+            CERT_OID_NAME_STR | CERT_NAME_STR_REVERSE_FLAG,
+            NULL,
+            issuer.pbData,
+            &issuer.cbData,
+            NULL );
+
+        if (!res) {
+            free(issuer.pbData);
+            throw CSPException("Couldn't encode cert info");
+        }
+
+        CRYPT_ALGORITHM_IDENTIFIER algid;
+        DWORD hasi = sizeof(algid);
+        memset(&algid, 0, hasi);
+        algid.pszObjId = (char *)szOID_CP_GOST_R3411;  
+
+        PCCERT_CONTEXT pc = CertCreateSelfSignCertificate(ctx->hprov,
+            &issuer,
+            0,
+            NULL,
+            &algid,
+            NULL,
+            NULL,
+            NULL);
+
+        if (!pc) {
+            free(issuer.pbData);
+            throw CSPException("Couldn't acquire self-signed certificate");
+        }
+
+        free(issuer.pbData);
+        return new Cert(pc);
+    }
+
+    ~Cert() throw(CSPException);
 
     void extract(BYTE **s, DWORD *slen) throw(CSPException) {
         *slen = pcert->cbCertEncoded;
@@ -135,16 +187,19 @@ public:
     CertFind(CertStore *p, DWORD et, DWORD ft, BYTE *STRING, DWORD LENGTH) : CertIter(p) {
         enctype = et;
         findtype = ft;
-        chb.pbData = STRING;
+        chb.pbData = (BYTE *)malloc(LENGTH);
+        memcpy(chb.pbData, STRING, LENGTH);
         chb.cbData = LENGTH;
         param = &chb;
         LOG("Started find %i-%i-%i\n", et, ft, LENGTH);
     };
 
+    virtual ~CertFind() throw (CSPException);
+
     CertFind(CertStore *p, DWORD et, BYTE *name) : CertIter(p) {
         enctype = et;
         findtype = CERT_FIND_SUBJECT_STR;
-        param = (CRYPT_HASH_BLOB *)name;
+        param = (CRYPT_HASH_BLOB *)strdup((const char *)name);
 
         LOG("Started find %i-'%s'\n", et, name);
     };
@@ -251,6 +306,19 @@ CertIter::~CertIter() throw (CSPException) {
     parent->unref();
 };
 
+CertFind::~CertFind() throw (CSPException) {
+    if (findtype == CERT_FIND_SUBJECT_STR) {
+        if (param) {
+            free(param);
+        }
+    } else {
+        if (chb.pbData) {
+            free(chb.pbData);
+        }
+    }
+};
+
+
 Cert *CertIter::next() throw (Stop_Iteration, CSPException) {
     if (!iter) {
         LOG("Stop iter\n");
@@ -258,7 +326,7 @@ Cert *CertIter::next() throw (Stop_Iteration, CSPException) {
     }
     pcert = CertEnumCertificatesInStore(parent->hstore, pcert);
     if (pcert) {
-        return new Cert(CertDuplicateCertificateContext(pcert));
+        return new Cert(CertDuplicateCertificateContext(pcert), parent);
     } else {
         iter = false;
         LOG("Stop iter\n");
@@ -273,14 +341,36 @@ Cert *CertFind::next() throw (Stop_Iteration, CSPException) {
     }
     pcert = CertFindCertificateInStore(parent->hstore, enctype, 0, findtype, param, pcert);
     if (pcert) {
-        LOG("Next find %i %i\n", enctype, findtype);
-        return new Cert(CertDuplicateCertificateContext(pcert));
+        LOG("Next find %lu %lu '%s'\n", enctype, findtype, param);
+        return new Cert(CertDuplicateCertificateContext(pcert), parent);
     } else {
         iter = false;
         LOG("Stopped find\n");
         throw Stop_Iteration();
     }
 };
+
+Cert::Cert(PCCERT_CONTEXT pc, CertStore *parent) throw(CSPException) : parent(parent) {
+    if (!pc) {
+        throw CSPException("Invalid certificate context");
+    }
+    if (parent) {
+        parent->ref();
+    }
+    pcert = pc;
+    LOG("New cert %x\n", pcert);
+}
+
+Cert::~Cert() throw(CSPException){
+    if (!CertFreeCertificateContext(pcert)) {
+        throw CSPException("Couldn't free certificate context");
+    }
+    if (parent) {
+        parent->unref();
+    }
+    LOG("Freed cert %x\n", pcert);
+};
+
 
 %}
 

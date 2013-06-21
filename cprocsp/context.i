@@ -56,6 +56,7 @@ public:
     Key *create_key(DWORD flags, DWORD keyspec=AT_SIGNATURE) throw(CSPException);
     Key *get_key(DWORD keyspec=AT_SIGNATURE) throw(CSPException);
     Key *import_key(BYTE *STRING, DWORD LENGTH, Key *decrypt=NULL) throw(CSPException);
+    friend class Cert;
     friend class CryptMsg;
     friend class CertStore;
     friend Crypt *Context(char *, DWORD , DWORD, char*) throw (CSPException);
@@ -77,10 +78,14 @@ Crypt *Context(char *container, DWORD type, DWORD flags, char *name) throw(CSPEx
 
     /*printf("%x\n", flags);*/
     if (!CryptAcquireContext(&hp, container, name, type, flags)) {
-        switch (GetLastError()) {
+        DWORD err = GetLastError();
+        switch (err) {
+            case NTE_KEYSET_NOT_DEF:
             case NTE_BAD_KEYSET_PARAM:
                 return NULL;
-            default: throw CSPException("Couldn't acquire context");
+            default:
+                printf("%lx\n", err);
+                throw CSPException("Couldn't acquire context");
         }
     }
     if (flags & CRYPT_DELETEKEYSET) {

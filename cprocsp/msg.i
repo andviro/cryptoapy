@@ -213,7 +213,7 @@ void CryptMsg::add_signer_cert(Cert *c) throw(CSPException) {
     CERT_BLOB *signer_cert = NULL;
     DWORD ssi = sizeof(CMSG_SIGNER_ENCODE_INFO);
     DWORD ssb = sizeof(CERT_BLOB);
-    HCRYPTPROV      hprov = 0;
+    HCRYPTPROV      hprov = cprov? cprov->hprov : 0;
     DWORD keytype = AT_KEYEXCHANGE;
     BOOL do_release;
 
@@ -459,9 +459,13 @@ CertStore::CertStore(CryptMsg *parent) throw(CSPException) {
 };
 
 CertStore::~CertStore() throw(CSPException) {
-    if (hstore && !CertCloseStore(hstore, CERT_CLOSE_STORE_CHECK_FLAG)) {
-        throw CSPException("Couldn't properly close certificate store");
+    LOG("begin store free");
+    if (hstore) {
+        if (!CertCloseStore(hstore, CERT_CLOSE_STORE_CHECK_FLAG)) {
+            throw CSPException("Couldn't properly close certificate store");
+        }
     }
+    LOG("end store free");
     if (msg) {
         LOG("msg free: %p\n", msg);
         msg->unref();

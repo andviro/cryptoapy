@@ -24,17 +24,21 @@ else:
 
 
 def setup():
-    '''
-    Создание тестового блока данных и его отсоединенной подписи с помощью
-    командной строки.
-    '''
-    global signname
-    signname = os.path.join('/tmp', uuid4().hex)
-    with open(signname, 'wb') as f:
-        f.write(os.urandom(1024))
-    if sub.call(['/opt/cprocsp/bin/{0}/cryptcp'.format(arch),
-                 '-dir', '/tmp', '-signf', '-nochain', '-cert', '-der', signname]):
-        assert False
+    ctx = csp.Context('test', csp.PROV_GOST_2001_DH, 0)
+    if ctx is None:
+        ctx = csp.Context(r'\\.\hdimage\test', csp.PROV_GOST_2001_DH, csp.CRYPT_NEWKEYSET)
+    assert ctx
+    name = ctx.name()
+    assert name == 'new_test'
+
+    key = ctx.get_key()
+    if key is None:
+        key = ctx.create_key(csp.CRYPT_EXPORTABLE)
+    ekey = ctx.get_key(csp.AT_KEYEXCHANGE)
+    if ekey is None:
+        ekey = ctx.create_key(csp.CRYPT_EXPORTABLE, csp.AT_KEYEXCHANGE)
+    assert ekey
+    return name
 
 
 def teardown():

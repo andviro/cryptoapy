@@ -44,7 +44,7 @@ def swig(size=void_size):
 
 def test(pyversion=''):
     local("python{0} setup.py build_ext --inplace".format(pyversion))
-    local("python{0} setup.py test".format(pyversion))
+    #local("python{0} setup.py test".format(pyversion))
 
 
 def build(pyversion=''):
