@@ -4,6 +4,8 @@
 %newobject Cert::duplicate();
 %newobject Cert::extract();
 %newobject CertStore::__iter__();
+%newobject Cert::self_sign();
+%newobject CertStore::add_cert();
 %feature("ref") CertStore "$this->ref();"
 %feature("unref") CertStore "$this->unref();"
 
@@ -283,10 +285,13 @@ public:
         return new Cert(res);
     };
 
-    void add_cert(Cert *c) throw(CSPException) {
-        if (c && !CertAddCertificateContextToStore(hstore, c->pcert, CERT_STORE_ADD_ALWAYS, NULL)) {
+    Cert *add_cert(Cert *c) throw(CSPException) {
+        PCCERT_CONTEXT copy;
+        if (c && !CertAddCertificateContextToStore(hstore, c->pcert,
+        CERT_STORE_ADD_ALWAYS, &copy)) {
             throw CSPException("Couldn't add cert to store");
         }
+        return new Cert(copy, this);
     };
     friend class CryptMsg;
     friend class CertIter;

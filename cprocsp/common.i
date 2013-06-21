@@ -2,8 +2,8 @@
 */
 %{
 #define MY_ENC_TYPE (X509_ASN_ENCODING | PKCS_7_ASN_ENCODING)
-/*#define LOG printf*/
-#define LOG(...)
+#define LOG printf
+/*#define LOG(...)*/
 %}
 
 %inline %{
