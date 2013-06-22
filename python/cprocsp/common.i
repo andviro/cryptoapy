@@ -1,40 +1,7 @@
 /* vim: ft=swig
 */
-%{
-#define MY_ENC_TYPE (X509_ASN_ENCODING | PKCS_7_ASN_ENCODING)
-/*#define LOG printf*/
-#define LOG(...)
-%}
 
-%inline %{
-class RCObj {
-protected:
-    signed int refcount;
-public:
-    RCObj() {
-        refcount = 0;
-    }
-
-    virtual ~RCObj() {};
-
-    int ref() {
-        refcount ++;
-        LOG("ref %i\n", refcount);
-        return refcount;
-    }
-
-    int unref() {
-        refcount --;
-        if (refcount <= 0) {
-            LOG("delete \n");
-            delete this;
-            return 0;
-        }
-        LOG("unref %i\n", refcount);
-        return refcount;
-    }
-};
-%}
+%include "../../cpp/rcobj.hpp"
 
 typedef ULONG_PTR HCRYPTPROV;
 typedef ULONG_PTR HCRYPTKEY;

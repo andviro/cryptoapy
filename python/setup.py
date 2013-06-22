@@ -41,8 +41,10 @@ class TestCommand(Command):
 
 cmdclass = {'test': TestCommand}
 
+include_dirs = ['../cpp']
+
 if platform.system() == 'Windows':
-    include_dirs = [
+    include_dirs += [
         './',
         './cprocsp/',
     ]
@@ -50,7 +52,7 @@ if platform.system() == 'Windows':
     libraries = ['crypt32']
     extra_compile_args = ['-DSIZEOF_VOID_P={0}'.format(size)]
 else:
-    include_dirs = [
+    include_dirs += [
         '/opt/cprocsp/include',
         '/opt/cprocsp/include/cpcsp',
         '/opt/cprocsp/include/asn1c/rtsrc',
@@ -71,7 +73,16 @@ else:
 
 
 csp = Extension('cprocsp._csp',
-                sources=['cprocsp/csp_wrap.cxx'],
+                sources=[
+                    'cprocsp/csp_wrap.cxx',
+                    '../cpp/cert.cpp',
+                    '../cpp/context.cpp',
+                    '../cpp/except.cpp',
+                    '../cpp/key.cpp',
+                    '../cpp/msg.cpp',
+                    '../cpp/rcobj.cpp',
+                    '../cpp/sign.cpp',
+                ],
                 include_dirs=include_dirs,
                 library_dirs=library_dirs,
                 libraries=libraries,

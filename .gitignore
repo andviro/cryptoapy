@@ -3,6 +3,7 @@ build
 dist
 wiki
 *.egg
+*.orig
 *.egg-info
 test
 csp.py

@@ -64,28 +64,20 @@
 %include "bytes.i"
 %feature("autodoc", "2");
 
-%inline %{
-class Stop_Iteration {
-};
-%}
-
 %typemap(throws) Stop_Iteration %{
   PyErr_SetNone(PyExc_StopIteration);
   SWIG_fail;
 %}
 
 %{
-#include <stdio.h>
-#ifdef _WIN32
-#   include <windows.h>
-#   include <wincrypt.h>
-#else
-#   include <stdlib.h>
-#   include <string.h>
-#   include <CSP_WinDef.h>
-#   include <CSP_WinCrypt.h>
-#endif
-#include <WinCryptEx.h>
+#include "common.hpp"
+#include "cert.hpp"
+#include "context.hpp"
+#include "except.hpp"
+#include "key.hpp"
+#include "msg.hpp"
+#include "rcobj.hpp"
+#include "sign.hpp"
 %}
 
 %include "wintypes.i"
