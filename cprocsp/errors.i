@@ -9,8 +9,9 @@
 class CSPException {
 public:
     char msg[256];
-    CSPException(const char *m) {
-        DWORD code = GetLastError();
+    CSPException(const char *m, DWORD code=0) {
+        if (!code)
+            code = GetLastError();
         snprintf(msg, 256, "%s (0x%x)", m, code);
     }
 };

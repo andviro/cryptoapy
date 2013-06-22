@@ -1,11 +1,16 @@
 /* vim: ft=swig
 */
-%newobject Cert::name();
-%newobject Cert::duplicate();
-%newobject Cert::extract();
-%newobject CertStore::__iter__();
-%newobject Cert::self_sign();
-%newobject CertStore::add_cert();
+%newobject Cert::name;
+%newobject Cert::duplicate;
+%newobject Cert::extract;
+%newobject Cert::self_sign;
+%newobject CertStore::__iter__;
+%newobject CertStore::add_cert;
+%newobject CertStore::find_by_thumb;
+%newobject CertStore::find_by_name;
+%newobject CertStore::get_cert_by_info;
+%newobject CertIter::next;
+
 %feature("ref") CertStore "$this->ref();"
 %feature("unref") CertStore "$this->unref();"
 
@@ -40,31 +45,26 @@ private:
 public:
     Cert* duplicate() throw(CSPException) {
         PCCERT_CONTEXT pc = CertDuplicateCertificateContext(pcert);
-        return new Cert(pc);
+        return new Cert(pc, parent);
     };
 
 
-    void remove_from_store() throw(CSPException) {
-        PCCERT_CONTEXT pc = CertDuplicateCertificateContext(pcert);
-        if (!pc) {
-            throw CSPException("Couldn't duplicate cert context");
-        }
-        if(!CertDeleteCertificateFromStore(pc))   
-        {
-            throw CSPException("Couldn't remove certificate");
-        }
-    }
+    void remove_from_store() throw(CSPException);
 
     Cert(PCCERT_CONTEXT pc, CertStore *parent=NULL) throw(CSPException);
 
-    Cert(BYTE* STRING, DWORD LENGTH) throw(CSPException) {
+    Cert(BYTE* STRING, DWORD LENGTH) throw(CSPException) : parent(NULL) {
         pcert = CertCreateCertificateContext(MY_ENC_TYPE, STRING, LENGTH);
         if (!pcert) {
             throw CSPException("Couldn't decode certificate blob");
         }
+        LOG("New cert %p\n", pcert);
     };
 
     static Cert *self_sign(Crypt *ctx, BYTE *STRING, DWORD LENGTH)  throw(CSPException) {
+#ifdef UNIX
+    throw CSPException("Self-signed certificates are not implemented on Unix", 1);
+#else
         CERT_NAME_BLOB issuer;
         bool res;
 
@@ -118,6 +118,7 @@ public:
 
         free(issuer.pbData);
         return new Cert(pc);
+#endif
     }
 
     ~Cert() throw(CSPException);
@@ -130,7 +131,7 @@ public:
 
     void thumbprint(BYTE **s, DWORD *slen) throw(CSPException) {
         if(!CertGetCertificateContextProperty(pcert, CERT_HASH_PROP_ID, NULL, slen)) {
-            LOG("Error: %x\n", pcert);
+            LOG("Error: %p\n", pcert);
             throw CSPException("Couldn't get certificate hash size");
         }
         *s = (BYTE *)malloc(*slen);
@@ -160,7 +161,6 @@ public:
 %feature("python:slot", "tp_iter", functype="getiterfunc") CertStore::__iter__;
 %feature("python:slot", "tp_iter", functype="getiterfunc") CertIter::__iter__;
 %feature("python:slot", "tp_iternext", functype="iternextfunc") CertIter::next;
-%newobject CertIter::next();
 
 %inline %{
 class CertStore;
@@ -220,6 +220,7 @@ private:
         ctx = NULL;
         msg = NULL;
         hstore = 0;
+        LOG("init store\n");
     }
 public:
 
@@ -239,7 +240,6 @@ public:
         if (parent) {
             ctx = parent;
             ctx->ref();
-            LOG("ctx ref: %p\n", ctx);
             hprov = ctx->hprov;
         }
         hstore = CertOpenStore(
@@ -256,7 +256,6 @@ public:
         if (!hstore) {
             throw CSPException("Couldn't open certificate store");
         }
-        LOG("Opened store\n");
     };
 
     ~CertStore() throw(CSPException);
@@ -277,12 +276,13 @@ public:
         PCCERT_CONTEXT res;
         res = CertGetSubjectCertificateFromStore(hstore, MY_ENC_TYPE, psi);
         if (!res) {
-            if (GetLastError() == (DWORD) CRYPT_E_NOT_FOUND) {
+            DWORD err = GetLastError();
+            if (err == CRYPT_E_NOT_FOUND) {
                 return NULL;
             }
-            throw CSPException("Error gettin subject certificate from store");
+            throw CSPException("Error gettin subject certificate from store", err);
         }
-        return new Cert(res);
+        return new Cert(res, this);
     };
 
     Cert *add_cert(Cert *c) throw(CSPException) {
@@ -293,6 +293,7 @@ public:
         }
         return new Cert(copy, this);
     };
+
     friend class CryptMsg;
     friend class CertIter;
     friend class CertFind;
@@ -363,7 +364,7 @@ Cert::Cert(PCCERT_CONTEXT pc, CertStore *parent) throw(CSPException) : parent(pa
         parent->ref();
     }
     pcert = pc;
-    LOG("New cert %x\n", pcert);
+    LOG("New cert %p\n", pcert);
 }
 
 Cert::~Cert() throw(CSPException){
@@ -373,9 +374,23 @@ Cert::~Cert() throw(CSPException){
     if (parent) {
         parent->unref();
     }
-    LOG("Freed cert %x\n", pcert);
+    LOG("Freed cert %p\n", pcert);
 };
 
+void Cert::remove_from_store() throw(CSPException) {
+    PCCERT_CONTEXT pc = CertDuplicateCertificateContext(pcert);
+    if (!pc) {
+        throw CSPException("Couldn't duplicate cert context");
+    }
+    if(!CertDeleteCertificateFromStore(pc))   
+    {
+        throw CSPException("Couldn't remove certificate");
+    }
+    if (parent) {
+        parent->unref();
+        parent = NULL;
+    }
+}
 
 %}
 

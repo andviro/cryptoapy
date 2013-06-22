@@ -20,19 +20,20 @@ class Crypt : public RCObj {
 
     Crypt(HCRYPTPROV hp) throw(CSPException) {
         hprov = hp;
-        LOG("New ctx %i\n", hprov);
+        LOG("New ctx %lu\n", hprov);
     };
 public:
 
     ~Crypt() throw(CSPException) {
-        LOG("Free ctx %i\n", hprov);
         if (hprov) {
             bool res = CryptReleaseContext(hprov, 0);
             if (!res) {
-                LOG("error ctx %x\n", GetLastError());
-                throw CSPException("Couldn't release context");
+                DWORD err = GetLastError();
+                LOG("error ctx %x\n", err);
+                throw CSPException("Couldn't release context", err);
             }
         }
+        LOG("Free ctx %lu\n", hprov);
     };
 
     char *name() {
@@ -84,7 +85,6 @@ Crypt *Context(char *container, DWORD type, DWORD flags, char *name) throw(CSPEx
             case NTE_BAD_KEYSET_PARAM:
                 return NULL;
             default:
-                printf("%lx\n", err);
                 throw CSPException("Couldn't acquire context");
         }
     }

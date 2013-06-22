@@ -24,27 +24,25 @@ else:
 
 
 def setup():
-    ctx = csp.Context('test', csp.PROV_GOST_2001_DH, 0)
-    if ctx is None:
-        ctx = csp.Context(r'\\.\hdimage\test', csp.PROV_GOST_2001_DH, csp.CRYPT_NEWKEYSET)
-    assert ctx
-    name = ctx.name()
-    assert name == 'new_test'
-
-    key = ctx.get_key()
-    if key is None:
-        key = ctx.create_key(csp.CRYPT_EXPORTABLE)
-    ekey = ctx.get_key(csp.AT_KEYEXCHANGE)
-    if ekey is None:
-        ekey = ctx.create_key(csp.CRYPT_EXPORTABLE, csp.AT_KEYEXCHANGE)
-    assert ekey
-    return name
+    '''
+    Создание тестового блока данных и его отсоединенной подписи с помощью
+    командной строки.
+    '''
+    return
+    global signname
+    signname = os.path.join('/tmp', uuid4().hex)
+    with open(signname, 'wb') as f:
+        f.write(os.urandom(1024))
+    if sub.call(['/opt/cprocsp/bin/{0}/cryptcp'.format(arch),
+                 '-dir', '/tmp', '-signf', '-nochain', '-cert', '-der', signname]):
+        assert False
 
 
 def teardown():
     '''
     Прибиение временных файлов.
     '''
+    return
     global signname
     if os.path.exists(signname):
         os.unlink(signname)
@@ -534,19 +532,6 @@ def test_verify_with_detached():
         assert sgn.verify_data(b'hurblewurble', n)
 
 
-def test_verify_with_detached2():
-    '''
-    Проверка отсоединенной подписи, созданной через командную строку.
-    '''
-    with open(signname, 'rb') as f:
-        data = f.read()
-    with open(signname + '.sgn', 'rb') as f:
-        signdata = f.read()
-    sgn = csp.Signature(signdata)
-    for n in range(sgn.num_signers):
-        assert sgn.verify_data(data, n)
-
-
 def test_verify_with_detached_bad():
     '''
     Если для `n`-го подписанта подпись под данными не бьется, функция
@@ -558,16 +543,10 @@ def test_verify_with_detached_bad():
         assert not sgn.verify_data(b'hUrblEwurBle', n)
 
 
-def test_verify_with_detached_bad2():
-    data = os.urandom(1024)
-    with open(signname + '.sgn', 'rb') as f:
-        signdata = f.read()
-    sgn = csp.Signature(signdata)
-    for n in range(sgn.num_signers):
-        assert not sgn.verify_data(data, n)
-
-
 def test_verify_file():
+    '''
+    Проверка отсоединенной подписи, созданной через командную строку.
+    '''
     names = ('data1', 'data2')
     for name in names:
         with open('tests/{0}.bin'.format(name), 'rb') as f:
@@ -577,8 +556,8 @@ def test_verify_file():
         sign = csp.Signature(sigdata)
         print(sign.num_signers)
         for c in csp.CertStore(sign):
-            print(unicode(c.name()))
-            print(unicode(c.issuer()))
+            print(unicode(c.name(), 'cp1251', 'replace'))
+            print(unicode(c.issuer(), 'cp1251', 'replace'))
             print(b64encode(c.thumbprint()))
         assert all(sign.verify_data(data, n) for n in range(sign.num_signers))
 
@@ -637,7 +616,7 @@ def test_decrypt_data():
 
     '''
     data = test_encrypt_data()
-    print(data)
+    print(b64encode(data))
     msg = csp.CryptMsg()
     assert msg
     res = msg.decrypt_data(data)

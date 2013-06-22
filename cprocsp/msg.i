@@ -1,6 +1,8 @@
 // vim: ft=swig
 
 %newobject CryptMsg::get_nth_signer_info;
+%newobject CryptMsg::signer_certs;
+%newobject SignerIter::next;
 
 typedef struct _CERT_INFO {
     DWORD                       dwVersion;
@@ -22,7 +24,6 @@ typedef struct _CERT_INFO {
         free($self);
     }
 }
-%newobject SignerIter::next;
 %feature("python:slot", "tp_iter", functype="getiterfunc") SignerIter::__iter__;
 %feature("python:slot", "tp_iternext", functype="iternextfunc") SignerIter::next;
 %feature("ref") CryptMsg "$this->ref();"
@@ -190,7 +191,12 @@ void CryptMsg::decrypt_data(BYTE *STRING, DWORD LENGTH, BYTE **s, DWORD *slen) t
         slen,
         NULL))
     {
-        throw CSPException("Cannot acquire decrypted blob size");
+        DWORD err = GetLastError();
+        if (err == CRYPT_E_NO_DECRYPT_CERT) {
+            throw CSPException("Certificate for decryption is not available", err);
+        } else {
+            throw CSPException("Cannot acquire decrypted blob size", err);
+        }
     }
 
     *s = (BYTE *) malloc(*slen);
@@ -403,7 +409,6 @@ CERT_INFO *CryptMsg::get_nth_signer_info(DWORD idx) {
         throw CSPException("Couldn't get signer info size");
     }
     psi = (CERT_INFO *) malloc(spsi);
-    /*LOG("psi:%i\n", spsi);*/
     if (!CryptMsgGetParam(hmsg, CMSG_SIGNER_CERT_INFO_PARAM, idx, psi, &spsi)) {
         throw CSPException("Couldn't get signer info data");
     }
@@ -420,7 +425,7 @@ SignerIter *SignerIter::__iter__() { return this; };
 
 SignerIter::SignerIter(CryptMsg* o) {
     owner = o;
-    owner->ref();
+    if (owner) owner->ref();
     idx = 0;
 };
 
@@ -459,19 +464,16 @@ CertStore::CertStore(CryptMsg *parent) throw(CSPException) {
 };
 
 CertStore::~CertStore() throw(CSPException) {
-    LOG("begin store free");
+    LOG("Begin freeing store\n");
     if (hstore) {
         if (!CertCloseStore(hstore, CERT_CLOSE_STORE_CHECK_FLAG)) {
             throw CSPException("Couldn't properly close certificate store");
         }
     }
-    LOG("end store free");
     if (msg) {
-        LOG("msg free: %p\n", msg);
         msg->unref();
     }
     if (ctx) {
-        LOG("ctx free: %p\n", ctx);
         ctx->unref();
     }
     LOG("Freed store\n");

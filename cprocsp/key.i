@@ -55,10 +55,11 @@ public:
 Key *Crypt::get_key(DWORD keyspec) throw(CSPException) {
     HCRYPTKEY hkey = 0;
     if(!CryptGetUserKey(hprov, keyspec, &hkey)) { 
-        if (GetLastError() == (DWORD) NTE_NO_KEY) {
+        DWORD err = GetLastError();
+        if (err == NTE_NO_KEY) {
             return NULL;
         } else {
-            throw CSPException("Couldn't acquire user pub key");
+            throw CSPException("Couldn't acquire user pub key", err);
         }
     }
     return new Key(this, hkey);

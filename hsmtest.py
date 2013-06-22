@@ -22,8 +22,38 @@ def setup():
     print c.name()
     print c.issuer()
     print c.thumbprint()
-    c2 = store.add_cert(c)
+    store.add_cert(c)
 
+
+def test_extract_cert():
+    '''
+    Метод `Cert.extract()` возвращает закодированный сертификат в виде байтовой строки.
+    '''
+    cs = csp.CertStore(None, "MY")
+    cert = list(cs)[0]
+    cdata = cert.extract()
+    assert len(cdata)
+    return cdata
+
+
+def test_cert_from_data():
+    '''
+    Конструктор `Cert(s)`, при передаче ему байтовой строки `s`, декодирует и
+    загружает из нее новый экземпляр сертификата, не сохраненный в хранилище.
+    При необходимости его можно туда добавить функцией `CertStore.add_cert()`.
+    '''
+    cdata = test_extract_cert()
+    print '!!!', len(cdata)
+    newc = csp.Cert(cdata)
+    print '!!!', newc
+    memstore = csp.CertStore()
+    c = memstore.add_cert(newc)
+    l = list(memstore.find_by_name(''))
+    c2 = c.duplicate()
+    print "!!!", c
+    print '!!!', len(list(memstore))
+    for c in memstore:
+        c.remove_from_store()
 
 if __name__ == "__main__":
-    setup()
+    test_cert_from_data()
