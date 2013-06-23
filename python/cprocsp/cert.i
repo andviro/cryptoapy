@@ -17,4 +17,4 @@
 %feature("python:slot", "tp_iter", functype="getiterfunc") CertIter::__iter__;
 %feature("python:slot", "tp_iternext", functype="iternextfunc") CertIter::next;
 
-%include "../../cpp/cert.hpp"
+%include "cert.hpp"

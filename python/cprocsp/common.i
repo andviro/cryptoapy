@@ -1,7 +1,7 @@
 /* vim: ft=swig
 */
 
-%include "../../cpp/rcobj.hpp"
+%include "rcobj.hpp"
 
 typedef ULONG_PTR HCRYPTPROV;
 typedef ULONG_PTR HCRYPTKEY;

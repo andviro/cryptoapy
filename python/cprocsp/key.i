@@ -1,4 +1,4 @@
 /* vim: ft=swig
 */
 
-%include "../../cpp/key.hpp"
+%include "key.hpp"

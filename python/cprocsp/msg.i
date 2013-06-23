@@ -29,4 +29,4 @@ typedef struct _CERT_INFO {
 %feature("ref") CryptMsg "$this->ref();"
 %feature("unref") CryptMsg "$this->unref();"
 
-%include "../../cpp/msg.hpp"
+%include "msg.hpp"

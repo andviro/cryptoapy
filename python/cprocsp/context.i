@@ -8,4 +8,4 @@
 %newobject Crypt::name;
 %newobject ::Context;
 
-%include "../../cpp/context.hpp"
+%include "context.hpp"

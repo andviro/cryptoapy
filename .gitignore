@@ -14,3 +14,4 @@ csp.py
 *.py[cow]
 *.so
 *.o
+*.a

@@ -26,6 +26,7 @@ def swig(size=void_size):
         '-py3',
         '-builtin',
         '-c++',
+        '-I../cpp/include',
         '-DSIZEOF_VOID_P={0}'.format(size),
     ]
     if platform.system() == 'Windows':

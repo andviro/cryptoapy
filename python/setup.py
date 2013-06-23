@@ -41,16 +41,17 @@ class TestCommand(Command):
 
 cmdclass = {'test': TestCommand}
 
-include_dirs = ['../cpp']
+include_dirs = ['../cpp/include']
+library_dirs = ['../cpp']
+libraries = []
+extra_compile_args = ['-DSIZEOF_VOID_P={0}'.format(size)]
 
 if platform.system() == 'Windows':
     include_dirs += [
         './',
         './cprocsp/',
     ]
-    library_dirs = []
-    libraries = ['crypt32']
-    extra_compile_args = ['-DSIZEOF_VOID_P={0}'.format(size)]
+    libraries += ['crypt32']
 else:
     include_dirs += [
         '/opt/cprocsp/include',
@@ -58,16 +59,15 @@ else:
         '/opt/cprocsp/include/asn1c/rtsrc',
         '/opt/cprocsp/include/asn1data',
     ]
-    library_dirs = ['/opt/cprocsp/lib/{0}'.format(arch)]
-    libraries = ['pthread',
-                 'asn1data',
-                 'ssp',
-                 'capi20']
-    extra_compile_args = [
+    library_dirs += ['/opt/cprocsp/lib/{0}'.format(arch)]
+    libraries += ['pthread',
+                  'asn1data',
+                  'ssp',
+                  'capi20']
+    extra_compile_args += [
         '-DUNIX',
         '-DHAVE_LIMITS_H',
         '-DHAVE_STDINT_H',
-        '-DSIZEOF_VOID_P={0}'.format(size),
         '-DCP_IOVEC_USE_SYSTEM',
     ]
 
@@ -75,14 +75,8 @@ else:
 csp = Extension('cprocsp._csp',
                 sources=[
                     'cprocsp/csp_wrap.cxx',
-                    '../cpp/cert.cpp',
-                    '../cpp/context.cpp',
-                    '../cpp/except.cpp',
-                    '../cpp/key.cpp',
-                    '../cpp/msg.cpp',
-                    '../cpp/rcobj.cpp',
-                    '../cpp/sign.cpp',
                 ],
+                extra_objects=['../cpp/csp.a'],
                 include_dirs=include_dirs,
                 library_dirs=library_dirs,
                 libraries=libraries,
