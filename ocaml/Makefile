@@ -1,28 +1,34 @@
-ifndef COMSPEC
-	EXE =
-else
-	EXE = .exe
-endif
+include ../Makefile.config
 
-all: test$(EXE)
-	./test$(EXE)
+SOURCES = csp_stubs.cpp.c
 
-clean:
-	rm -f *.cm[xo]
-	rm -f test$(EXE)
-	rm -f *_stubs.c
+MLSOURCES = 
 
-%.ml %_stubs.c: %.idl
-	camlidl -no-include $<
+OBJECTS = $(SOURCES:.c=.o)
 
-%.cmx: %.ml
-	ocamlopt -c $<
+MLOBJECTS = $(MLSOURCES:.ml=.cmx)
+
+MLCFLAGS = $(foreach flg, $(CPPFLAGS), -ccopt $(flg))
+MLCFLAGS += -ccopt -I../cpp/include 
+
+MLLDFLAGS = $(foreach flg, $(LDFLAGS), -ccopt $(flg))
+MLLDLIBS = $(foreach flg, $(LDLIBS), -cclib $(flg))
+
+MLCLIBS = ../cpp/csp.a
+
+TARGET = csp.cmxa
+
+all: $(TARGET)
+	ocamlopt $(TARGET) test.ml  $(MLLDLIBS) $(MLLDFLAGS) -o test
+
+clean::
+	rm -f $(MLOBJECTS) $(OBJECTS) $(TARGET)
+
+$(TARGET): $(OBJECTS) $(MLOBJECTS)
+	ocamlopt -a -o $@ $^ $(MLCLIBS) -cclib -lstdc++ $(MLLDLIBS) $(MLLDFLAGS) 
 
 %.o: %.c
-	ocamlopt -c $<
+	ocamlopt -ccopt -xc++ $(MLCFLAGS) -c $<
 
-
-test$(EXE): wrap_stubs.c wrap.ml csp.cmx
-	ocamlopt -o $@ $^
-
-
+%.cmx: %.ml
+	ocamlopt -c -o $@ $<
