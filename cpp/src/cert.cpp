@@ -1,5 +1,6 @@
 #include "common.hpp"
 #include "context.hpp"
+#include "msg.hpp"
 #include "cert.hpp"
 
 void CertStore::init() {
@@ -237,15 +238,16 @@ CertFind *CertStore::find_by_name(BYTE *STRING, DWORD LENGTH) throw(CSPException
 
 CertIter::CertIter(CertStore *p) throw (CSPException)
 {
+    LOG("Started iter\n");
     parent = p;
     parent->ref();
     iter = true;
     pcert = NULL;
-    LOG("Started iter\n");
 };
 
 CertIter::~CertIter() throw (CSPException)
 {
+    LOG("delete iterator\n");
     parent->unref();
 };
 
@@ -265,13 +267,17 @@ CertFind::~CertFind() throw (CSPException)
 
 Cert *CertIter::next() throw (Stop_Iteration, CSPException)
 {
+    LOG("Next iter\n");
     if (!iter) {
         LOG("Stop iter\n");
         throw Stop_Iteration();
     }
     pcert = CertEnumCertificatesInStore(parent->hstore, pcert);
+    LOG("Next iter found cert %x\n", pcert);
     if (pcert) {
-        return new Cert(CertDuplicateCertificateContext(pcert), parent);
+        PCCERT_CONTEXT pc = CertDuplicateCertificateContext(pcert);
+        LOG("Duplicated cert into %x\n", pc);
+        return new Cert(pc, parent);
     } else {
         iter = false;
         LOG("Stop iter\n");
@@ -281,13 +287,14 @@ Cert *CertIter::next() throw (Stop_Iteration, CSPException)
 
 Cert *CertFind::next() throw (Stop_Iteration, CSPException)
 {
+    LOG("Next find\n");
     if (!iter) {
         LOG("Stopped find\n");
         throw Stop_Iteration();
     }
     pcert = CertFindCertificateInStore(parent->hstore, enctype, 0, findtype, param, pcert);
+    LOG("Next find found cert %x\n", pcert);
     if (pcert) {
-        LOG("Next find %lu %lu '%s'\n", enctype, findtype, param);
         return new Cert(CertDuplicateCertificateContext(pcert), parent);
     } else {
         iter = false;
@@ -310,8 +317,9 @@ Cert::Cert(PCCERT_CONTEXT pc, CertStore *parent) throw(CSPException) : parent(pa
 
 Cert::~Cert() throw(CSPException)
 {
+    LOG("Begin free cert %p\n", pcert);
     if (!CertFreeCertificateContext(pcert)) {
-        throw CSPException("Couldn't free certificate context");
+        //throw CSPException("Couldn't free certificate context");
     }
     if (parent) {
         parent->unref();
@@ -333,3 +341,34 @@ void Cert::remove_from_store() throw(CSPException)
         parent = NULL;
     }
 }
+
+CertStore::CertStore(CryptMsg *parent) throw(CSPException)
+{
+    init();
+    if (!parent) {
+        throw CSPException("Invalid message for cert store");
+    }
+    msg = parent;
+    msg->ref();
+    hstore = CertOpenStore(CERT_STORE_PROV_MSG, MY_ENC_TYPE, 0, 0, msg->hmsg);
+    if (!hstore) {
+        throw CSPException("Couldn't open message certificate store");
+    }
+};
+
+CertStore::~CertStore() throw(CSPException)
+{
+    LOG("Begin freeing store\n");
+    if (hstore) {
+        if (!CertCloseStore(hstore, CERT_CLOSE_STORE_CHECK_FLAG)) {
+            //throw CSPException("Couldn't properly close certificate store");
+        }
+    }
+    if (msg) {
+        msg->unref();
+    }
+    if (ctx) {
+        ctx->unref();
+    }
+    LOG("Freed store\n");
+};

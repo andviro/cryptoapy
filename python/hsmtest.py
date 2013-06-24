@@ -49,11 +49,26 @@ def test_cert_from_data():
     memstore = csp.CertStore()
     c = memstore.add_cert(newc)
     l = list(memstore.find_by_name(''))
+    for z in csp.CertStore(None, "MY"):
+        print z.name()
     c2 = c.duplicate()
     print "!!!", c
     print '!!!', len(list(memstore))
     for c in memstore:
         c.remove_from_store()
 
+
+def main():
+    my = csp.CertStore(None, "MY")
+    cert = list(my)[0]
+
+    cs = csp.CertStore()
+
+    # метод `CertStore.add_cert(c)` добавляет сертификат `c` в хранилище.
+    cs.add_cert(cert)
+
+    assert len(list(cs))
+
+
 if __name__ == "__main__":
-    test_cert_from_data()
+    main()

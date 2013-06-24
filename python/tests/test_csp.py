@@ -317,8 +317,8 @@ def test_cert_find_by_name():
 
 def test_memory_store():
     '''
-    Хранилище сертификатов может быть создано в памяти вызовом конструктора
-    `CertStore()` без параметров.
+    Test: memory store
+    Хранилище сертификатов может быть создано в памяти вызовом конструктора `CertStore()` без параметров.
 
     '''
     my = csp.CertStore(None, "MY")
@@ -626,6 +626,7 @@ def test_decrypt_data():
 
 def test_add_remove_cert():
     '''
+    Test add_cert
     Метод `CertStore.add_cert(cert) добавляет сертификат `cert` в хранилище.
     Объект сертификата может быть загружен из сообщения, взят из другого
     хранилища или получен дублированием с помощью функции `Cert.duplicate()`.

@@ -309,7 +309,7 @@ CryptMsg::~CryptMsg() throw(CSPException)
     }
 
     if(hmsg && !CryptMsgClose(hmsg)) {
-        throw CSPException("Couldn't close message");
+        //throw CSPException("Couldn't close message");
     }
 
 
@@ -372,33 +372,3 @@ Cert *SignerIter::next() throw (Stop_Iteration, CSPException)
     return res;
 };
 
-CertStore::CertStore(CryptMsg *parent) throw(CSPException)
-{
-    init();
-    if (!parent) {
-        throw CSPException("Invalid message for cert store");
-    }
-    msg = parent;
-    msg->ref();
-    hstore = CertOpenStore(CERT_STORE_PROV_MSG, MY_ENC_TYPE, 0, 0, msg->hmsg);
-    if (!hstore) {
-        throw CSPException("Couldn't open message certificate store");
-    }
-};
-
-CertStore::~CertStore() throw(CSPException)
-{
-    LOG("Begin freeing store\n");
-    if (hstore) {
-        if (!CertCloseStore(hstore, CERT_CLOSE_STORE_CHECK_FLAG)) {
-            throw CSPException("Couldn't properly close certificate store");
-        }
-    }
-    if (msg) {
-        msg->unref();
-    }
-    if (ctx) {
-        ctx->unref();
-    }
-    LOG("Freed store\n");
-};
