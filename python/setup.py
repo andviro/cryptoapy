@@ -76,7 +76,7 @@ csp = Extension('cprocsp._csp',
                 sources=[
                     'cprocsp/csp_wrap.cxx',
                 ],
-                extra_objects=['../cpp/csp.a'],
+                extra_objects=['../cpp/libcsp.a'],
                 include_dirs=include_dirs,
                 library_dirs=library_dirs,
                 libraries=libraries,

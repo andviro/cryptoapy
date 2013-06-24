@@ -2,6 +2,7 @@ doc/_*
 build
 dist
 wiki
+*.exe
 *.egg
 *.orig
 *.egg-info
@@ -11,7 +12,7 @@ csp.py
 *_wrap.cpp
 *_wrap.cxx
 .ropeproject
-*.py[cow]
+*.py[dcow]
 *.so
 *.o
 *.a

@@ -6,7 +6,7 @@ OBJECTS = $(SOURCES:.cpp=.o)
 
 CPPFLAGS += -Iinclude
 
-TARGET = csp.a
+TARGET = libcsp.a
 
 all: $(TARGET)
 
