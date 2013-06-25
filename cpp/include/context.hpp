@@ -12,7 +12,7 @@ class Crypt : public RCObj
 
     Crypt(HCRYPTPROV hp) throw(CSPException) {
         hprov = hp;
-        LOG("New ctx %lu\n", hprov);
+        LOG("Crypt::Crypt(): %p (%lx)\n", this, hprov);
     };
 public:
 

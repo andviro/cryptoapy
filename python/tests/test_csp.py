@@ -243,7 +243,7 @@ def test_extract_cert():
     return cdata
 
 
-def test_cert_from_data():
+def _test_cert_from_data():
     '''
     Конструктор `Cert(s)`, при передаче ему байтовой строки `s`, декодирует и
     загружает из нее новый экземпляр сертификата, не сохраненный в хранилище.
@@ -284,6 +284,7 @@ def test_cert_name():
 
 def test_cert_issuer():
     '''
+    Test: issuer
     Метод `Cert.issuer()` возвращает информацию о том, кто выдал сертификат,
     работает аналогично `Cert.name()`.
     '''
@@ -295,6 +296,7 @@ def test_cert_issuer():
 
 def test_cert_find_by_thumb():
     '''
+    Test: find by thumb
     Метод `CertStore.find_by_thumb(s)` перечисляет все сертификаты с
     отпечатком, равным байтовой строке `s`.
     '''
@@ -306,6 +308,7 @@ def test_cert_find_by_thumb():
 
 def test_cert_find_by_name():
     '''
+    Test: find by name
     Метод `CertStore.find_by_name(s)` перечисляет все сертификаты, в RDN которых
     так или иначе встречается байтовая строка `s`.
     '''
@@ -315,10 +318,11 @@ def test_cert_find_by_name():
     assert len(res)
 
 
-def test_memory_store():
+def _test_memory_store():
     '''
     Test: memory store
-    Хранилище сертификатов может быть создано в памяти вызовом конструктора `CertStore()` без параметров.
+    Хранилище сертификатов может быть создано в памяти вызовом конструктора
+    `CertStore()` без параметров.
 
     '''
     my = csp.CertStore(None, "MY")
@@ -348,6 +352,7 @@ def test_cert_name_not_found():
 
 def test_cert_sign_algorithm():
     '''
+    Test: sign algorithm
     Метод `Cert.sign_algorithm()` возвращает идентификатор алгоритма ЭЦП.
     '''
     cs = csp.CertStore(None, "MY")
@@ -355,8 +360,9 @@ def test_cert_sign_algorithm():
     assert cert.sign_algorithm() == '1.2.643.2.2.3'
 
 
-def _msg_decode():
+def test_msg_decode():
     '''
+    Test: msg decode
     Конструктор сообщения `CryptMsg(s[, c])` инициализируется бинарной строкой с
     PKCS7 или DER сообщением. При создании сообщение автоматически
     декодируется. Второй, необязательный, параметр `c` задает контекст
@@ -624,7 +630,7 @@ def test_decrypt_data():
     assert res == b'murblehurblewurble'
 
 
-def test_add_remove_cert():
+def _test_add_remove_cert():
     '''
     Test add_cert
     Метод `CertStore.add_cert(cert) добавляет сертификат `cert` в хранилище.

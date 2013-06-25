@@ -59,15 +59,16 @@ def test_cert_from_data():
 
 
 def main():
+    cs = csp.CertStore()
     my = csp.CertStore(None, "MY")
     cert = list(my)[0]
 
-    cs = csp.CertStore()
 
     # метод `CertStore.add_cert(c)` добавляет сертификат `c` в хранилище.
     cs.add_cert(cert)
 
-    assert len(list(cs))
+    print(list(cs))
+    print(list(my))
 
 
 if __name__ == "__main__":

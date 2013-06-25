@@ -4,7 +4,7 @@
 int RCObj::ref()
 {
     refcount ++;
-    LOG("ref %i\n", refcount);
+    LOG("    ref %p: %i\n", this, refcount);
     return refcount;
 }
 
@@ -12,10 +12,10 @@ int RCObj::unref()
 {
     refcount --;
     if (refcount <= 0) {
-        LOG("delete \n");
+        LOG("    delete %p\n", this);
         delete this;
         return 0;
     }
-    LOG("unref %i\n", refcount);
+    LOG("    unref %p: %i\n", this, refcount);
     return refcount;
 }

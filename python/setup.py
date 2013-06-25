@@ -51,7 +51,7 @@ if platform.system() == 'Windows':
         './',
         './cprocsp/',
     ]
-    libraries += ['crypt32']
+    libraries += ['crypt32', 'pthread']
 else:
     include_dirs += [
         '/opt/cprocsp/include',
@@ -60,8 +60,7 @@ else:
         '/opt/cprocsp/include/asn1data',
     ]
     library_dirs += ['/opt/cprocsp/lib/{0}'.format(arch)]
-    libraries += ['pthread',
-                  'asn1data',
+    libraries += ['asn1data',
                   'ssp',
                   'capi20']
     extra_compile_args += [

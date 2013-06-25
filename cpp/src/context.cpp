@@ -3,15 +3,16 @@
 #include "key.hpp"
 
 Crypt::~Crypt() throw(CSPException) {
+    LOG("Crypt::~Crypt(%p)\n", this);
     if (hprov) {
         bool res = CryptReleaseContext(hprov, 0);
         if (!res) {
             DWORD err = GetLastError();
-            LOG("error ctx %x\n", err);
-            //throw CSPException("Couldn't release context", err);
+            LOG("Crypt::~Crypt(%p): error %x\n", this, err);
+            throw CSPException("Couldn't release context", err);
         }
     }
-    LOG("Free ctx %lu\n", hprov);
+    LOG("    Freed ctx %p (%x)\n", this, hprov);
 }
 
 char *Crypt::name() {
@@ -35,6 +36,7 @@ Crypt *Context(char *container, DWORD type, DWORD flags, char *name) throw(CSPEx
     HCRYPTPROV hp;
     Crypt *res;
 
+    LOG("Context(%s, %u, %x, %s)\n", container, type, flags, name);
     /*printf("%x\n", flags);*/
     if (!CryptAcquireContext(&hp, container, name, type, flags)) {
         DWORD err = GetLastError();

@@ -7,12 +7,13 @@ void CertStore::init() {
     ctx = NULL;
     msg = NULL;
     hstore = 0;
-    LOG("init store\n");
+    LOG("CertStore::init %p\n", this);
 }
 
 void Cert::decode_name_blob(PCERT_NAME_BLOB pNameBlob, BYTE **s, DWORD *slen)
 {
     DWORD flags = CERT_X500_NAME_STR | CERT_NAME_STR_NO_PLUS_FLAG;
+    LOG("Cert::decode_name_blob %p\n", pNameBlob);
 
     *slen = CertNameToStr( X509_ASN_ENCODING, pNameBlob, flags, NULL, 0);
     if (*slen <= 1) {
@@ -32,22 +33,26 @@ void Cert::decode_name_blob(PCERT_NAME_BLOB pNameBlob, BYTE **s, DWORD *slen)
 
 Cert* Cert::duplicate() throw(CSPException)
 {
+    LOG("Cert::duplicate %p\n", pcert);
     PCCERT_CONTEXT pc = CertDuplicateCertificateContext(pcert);
+    LOG("    into %p\n", pc);
     return new Cert(pc, parent);
 };
 
 
 Cert::Cert(BYTE* STRING, DWORD LENGTH) throw(CSPException) : parent(NULL)
 {
+    LOG("Cert::Cert(str)\n");
     pcert = CertCreateCertificateContext(MY_ENC_TYPE, STRING, LENGTH);
+    LOG("    created cert: %p\n", pcert);
     if (!pcert) {
         throw CSPException("Couldn't decode certificate blob");
     }
-    LOG("New cert %p\n", pcert);
 };
 
 Cert *Cert::self_sign(Crypt *ctx, BYTE *STRING, DWORD LENGTH)  throw(CSPException)
 {
+    LOG("Cert::self_sign\n");
 #ifdef UNIX
     throw CSPException("Self-signed certificates are not implemented on Unix", 1);
 #else
@@ -109,6 +114,7 @@ Cert *Cert::self_sign(Crypt *ctx, BYTE *STRING, DWORD LENGTH)  throw(CSPExceptio
 
 void Cert::extract(BYTE **s, DWORD *slen) throw(CSPException)
 {
+    LOG("Cert::extract\n");
     *slen = pcert->cbCertEncoded;
     *s = (BYTE *)malloc(*slen);
     memcpy(*s, pcert->pbCertEncoded, *slen);
@@ -116,8 +122,9 @@ void Cert::extract(BYTE **s, DWORD *slen) throw(CSPException)
 
 void Cert::thumbprint(BYTE **s, DWORD *slen) throw(CSPException)
 {
+    LOG("Cert::thumbprint\n");
     if(!CertGetCertificateContextProperty(pcert, CERT_HASH_PROP_ID, NULL, slen)) {
-        LOG("Error: %p\n", pcert);
+        LOG("    Error: %p\n", pcert);
         throw CSPException("Couldn't get certificate hash size");
     }
     *s = (BYTE *)malloc(*slen);
@@ -129,42 +136,45 @@ void Cert::thumbprint(BYTE **s, DWORD *slen) throw(CSPException)
 
 char *Cert::sign_algorithm()
 {
+    LOG("Cert::sign_algorithm\n");
     return pcert->pCertInfo->SignatureAlgorithm.pszObjId;
 }
 
 void Cert::name(BYTE **s, DWORD *slen) throw(CSPException)
 {
+    LOG("Cert::name()\n");
     decode_name_blob(&pcert->pCertInfo->Subject, s, slen);
 };
 
 void Cert::issuer(BYTE **s, DWORD *slen) throw(CSPException)
 {
+    LOG("Cert::issuer()\n");
     decode_name_blob(&pcert->pCertInfo->Issuer, s, slen);
 };
 
 CertFind::CertFind(CertStore *p, DWORD et, DWORD ft, BYTE *STRING, DWORD LENGTH) : CertIter(p)
 {
+    LOG("CertFind::CertFind(%p, %u, %u, %u)\n", p, et, ft, LENGTH);
     enctype = et;
     findtype = ft;
     chb.pbData = (BYTE *)malloc(LENGTH);
     memcpy(chb.pbData, STRING, LENGTH);
     chb.cbData = LENGTH;
     param = &chb;
-    LOG("Started find %i-%i-%i\n", et, ft, LENGTH);
 };
 
 
 CertFind::CertFind(CertStore *p, DWORD et, BYTE *name) : CertIter(p)
 {
+    LOG("CertFind::CertFind(%p, %u, %s)\n", p, et, name);
     enctype = et;
     findtype = CERT_FIND_SUBJECT_STR;
     param = (CRYPT_HASH_BLOB *)strdup((const char *)name);
-
-    LOG("Started find %i-'%s'\n", et, name);
 };
 
 CertStore::CertStore() throw(CSPException)
 {
+    LOG("CertStore::CertStore()\n");
     init();
     hstore = CertOpenStore(CERT_STORE_PROV_MEMORY, MY_ENC_TYPE, 0, CERT_STORE_CREATE_NEW_FLAG,NULL);
     if (!hstore) {
@@ -174,6 +184,7 @@ CertStore::CertStore() throw(CSPException)
 
 CertStore::CertStore(Crypt *parent, LPCTSTR protocol) throw(CSPException)
 {
+    LOG("CertStore::CertStore(%p, %s)\n", parent, protocol);
     HCRYPTPROV hprov = 0;
     init();
     if (parent) {
@@ -200,6 +211,7 @@ CertStore::CertStore(Crypt *parent, LPCTSTR protocol) throw(CSPException)
 Cert *CertStore::get_cert_by_info(CERT_INFO *psi) throw(CSPException)
 {
     PCCERT_CONTEXT res;
+    LOG("CertStore::get_cert_by_info(%p)\n", psi);
     res = CertGetSubjectCertificateFromStore(hstore, MY_ENC_TYPE, psi);
     if (!res) {
         DWORD err = GetLastError();
@@ -213,6 +225,7 @@ Cert *CertStore::get_cert_by_info(CERT_INFO *psi) throw(CSPException)
 
 Cert *CertStore::add_cert(Cert *c) throw(CSPException)
 {
+    LOG("CertStore::add_cert(%p)\n", c->pcert);
     PCCERT_CONTEXT copy;
     if (c && !CertAddCertificateContextToStore(hstore, c->pcert,
             CERT_STORE_ADD_ALWAYS, &copy)) {
@@ -236,23 +249,24 @@ CertFind *CertStore::find_by_name(BYTE *STRING, DWORD LENGTH) throw(CSPException
     return new CertFind(this, X509_ASN_ENCODING | PKCS_7_ASN_ENCODING, STRING);
 };
 
-CertIter::CertIter(CertStore *p) throw (CSPException)
+CertIter::CertIter(CertStore *p) throw (CSPException) : parent(p)
 {
-    LOG("Started iter\n");
-    parent = p;
-    parent->ref();
+    LOG("CertIter::CertIter(%p)\n", p);
+    if (parent)
+        parent->ref();
     iter = true;
     pcert = NULL;
 };
 
 CertIter::~CertIter() throw (CSPException)
 {
-    LOG("delete iterator\n");
+    LOG("CertIter::~CertIter()\n");
     parent->unref();
 };
 
 CertFind::~CertFind() throw (CSPException)
 {
+    LOG("CertFind::~CertFind()\n");
     if (findtype == CERT_FIND_SUBJECT_STR) {
         if (param) {
             free(param);
@@ -267,44 +281,46 @@ CertFind::~CertFind() throw (CSPException)
 
 Cert *CertIter::next() throw (Stop_Iteration, CSPException)
 {
-    LOG("Next iter\n");
+    LOG("CertIter::next()\n");
     if (!iter) {
-        LOG("Stop iter\n");
+        LOG("    Stop iter\n");
         throw Stop_Iteration();
     }
     pcert = CertEnumCertificatesInStore(parent->hstore, pcert);
-    LOG("Next iter found cert %x\n", pcert);
+    LOG("    Found next cert %p\n", pcert);
     if (pcert) {
         PCCERT_CONTEXT pc = CertDuplicateCertificateContext(pcert);
-        LOG("Duplicated cert into %x\n", pc);
+        LOG("    Duplicated cert into %p\n", pc);
+        LOG("    parent: %p\n", parent);
         return new Cert(pc, parent);
     } else {
         iter = false;
-        LOG("Stop iter\n");
+        LOG("    Stop iter\n");
         throw Stop_Iteration();
     }
 };
 
 Cert *CertFind::next() throw (Stop_Iteration, CSPException)
 {
-    LOG("Next find\n");
+    LOG("CertFind::next()\n");
     if (!iter) {
-        LOG("Stopped find\n");
+        LOG("    Stopped find\n");
         throw Stop_Iteration();
     }
     pcert = CertFindCertificateInStore(parent->hstore, enctype, 0, findtype, param, pcert);
-    LOG("Next find found cert %x\n", pcert);
+    LOG("    Found next cert %p\n", pcert);
     if (pcert) {
         return new Cert(CertDuplicateCertificateContext(pcert), parent);
     } else {
         iter = false;
-        LOG("Stopped find\n");
+        LOG("    Stopped find\n");
         throw Stop_Iteration();
     }
 };
 
 Cert::Cert(PCCERT_CONTEXT pc, CertStore *parent) throw(CSPException) : parent(parent)
 {
+    LOG("Cert::Cert(%p, %p)\n", pc, parent);
     if (!pc) {
         throw CSPException("Invalid certificate context");
     }
@@ -312,23 +328,23 @@ Cert::Cert(PCCERT_CONTEXT pc, CertStore *parent) throw(CSPException) : parent(pa
         parent->ref();
     }
     pcert = pc;
-    LOG("New cert %p\n", pcert);
 }
 
 Cert::~Cert() throw(CSPException)
 {
-    LOG("Begin free cert %p\n", pcert);
+    LOG("Cert::~Cert(%p)\n", pcert);
     if (!CertFreeCertificateContext(pcert)) {
-        //throw CSPException("Couldn't free certificate context");
+        throw CSPException("Couldn't free certificate context");
     }
     if (parent) {
         parent->unref();
     }
-    LOG("Freed cert %p\n", pcert);
+    LOG("Deleted cert: %p\n", pcert);
 };
 
 void Cert::remove_from_store() throw(CSPException)
 {
+    LOG("Cert::remove_from_store(): cert=%p parent=%p\n", pcert, parent);
     PCCERT_CONTEXT pc = CertDuplicateCertificateContext(pcert);
     if (!pc) {
         throw CSPException("Couldn't duplicate cert context");
@@ -336,14 +352,15 @@ void Cert::remove_from_store() throw(CSPException)
     if(!CertDeleteCertificateFromStore(pc)) {
         throw CSPException("Couldn't remove certificate");
     }
-    if (parent) {
-        parent->unref();
-        parent = NULL;
-    }
+    //if (parent) {
+        //parent->unref();
+        //parent = NULL;
+    //}
 }
 
 CertStore::CertStore(CryptMsg *parent) throw(CSPException)
 {
+    LOG("CertStore::CertStore(%p)\n", parent);
     init();
     if (!parent) {
         throw CSPException("Invalid message for cert store");
@@ -358,10 +375,12 @@ CertStore::CertStore(CryptMsg *parent) throw(CSPException)
 
 CertStore::~CertStore() throw(CSPException)
 {
-    LOG("Begin freeing store\n");
+    LOG("CertStore::~CertStore(%p)\n", this);
     if (hstore) {
         if (!CertCloseStore(hstore, CERT_CLOSE_STORE_CHECK_FLAG)) {
-            //throw CSPException("Couldn't properly close certificate store");
+            DWORD err = GetLastError();
+            LOG("Error freeing store: %x\n", err);
+            throw CSPException("Couldn't properly close certificate store", err);
         }
     }
     if (msg) {
@@ -370,5 +389,5 @@ CertStore::~CertStore() throw(CSPException)
     if (ctx) {
         ctx->unref();
     }
-    LOG("Freed store\n");
+    LOG("Deleted store %p\n", this);
 };

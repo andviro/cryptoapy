@@ -12,9 +12,19 @@
 #   include <CSP_WinCrypt.h>
 #endif
 #include <WinCryptEx.h>
+#include <stdarg.h>
+
+static void debug_log(char *s, ...) {
+    va_list ap;
+    va_start(ap, s);
+    FILE *fp = fopen("debug.log", "a");
+    vfprintf(fp, s, ap);
+    va_end(ap);
+    fclose(fp);
+}
 
 #define MY_ENC_TYPE (X509_ASN_ENCODING | PKCS_7_ASN_ENCODING)
-#define LOG printf
-//#define LOG(...)
+//#define LOG debug_log
+#define LOG(...)
 
 #endif

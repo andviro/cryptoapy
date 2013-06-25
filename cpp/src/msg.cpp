@@ -288,7 +288,7 @@ CryptMsg::CryptMsg(BYTE *STRING, DWORD LENGTH, Crypt *ctx) throw(CSPException)
 
 CryptMsg::~CryptMsg() throw(CSPException)
 {
-    LOG("close msg\n");
+    LOG("CryptMsg::~CryptMsg(%p)\n", this);
     if (cprov) {
         cprov->unref();
     }
