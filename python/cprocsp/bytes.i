@@ -42,7 +42,7 @@
     %#endif
         }
         %append_output(res);
-        free(*$1);
+        /*free(*$1);*/
     } else {
         %append_output(SWIG_Py_Void());
     }

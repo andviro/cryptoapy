@@ -261,7 +261,8 @@ CertIter::CertIter(CertStore *p) throw (CSPException) : parent(p)
 CertIter::~CertIter() throw (CSPException)
 {
     LOG("CertIter::~CertIter()\n");
-    parent->unref();
+    if (parent)
+        parent->unref();
 };
 
 CertFind::~CertFind() throw (CSPException)
@@ -269,10 +270,12 @@ CertFind::~CertFind() throw (CSPException)
     LOG("CertFind::~CertFind()\n");
     if (findtype == CERT_FIND_SUBJECT_STR) {
         if (param) {
+            LOG("hohoho\n");
             free(param);
         }
     } else {
         if (chb.pbData) {
+            LOG("hahaha\n");
             free(chb.pbData);
         }
     }
@@ -391,3 +394,63 @@ CertStore::~CertStore() throw(CSPException)
     }
     LOG("Deleted store %p\n", this);
 };
+
+
+void Cert::request(Crypt *ctx, BYTE *STRING, DWORD LENGTH,
+        BYTE **s, DWORD *slen, DWORD keyspec) throw(CSPException)
+{
+    DWORD            cbNameEncoded;
+    BYTE*            pbNameEncoded = NULL; 
+    CERT_REQUEST_INFO   CertReqInfo;
+    CertStrToName(    
+        MY_ENC_TYPE,
+        (LPCSTR) STRING,
+        //CERT_OID_NAME_STR | CERT_NAME_STR_REVERSE_FLAG,
+        CERT_OID_NAME_STR,
+        NULL,
+        NULL,
+        &cbNameEncoded,
+        NULL );
+    pbNameEncoded = (BYTE*) malloc( cbNameEncoded );
+    CertStrToName( 
+        MY_ENC_TYPE,
+        (LPCSTR) STRING,
+        //CERT_OID_NAME_STR | CERT_NAME_STR_REVERSE_FLAG,
+        CERT_OID_NAME_STR,
+        NULL,
+        pbNameEncoded,
+        &cbNameEncoded,
+        NULL );
+    CertReqInfo.Subject.cbData = cbNameEncoded;
+    CertReqInfo.Subject.pbData = pbNameEncoded;
+    CertReqInfo.cAttribute = 0;
+    CertReqInfo.rgAttribute = NULL;
+    CertReqInfo.dwVersion = CERT_REQUEST_V1;
+
+    DWORD cbPublicKeyInfo;
+    CryptExportPublicKeyInfo( ctx->hprov, keyspec, 
+        MY_ENC_TYPE, NULL, &cbPublicKeyInfo );
+
+    CERT_PUBLIC_KEY_INFO *pbPublicKeyInfo = (CERT_PUBLIC_KEY_INFO*) LocalAlloc( LPTR, cbPublicKeyInfo );
+    CryptExportPublicKeyInfo( ctx->hprov, keyspec, 
+        MY_ENC_TYPE, pbPublicKeyInfo, &cbPublicKeyInfo );
+
+    CertReqInfo.SubjectPublicKeyInfo = *pbPublicKeyInfo;
+
+    CRYPT_ALGORITHM_IDENTIFIER SigAlg;
+    ZeroMemory(&SigAlg, sizeof(SigAlg));
+    //SigAlg.pszObjId = szOID_OIWSEC_sha1;
+    SigAlg.pszObjId = (char *)szOID_CP_GOST_R3411;
+
+    CryptSignAndEncodeCertificate( 
+        ctx->hprov, AT_KEYEXCHANGE, MY_ENC_TYPE,
+        X509_CERT_REQUEST_TO_BE_SIGNED, &CertReqInfo, 
+        &SigAlg, NULL, NULL, slen );
+
+    *s = (BYTE *)malloc(*slen);
+
+    CryptSignAndEncodeCertificate( 
+        ctx->hprov, AT_KEYEXCHANGE, MY_ENC_TYPE,
+        X509_CERT_REQUEST_TO_BE_SIGNED, &CertReqInfo, 
+        &SigAlg, NULL, *s, slen );
+}

@@ -29,6 +29,8 @@ public:
 
     static Cert *self_sign(Crypt *ctx, BYTE *STRING, DWORD LENGTH)  throw(CSPException);
 
+    static void request(Crypt *ctx, BYTE *STRING, DWORD LENGTH, BYTE **s, DWORD *slen, DWORD keyspec=AT_SIGNATURE) throw(CSPException);
+
     ~Cert() throw(CSPException);
 
     void extract(BYTE **s, DWORD *slen) throw(CSPException);
@@ -107,6 +109,7 @@ public:
     Cert *get_cert_by_info(CERT_INFO *psi) throw(CSPException);
 
     Cert *add_cert(Cert *c) throw(CSPException);
+
 
     friend class CryptMsg;
     friend class CertIter;
