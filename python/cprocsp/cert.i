@@ -5,10 +5,10 @@
 %newobject Cert::duplicate;
 /*%newobject Cert::extract;*/
 %newobject Cert::self_sign;
-/*%newobject CertStore::__iter__;*/
+%newobject CertStore::__iter__;
 %newobject CertStore::add_cert;
-/*%newobject CertStore::find_by_thumb;*/
-/*%newobject CertStore::find_by_name;*/
+%newobject CertStore::find_by_thumb;
+%newobject CertStore::find_by_name;
 %newobject CertStore::get_cert_by_info;
 %newobject CertIter::next;
 %newobject CertFind::next;
