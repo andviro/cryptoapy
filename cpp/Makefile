@@ -6,6 +6,10 @@ OBJECTS = $(SOURCES:.cpp=.o)
 
 CPPFLAGS += -Iinclude
 
+ifdef DEBUG
+	CPPFLAGS += -DDEBUG_LOG
+endif
+
 TARGET = libcsp.a
 
 all: $(TARGET)

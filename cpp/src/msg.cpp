@@ -213,7 +213,6 @@ void CryptMsg::sign_data(BYTE *STRING, DWORD LENGTH, BYTE **s, DWORD *slen, bool
                 (DWORD)LENGTH);                /* Size of content*/
 
     if (! *slen) {
-        free((void *)*s);
         throw CSPException("Getting cbEncodedBlob length failed.");
     }
 

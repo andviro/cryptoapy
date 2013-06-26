@@ -3,7 +3,6 @@
 %newobject Cert::name;
 %newobject Cert::issuer;
 %newobject Cert::thumbprint;
-%newobject Cert::sign_algorithm;
 %newobject Cert::duplicate;
 %newobject Cert::extract;
 %newobject Cert::self_sign;

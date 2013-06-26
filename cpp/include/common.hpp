@@ -16,7 +16,10 @@
 
 #define MY_ENC_TYPE (X509_ASN_ENCODING | PKCS_7_ASN_ENCODING)
 void debug_log(char *s, ...);
-#define LOG debug_log
-//#define LOG(...)
+#ifdef DEBUG_LOG
+#    define LOG debug_log
+#else
+#    define LOG(...)
+#endif
 
 #endif

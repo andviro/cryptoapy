@@ -22,10 +22,10 @@ char *Crypt::name() {
         throw CSPException("Couldn't determine container name length");
     }
 
-    s=(char *)malloc((slen + 1)*sizeof(CHAR));
+    s=new char[slen + 1];
 
     if(!CryptGetProvParam( hprov, PP_CONTAINER, (BYTE *)s, &slen, 0)) {
-        free(s);
+        delete[] s;
         throw CSPException("Couldn't get container name");
     }
     return s;
