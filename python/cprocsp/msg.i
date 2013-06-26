@@ -4,6 +4,13 @@
 %newobject CryptMsg::signer_certs;
 %newobject SignerIter::next;
 
+%feature("python:slot", "tp_iter", functype="getiterfunc") SignerIter::__iter__;
+%feature("python:slot", "tp_iternext", functype="iternextfunc") SignerIter::next;
+%feature("ref") CryptMsg "$this->ref();"
+%feature("unref") CryptMsg "$this->unref();"
+
+%include "msg.hpp"
+
 typedef struct _CERT_INFO {
     DWORD                       dwVersion;
     CRYPT_INTEGER_BLOB          SerialNumber;
@@ -24,9 +31,3 @@ typedef struct _CERT_INFO {
         free($self);
     }
 }
-%feature("python:slot", "tp_iter", functype="getiterfunc") SignerIter::__iter__;
-%feature("python:slot", "tp_iternext", functype="iternextfunc") SignerIter::next;
-%feature("ref") CryptMsg "$this->ref();"
-%feature("unref") CryptMsg "$this->unref();"
-
-%include "msg.hpp"

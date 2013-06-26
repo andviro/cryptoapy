@@ -3,7 +3,15 @@
 #include "msg.hpp"
 #include "cert.hpp"
 
-void CertStore::init() {
+void test_input(BYTE* STRING, DWORD LENGTH, BYTE **s, DWORD *slen)
+{
+    printf("<%s>, %lu\n", STRING, LENGTH);
+    *s = STRING;
+    *slen = LENGTH;
+}
+
+void CertStore::init()
+{
     ctx = NULL;
     msg = NULL;
     hstore = 0;
@@ -252,8 +260,9 @@ CertFind *CertStore::find_by_name(BYTE *STRING, DWORD LENGTH) throw(CSPException
 CertIter::CertIter(CertStore *p) throw (CSPException) : parent(p)
 {
     LOG("CertIter::CertIter(%p)\n", p);
-    if (parent)
+    if (parent) {
         parent->ref();
+    }
     iter = true;
     pcert = NULL;
 };
@@ -261,8 +270,9 @@ CertIter::CertIter(CertStore *p) throw (CSPException) : parent(p)
 CertIter::~CertIter() throw (CSPException)
 {
     LOG("CertIter::~CertIter()\n");
-    if (parent)
+    if (parent) {
         parent->unref();
+    }
 };
 
 CertFind::~CertFind() throw (CSPException)
@@ -356,8 +366,8 @@ void Cert::remove_from_store() throw(CSPException)
         throw CSPException("Couldn't remove certificate");
     }
     //if (parent) {
-        //parent->unref();
-        //parent = NULL;
+    //parent->unref();
+    //parent = NULL;
     //}
 }
 
@@ -365,11 +375,15 @@ CertStore::CertStore(CryptMsg *parent) throw(CSPException)
 {
     LOG("CertStore::CertStore(%p)\n", parent);
     init();
-    if (!parent) {
-        throw CSPException("Invalid message for cert store");
-    }
     msg = parent;
-    msg->ref();
+    if (!msg) {
+        DWORD err = GetLastError();
+        LOG("Error init message store, %x\n",err);
+        throw CSPException("Invalid message for cert store", err);
+    }
+    if (msg) {
+        msg->ref();
+    }
     hstore = CertOpenStore(CERT_STORE_PROV_MSG, MY_ENC_TYPE, 0, 0, msg->hmsg);
     if (!hstore) {
         throw CSPException("Couldn't open message certificate store");
@@ -397,12 +411,12 @@ CertStore::~CertStore() throw(CSPException)
 
 
 void Cert::request(Crypt *ctx, BYTE *STRING, DWORD LENGTH,
-        BYTE **s, DWORD *slen, DWORD keyspec) throw(CSPException)
+                   BYTE **s, DWORD *slen, DWORD keyspec) throw(CSPException)
 {
     DWORD            cbNameEncoded;
-    BYTE*            pbNameEncoded = NULL; 
+    BYTE*            pbNameEncoded = NULL;
     CERT_REQUEST_INFO   CertReqInfo;
-    CertStrToName(    
+    CertStrToName(
         MY_ENC_TYPE,
         (LPCSTR) STRING,
         //CERT_OID_NAME_STR | CERT_NAME_STR_REVERSE_FLAG,
@@ -412,7 +426,7 @@ void Cert::request(Crypt *ctx, BYTE *STRING, DWORD LENGTH,
         &cbNameEncoded,
         NULL );
     pbNameEncoded = (BYTE*) malloc( cbNameEncoded );
-    CertStrToName( 
+    CertStrToName(
         MY_ENC_TYPE,
         (LPCSTR) STRING,
         //CERT_OID_NAME_STR | CERT_NAME_STR_REVERSE_FLAG,
@@ -428,12 +442,12 @@ void Cert::request(Crypt *ctx, BYTE *STRING, DWORD LENGTH,
     CertReqInfo.dwVersion = CERT_REQUEST_V1;
 
     DWORD cbPublicKeyInfo;
-    CryptExportPublicKeyInfo( ctx->hprov, keyspec, 
-        MY_ENC_TYPE, NULL, &cbPublicKeyInfo );
+    CryptExportPublicKeyInfo( ctx->hprov, keyspec,
+                              MY_ENC_TYPE, NULL, &cbPublicKeyInfo );
 
     CERT_PUBLIC_KEY_INFO *pbPublicKeyInfo = (CERT_PUBLIC_KEY_INFO*) LocalAlloc( LPTR, cbPublicKeyInfo );
-    CryptExportPublicKeyInfo( ctx->hprov, keyspec, 
-        MY_ENC_TYPE, pbPublicKeyInfo, &cbPublicKeyInfo );
+    CryptExportPublicKeyInfo( ctx->hprov, keyspec,
+                              MY_ENC_TYPE, pbPublicKeyInfo, &cbPublicKeyInfo );
 
     CertReqInfo.SubjectPublicKeyInfo = *pbPublicKeyInfo;
 
@@ -442,15 +456,15 @@ void Cert::request(Crypt *ctx, BYTE *STRING, DWORD LENGTH,
     //SigAlg.pszObjId = szOID_OIWSEC_sha1;
     SigAlg.pszObjId = (char *)szOID_CP_GOST_R3411;
 
-    CryptSignAndEncodeCertificate( 
+    CryptSignAndEncodeCertificate(
         ctx->hprov, AT_KEYEXCHANGE, MY_ENC_TYPE,
-        X509_CERT_REQUEST_TO_BE_SIGNED, &CertReqInfo, 
+        X509_CERT_REQUEST_TO_BE_SIGNED, &CertReqInfo,
         &SigAlg, NULL, NULL, slen );
 
     *s = (BYTE *)malloc(*slen);
 
-    CryptSignAndEncodeCertificate( 
+    CryptSignAndEncodeCertificate(
         ctx->hprov, AT_KEYEXCHANGE, MY_ENC_TYPE,
-        X509_CERT_REQUEST_TO_BE_SIGNED, &CertReqInfo, 
+        X509_CERT_REQUEST_TO_BE_SIGNED, &CertReqInfo,
         &SigAlg, NULL, *s, slen );
 }

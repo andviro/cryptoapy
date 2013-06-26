@@ -1,37 +1,36 @@
 include ../Makefile.config
 
 SOURCES = csp_stubs.cpp.c
-MLSOURCES = 
+MLSOURCES = csp.ml
 
 OBJECTS = $(SOURCES:.c=.o)
 MLOBJECTS = $(MLSOURCES:.ml=.cmx)
 
-MLCFLAGS = $(foreach flg, $(CPPFLAGS), -ccopt $(flg))
-MLCFLAGS += -ccopt -I../cpp/include 
+CPPFLAGS += -I../cpp/include 
+LDFLAGS := -L../cpp $(LDFLAGS)
+LDLIBS := -lcsp $(LDLIBS)
 
-MLLDFLAGS = $(foreach flg, $(LDFLAGS), -ccopt $(flg))
-MLLDLIBS = $(foreach flg, $(LDLIBS), -cclib $(flg))
+MLCFLAGS = $(addprefix -ccopt ,$(CPPFLAGS))
+MLLDFLAGS = $(addprefix -ccopt ,$(LDFLAGS))
+MLLDLIBS = $(addprefix -cclib ,$(LDLIBS))
 
-MLLDFLAGS += -ccopt -L../cpp
-MLLDLIBS += -cclib -lcsp
 
 TARGET = ocamlcsp.cmxa
 
 all: $(TARGET)
-	ocamlopt $(TARGET) test.ml -o test$(EXE)
+	ocamlopt -verbose -cc g++ $(TARGET) test.ml -o test$(EXE)
 
 clean::
 	rm -f $(MLOBJECTS) $(OBJECTS) $(TARGET) $(CLIBTARGET)
 
 $(TARGET): $(MLOBJECTS) $(OBJECTS)
-	ocamlopt -a -o $@ $(MLOBJECTS) $(MLLDLIBS) $(MLLDFLAGS) 
-	$(AR) r $(@:.cmxa=.a) $(OBJECTS)
+	ocamlopt -verbose -cc g++ -a -o $@ $(MLOBJECTS) $(OBJECTS) $(MLLDLIBS) $(MLLDFLAGS) 
 
 $(CLIBTARGET): $(OBJECTS)
 	$(AR) r $@ $^
 
 %.o: %.c
-	ocamlopt -ccopt -xc++ $(MLCFLAGS) -c $<
+	ocamlopt -verbose -cc g++ $(MLCFLAGS) -c $<
 
 %.cmx: %.ml
-	ocamlopt -c -o $@ $<
+	ocamlopt -verbose -cc g++ -c -o $@ $<

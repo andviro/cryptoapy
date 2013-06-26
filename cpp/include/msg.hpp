@@ -31,7 +31,7 @@ public:
     // данные добавляются потом методом .update
     CryptMsg(Crypt *ctx=NULL) throw(CSPException);
 
-    ~CryptMsg() throw(CSPException);
+    virtual ~CryptMsg() throw(CSPException);
 
     CERT_INFO *get_nth_signer_info(DWORD idx);
 

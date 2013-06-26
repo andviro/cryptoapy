@@ -20,3 +20,9 @@ bool Signature::verify_data(BYTE *STRING, DWORD LENGTH, int n) throw(CSPExceptio
     return CryptVerifyDetachedMessageSignature(&msg_para, n, raw_msg,
             raw_size, 1, (const BYTE **)&STRING, (DWORD *)&LENGTH, NULL);
 }
+
+Signature::~Signature() throw(CSPException) {
+    if (raw_msg) {
+        free(raw_msg);
+    }
+}

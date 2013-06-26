@@ -1,15 +1,14 @@
 #include "common.hpp"
 #include "msg.hpp"
 
-bool CryptMsg::verify_cert(Cert *c) throw(CSPException) {
+bool CryptMsg::verify_cert(Cert *c) throw(CSPException)
+{
     return CryptMsgControl(hmsg, 0, CMSG_CTRL_VERIFY_SIGNATURE, c->pcert->pCertInfo);
 }
 
 void CryptMsg::msg_init(Crypt *ctx) throw(CSPException)
 {
-    LOG("init msg\n");
     hmsg = NULL;
-    certs = NULL;
     num_signers = 0;
     release_flags = NULL;
     type = 0;
@@ -30,6 +29,7 @@ void CryptMsg::msg_init(Crypt *ctx) throw(CSPException)
     num_recipients = 0;
     encrypt_para = NULL;
     sign_info = NULL;
+    LOG("    initialized msg: %p\n", this);
 
 }
 
@@ -257,6 +257,7 @@ CryptMsg::CryptMsg(BYTE *STRING, DWORD LENGTH, Crypt *ctx) throw(CSPException)
 {
     DWORD temp = sizeof(DWORD);
 
+    LOG("CryptMsg::CryptMsg(%p, %lu, %p)\n", STRING, LENGTH, ctx);
     msg_init(ctx);
 
     hmsg = CryptMsgOpenToDecode(MY_ENC_TYPE, 0, 0, ctx? ctx->hprov : 0, NULL, NULL);
@@ -271,11 +272,10 @@ CryptMsg::CryptMsg(BYTE *STRING, DWORD LENGTH, Crypt *ctx) throw(CSPException)
         throw CSPException("Couldn't get message type");
     }
 
-    certs = new CertStore(this);
-
     if (!CryptMsgGetParam(hmsg, CMSG_SIGNER_COUNT_PARAM, 0, &num_signers, &temp)) {
         throw CSPException("Couldn't get message signer count");
     }
+    LOG("    constructed msg: %p\n", this);
 
     /*temp = sizeof(cai);*/
     /*if (!CryptMsgGetParam(hmsg, CMSG_HASH_ALGORITHM_PARAM, 0, &cai, &temp)) {*/
@@ -292,6 +292,12 @@ CryptMsg::~CryptMsg() throw(CSPException)
     if (cprov) {
         cprov->unref();
     }
+    if (recipient_certs) {
+        free(recipient_certs);
+    }
+    if (encrypt_para) {
+        free(encrypt_para);
+    }
     if (sign_info) {
         if(sign_info->rgSigners) {
             for (unsigned i=0; i<sign_info->cSigners; i++) {
@@ -307,12 +313,9 @@ CryptMsg::~CryptMsg() throw(CSPException)
             free(release_flags);
         }
     }
-
     if(hmsg && !CryptMsgClose(hmsg)) {
-        //throw CSPException("Couldn't close message");
+        throw CSPException("Couldn't close message");
     }
-
-
 };
 
 CERT_INFO *CryptMsg::get_nth_signer_info(DWORD idx)
@@ -342,9 +345,8 @@ SignerIter *SignerIter::__iter__()
     return this;
 };
 
-SignerIter::SignerIter(CryptMsg* o)
+SignerIter::SignerIter(CryptMsg* o) : owner(o)
 {
-    owner = o;
     if (owner) {
         owner->ref();
     }
@@ -362,7 +364,7 @@ Cert *SignerIter::next() throw (Stop_Iteration, CSPException)
 
     psi = owner->get_nth_signer_info(idx);
     try {
-        res = owner->certs->get_cert_by_info(psi);
+        res = CertStore(owner).get_cert_by_info(psi);
     } catch (...) {
         free(psi);
         throw;

@@ -1,9 +1,11 @@
 /* vim: ft=swig
 */
-/*%newobject Cert::name;*/
-/*%newobject Cert::sign_algorithm;*/
+%newobject Cert::name;
+%newobject Cert::issuer;
+%newobject Cert::thumbprint;
+%newobject Cert::sign_algorithm;
 %newobject Cert::duplicate;
-/*%newobject Cert::extract;*/
+%newobject Cert::extract;
 %newobject Cert::self_sign;
 %newobject CertStore::__iter__;
 %newobject CertStore::add_cert;

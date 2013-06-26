@@ -4,6 +4,8 @@
 #include "except.hpp"
 #include "rcobj.hpp"
 
+void test_input(BYTE* STRING, DWORD LENGTH, BYTE **s, DWORD *slen);
+
 class CertStore;
 class Crypt;
 class CryptMsg;

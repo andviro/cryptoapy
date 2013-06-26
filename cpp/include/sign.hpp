@@ -21,11 +21,7 @@ public:
         CryptMsg::sign_data(STRING, LENGTH, s, slen, detach);
     }
 
-    ~Signature() throw(CSPException) {
-        if (raw_msg) {
-            free(raw_msg);
-        }
-    }
+    virtual ~Signature() throw(CSPException);
 };
 
 #endif

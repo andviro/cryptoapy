@@ -26,7 +26,6 @@
 
 %typemap(freearg, match="in") (BYTE **s, DWORD *slen) "";
 
-
 %typemap(argout, noblock=1) (BYTE **s, DWORD *slen) 
 (PyObject *res = NULL) { 
     if (*$1) {
@@ -42,7 +41,7 @@
     %#endif
         }
         %append_output(res);
-        /*free(*$1);*/
+        free(*$1);
     } else {
         %append_output(SWIG_Py_Void());
     }
