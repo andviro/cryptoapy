@@ -29,6 +29,7 @@ public:
     friend class Cert;
     friend class CryptMsg;
     friend class CertStore;
+    friend class CertRequest;
     friend Crypt *Context(char *, DWORD , DWORD, char*) throw (CSPException);
 };
 

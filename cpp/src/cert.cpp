@@ -3,13 +3,6 @@
 #include "msg.hpp"
 #include "cert.hpp"
 
-void test_input(BYTE* STRING, DWORD LENGTH, BYTE **s, DWORD *slen)
-{
-    printf("<%s>, %lu\n", STRING, LENGTH);
-    *s = STRING;
-    *slen = LENGTH;
-}
-
 void CertStore::init()
 {
     ctx = NULL;
@@ -45,7 +38,7 @@ Cert* Cert::duplicate() throw(CSPException)
     PCCERT_CONTEXT pc = CertDuplicateCertificateContext(pcert);
     LOG("    into %p\n", pc);
     return new Cert(pc, parent);
-};
+}
 
 
 Cert::Cert(BYTE* STRING, DWORD LENGTH) throw(CSPException) : parent(NULL)
@@ -56,7 +49,7 @@ Cert::Cert(BYTE* STRING, DWORD LENGTH) throw(CSPException) : parent(NULL)
     if (!pcert) {
         throw CSPException("Couldn't decode certificate blob");
     }
-};
+}
 
 Cert *Cert::self_sign(Crypt *ctx, BYTE *STRING, DWORD LENGTH)  throw(CSPException)
 {
@@ -140,7 +133,7 @@ void Cert::thumbprint(BYTE **s, DWORD *slen) throw(CSPException)
         free((void *)*s);
         throw CSPException("Couldn't get certificate thumbprint");
     }
-};
+}
 
 char *Cert::sign_algorithm()
 {
@@ -152,13 +145,13 @@ void Cert::name(BYTE **s, DWORD *slen) throw(CSPException)
 {
     LOG("Cert::name()\n");
     decode_name_blob(&pcert->pCertInfo->Subject, s, slen);
-};
+}
 
 void Cert::issuer(BYTE **s, DWORD *slen) throw(CSPException)
 {
     LOG("Cert::issuer()\n");
     decode_name_blob(&pcert->pCertInfo->Issuer, s, slen);
-};
+}
 
 CertFind::CertFind(CertStore *p, DWORD et, DWORD ft, BYTE *STRING, DWORD LENGTH) : CertIter(p)
 {
@@ -169,7 +162,7 @@ CertFind::CertFind(CertStore *p, DWORD et, DWORD ft, BYTE *STRING, DWORD LENGTH)
     memcpy(chb.pbData, STRING, LENGTH);
     chb.cbData = LENGTH;
     param = &chb;
-};
+}
 
 
 CertFind::CertFind(CertStore *p, DWORD et, BYTE *name) : CertIter(p)
@@ -178,7 +171,7 @@ CertFind::CertFind(CertStore *p, DWORD et, BYTE *name) : CertIter(p)
     enctype = et;
     findtype = CERT_FIND_SUBJECT_STR;
     param = (CRYPT_HASH_BLOB *)strdup((const char *)name);
-};
+}
 
 CertStore::CertStore() throw(CSPException)
 {
@@ -188,7 +181,7 @@ CertStore::CertStore() throw(CSPException)
     if (!hstore) {
         throw CSPException("Couldn't create memory store");
     }
-};
+}
 
 CertStore::CertStore(Crypt *parent, LPCTSTR protocol) throw(CSPException)
 {
@@ -214,7 +207,7 @@ CertStore::CertStore(Crypt *parent, LPCTSTR protocol) throw(CSPException)
     if (!hstore) {
         throw CSPException("Couldn't open certificate store");
     }
-};
+}
 
 Cert *CertStore::get_cert_by_info(CERT_INFO *psi) throw(CSPException)
 {
@@ -229,7 +222,7 @@ Cert *CertStore::get_cert_by_info(CERT_INFO *psi) throw(CSPException)
         throw CSPException("Error gettin subject certificate from store", err);
     }
     return new Cert(res, this);
-};
+}
 
 Cert *CertStore::add_cert(Cert *c) throw(CSPException)
 {
@@ -240,22 +233,22 @@ Cert *CertStore::add_cert(Cert *c) throw(CSPException)
         throw CSPException("Couldn't add cert to store");
     }
     return new Cert(copy, this);
-};
+}
 
 CertIter *CertStore::__iter__() throw(CSPException)
 {
     return new CertIter(this);
-};
+}
 
 CertFind *CertStore::find_by_thumb(BYTE *STRING, DWORD LENGTH) throw(CSPException)
 {
     return new CertFind(this, X509_ASN_ENCODING | PKCS_7_ASN_ENCODING, CERT_FIND_HASH, STRING, LENGTH);
-};
+}
 
 CertFind *CertStore::find_by_name(BYTE *STRING, DWORD LENGTH) throw(CSPException)
 {
     return new CertFind(this, X509_ASN_ENCODING | PKCS_7_ASN_ENCODING, STRING);
-};
+}
 
 CertIter::CertIter(CertStore *p) throw (CSPException) : parent(p)
 {
@@ -265,7 +258,7 @@ CertIter::CertIter(CertStore *p) throw (CSPException) : parent(p)
     }
     iter = true;
     pcert = NULL;
-};
+}
 
 CertIter::~CertIter() throw (CSPException)
 {
@@ -273,7 +266,7 @@ CertIter::~CertIter() throw (CSPException)
     if (parent) {
         parent->unref();
     }
-};
+}
 
 CertFind::~CertFind() throw (CSPException)
 {
@@ -289,7 +282,7 @@ CertFind::~CertFind() throw (CSPException)
             free(chb.pbData);
         }
     }
-};
+}
 
 
 Cert *CertIter::next() throw (Stop_Iteration, CSPException)
@@ -311,7 +304,7 @@ Cert *CertIter::next() throw (Stop_Iteration, CSPException)
         LOG("    Stop iter\n");
         throw Stop_Iteration();
     }
-};
+}
 
 Cert *CertFind::next() throw (Stop_Iteration, CSPException)
 {
@@ -329,7 +322,7 @@ Cert *CertFind::next() throw (Stop_Iteration, CSPException)
         LOG("    Stopped find\n");
         throw Stop_Iteration();
     }
-};
+}
 
 Cert::Cert(PCCERT_CONTEXT pc, CertStore *parent) throw(CSPException) : parent(parent)
 {
@@ -353,7 +346,7 @@ Cert::~Cert() throw(CSPException)
         parent->unref();
     }
     LOG("Deleted cert: %p\n", pcert);
-};
+}
 
 void Cert::remove_from_store() throw(CSPException)
 {
@@ -388,7 +381,7 @@ CertStore::CertStore(CryptMsg *parent) throw(CSPException)
     if (!hstore) {
         throw CSPException("Couldn't open message certificate store");
     }
-};
+}
 
 CertStore::~CertStore() throw(CSPException)
 {
@@ -407,64 +400,4 @@ CertStore::~CertStore() throw(CSPException)
         ctx->unref();
     }
     LOG("Deleted store %p\n", this);
-};
-
-
-void Cert::request(Crypt *ctx, BYTE *STRING, DWORD LENGTH,
-                   BYTE **s, DWORD *slen, DWORD keyspec) throw(CSPException)
-{
-    DWORD            cbNameEncoded;
-    BYTE*            pbNameEncoded = NULL;
-    CERT_REQUEST_INFO   CertReqInfo;
-    CertStrToName(
-        MY_ENC_TYPE,
-        (LPCSTR) STRING,
-        //CERT_OID_NAME_STR | CERT_NAME_STR_REVERSE_FLAG,
-        CERT_OID_NAME_STR,
-        NULL,
-        NULL,
-        &cbNameEncoded,
-        NULL );
-    pbNameEncoded = (BYTE*) malloc( cbNameEncoded );
-    CertStrToName(
-        MY_ENC_TYPE,
-        (LPCSTR) STRING,
-        //CERT_OID_NAME_STR | CERT_NAME_STR_REVERSE_FLAG,
-        CERT_OID_NAME_STR,
-        NULL,
-        pbNameEncoded,
-        &cbNameEncoded,
-        NULL );
-    CertReqInfo.Subject.cbData = cbNameEncoded;
-    CertReqInfo.Subject.pbData = pbNameEncoded;
-    CertReqInfo.cAttribute = 0;
-    CertReqInfo.rgAttribute = NULL;
-    CertReqInfo.dwVersion = CERT_REQUEST_V1;
-
-    DWORD cbPublicKeyInfo;
-    CryptExportPublicKeyInfo( ctx->hprov, keyspec,
-                              MY_ENC_TYPE, NULL, &cbPublicKeyInfo );
-
-    CERT_PUBLIC_KEY_INFO *pbPublicKeyInfo = (CERT_PUBLIC_KEY_INFO*) LocalAlloc( LPTR, cbPublicKeyInfo );
-    CryptExportPublicKeyInfo( ctx->hprov, keyspec,
-                              MY_ENC_TYPE, pbPublicKeyInfo, &cbPublicKeyInfo );
-
-    CertReqInfo.SubjectPublicKeyInfo = *pbPublicKeyInfo;
-
-    CRYPT_ALGORITHM_IDENTIFIER SigAlg;
-    ZeroMemory(&SigAlg, sizeof(SigAlg));
-    //SigAlg.pszObjId = szOID_OIWSEC_sha1;
-    SigAlg.pszObjId = (char *)szOID_CP_GOST_R3411;
-
-    CryptSignAndEncodeCertificate(
-        ctx->hprov, AT_KEYEXCHANGE, MY_ENC_TYPE,
-        X509_CERT_REQUEST_TO_BE_SIGNED, &CertReqInfo,
-        &SigAlg, NULL, NULL, slen );
-
-    *s = (BYTE *)malloc(*slen);
-
-    CryptSignAndEncodeCertificate(
-        ctx->hprov, AT_KEYEXCHANGE, MY_ENC_TYPE,
-        X509_CERT_REQUEST_TO_BE_SIGNED, &CertReqInfo,
-        &SigAlg, NULL, *s, slen );
 }

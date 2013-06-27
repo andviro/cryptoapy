@@ -52,8 +52,10 @@ def main():
         else:
             print 'sign', n, 'failed!'
 
-    req = csp.Cert.request(ctx, b'CN=test3')
-    open('request.req', 'wb').write(b64encode(req))
+    req = csp.CertRequest(ctx, b'CN=test3')
+    data = req.get_data();
+    print len(data)
+    open('request.req', 'wb').write(b64encode(req.get_data()))
 
 if __name__ == "__main__":
     main()

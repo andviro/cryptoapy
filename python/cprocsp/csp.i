@@ -78,6 +78,7 @@
 #include "msg.hpp"
 #include "rcobj.hpp"
 #include "sign.hpp"
+#include "request.hpp"
 %}
 
 %include "wintypes.i"
@@ -90,3 +91,4 @@
 %include "cert.i"
 %include "msg.i"
 %include "sign.i"
+%include "request.i"

@@ -4,8 +4,6 @@
 #include "except.hpp"
 #include "rcobj.hpp"
 
-void test_input(BYTE* STRING, DWORD LENGTH, BYTE **s, DWORD *slen);
-
 class CertStore;
 class Crypt;
 class CryptMsg;
@@ -30,8 +28,6 @@ public:
     Cert(BYTE* STRING, DWORD LENGTH) throw(CSPException);
 
     static Cert *self_sign(Crypt *ctx, BYTE *STRING, DWORD LENGTH)  throw(CSPException);
-
-    static void request(Crypt *ctx, BYTE *STRING, DWORD LENGTH, BYTE **s, DWORD *slen, DWORD keyspec=AT_SIGNATURE) throw(CSPException);
 
     ~Cert() throw(CSPException);
 

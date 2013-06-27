@@ -45,7 +45,7 @@ Crypt *Context(char *container, DWORD type, DWORD flags, char *name) throw(CSPEx
         case NTE_BAD_KEYSET_PARAM:
             return NULL;
         default:
-            throw CSPException("Couldn't acquire context");
+            throw CSPException("Couldn't acquire context", err);
         }
     }
     if (flags & CRYPT_DELETEKEYSET) {
