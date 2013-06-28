@@ -402,17 +402,6 @@ CertStore::~CertStore() throw(CSPException)
     LOG("Deleted store %p\n", this);
 }
 
-static void cleanup_ckpi(CRYPT_KEY_PROV_INFO *ckpi) {
-    if (ckpi) {
-        if (ckpi->pwszContainerName) {
-            delete[] ckpi->pwszContainerName;
-        }
-        if (ckpi->pwszProvName) {
-            delete[] ckpi->pwszProvName;
-        }
-    }
-}
-
 void Cert::bind(Crypt *ctx, DWORD keyspec) {
     CRYPT_KEY_PROV_INFO ckpi;
     wchar_t w_ctx_name[1000];
@@ -438,7 +427,6 @@ void Cert::bind(Crypt *ctx, DWORD keyspec) {
 
     if (!CertSetCertificateContextProperty(pcert, CERT_KEY_PROV_INFO_PROP_ID, 0, &ckpi)) {
         DWORD err = GetLastError();
-        cleanup_ckpi(&ckpi);
         throw CSPException("Couldn't set certificate context property", err);
     }
     free(prov_name);
