@@ -415,25 +415,32 @@ static void cleanup_ckpi(CRYPT_KEY_PROV_INFO *ckpi) {
 
 void Cert::bind(Crypt *ctx, DWORD keyspec) {
     CRYPT_KEY_PROV_INFO ckpi;
+    wchar_t w_ctx_name[1000];
+    wchar_t w_prov_name[1000];
     ZeroMemory(&ckpi, sizeof(ckpi));
+    ckpi.pwszContainerName = w_ctx_name;
+    ckpi.pwszProvName = w_prov_name;
+
+    char *ctx_name, *prov_name;
+
+    ctx_name = ctx->uniq_name();
+    mbstowcs(ckpi.pwszContainerName, ctx_name, 1000);
     try {
-        char ctx_name = ctx->uniq_name();
-        ckpi.pwszContainerName = new wchar_t[strlen(ctx_name)];
-        mbstowcs(ckpi.pwszContainerName, ctx_name, strlen())
-        puts((char *)ckpi.pwszContainerName);
-        ckpi.pwszProvName = (LPWSTR) ctx->prov_name();
-        ckpi.dwProvType = ctx->prov_type();
-    }
-    catch (...) {
-        cleanup_ckpi(&ckpi);
+        prov_name = ctx->prov_name();
+    } catch (...) {
+        free(ctx_name);
         throw;
     }
+    mbstowcs(ckpi.pwszProvName, prov_name, 1000);
+    ckpi.dwProvType = ctx->prov_type();
     ckpi.dwFlags = CERT_SET_KEY_PROV_HANDLE_PROP_ID;
     ckpi.dwKeySpec = keyspec;
+
     if (!CertSetCertificateContextProperty(pcert, CERT_KEY_PROV_INFO_PROP_ID, 0, &ckpi)) {
         DWORD err = GetLastError();
         cleanup_ckpi(&ckpi);
         throw CSPException("Couldn't set certificate context property", err);
     }
-    cleanup_ckpi(&ckpi);
+    free(prov_name);
+    free(ctx_name);
 }

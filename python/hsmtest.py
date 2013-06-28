@@ -8,12 +8,15 @@ from base64 import b64encode
 ctxname = None
 
 
-ctxname = 'test2'
+ctxname = 'test'
+#provider = "Crypto-Pro HSM CSP"
+provider = None
 
 
 def main():
     global ctxname
-    ctx = csp.Context(ctxname, csp.PROV_GOST_2001_DH, 0 | csp.CRYPT_SILENT, "Crypto-Pro HSM CSP")
+    ctx = csp.Context(ctxname, csp.PROV_GOST_2001_DH, 0 | csp.CRYPT_SILENT,
+                      provider)
     if ctx is None:
         print 'creating context:', ctxname
         ctx = csp.Context(
