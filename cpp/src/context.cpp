@@ -15,6 +15,38 @@ Crypt::~Crypt() throw(CSPException) {
     LOG("    Freed ctx %p (%x)\n", this, hprov);
 }
 
+DWORD Crypt::prov_type() {
+    DWORD slen, type;
+    if(!CryptGetProvParam( hprov, PP_PROVTYPE, NULL, &slen, 0)) {
+        throw CSPException("Couldn't determine provider type data length");
+    }
+
+    if(slen != sizeof(DWORD)) {
+        throw CSPException("Wrong size for binary data", -1);
+    }
+
+    if(!CryptGetProvParam( hprov, PP_PROVTYPE, (BYTE *)&type, &slen, 0)) {
+        throw CSPException("Couldn't get provider type");
+    }
+    return type;
+}
+
+char *Crypt::prov_name() {
+    char *s;
+    DWORD slen;
+    if(!CryptGetProvParam( hprov, PP_NAME, NULL, &slen, 0)) {
+        throw CSPException("Couldn't determine provider name length");
+    }
+
+    s=new char[slen + 1];
+
+    if(!CryptGetProvParam( hprov, PP_NAME, (BYTE *)s, &slen, 0)) {
+        delete[] s;
+        throw CSPException("Couldn't get provider name");
+    }
+    return s;
+}
+
 char *Crypt::name() {
     char *s;
     DWORD slen;
@@ -27,6 +59,22 @@ char *Crypt::name() {
     if(!CryptGetProvParam( hprov, PP_CONTAINER, (BYTE *)s, &slen, 0)) {
         delete[] s;
         throw CSPException("Couldn't get container name");
+    }
+    return s;
+}
+
+char *Crypt::uniq_name() {
+    char *s;
+    DWORD slen;
+    if(!CryptGetProvParam( hprov, PP_UNIQUE_CONTAINER, NULL, &slen, 0)) {
+        throw CSPException("Couldn't determine container unique name length");
+    }
+
+    s=new char[slen + 1];
+
+    if(!CryptGetProvParam( hprov, PP_UNIQUE_CONTAINER, (BYTE *)s, &slen, 0)) {
+        delete[] s;
+        throw CSPException("Couldn't get container unique name");
     }
     return s;
 }

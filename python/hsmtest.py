@@ -21,7 +21,7 @@ def main():
             csp.CRYPT_NEWKEYSET | csp.CRYPT_SILENT, "Crypto-Pro HSM CSP")
         print 'created context:', ctx
     else:
-        print 'container', ctxname, 'exists'
+        print 'container', ctx.uniq_name(), 'exists'
     key = ctx.get_key()
     if key is None:
         print 'creating signature key'
@@ -31,29 +31,35 @@ def main():
         print 'creating exchange key'
         ekey = ctx.create_key(csp.CRYPT_EXPORTABLE, csp.AT_KEYEXCHANGE)
 
+    has_cert = True
     store = csp.CertStore(ctx, "MY")
-    if not len(list(store.find_by_name('test2'))):
-        c = csp.Cert.self_sign(ctx, b'CN=test2')
-        store.add_cert(c)
-        print 'Added test cert'
+    if not len(list(store.find_by_name('test3'))):
+        try:
+            c = csp.Cert.self_sign(ctx, b'CN=test3')
+            store.add_cert(c)
+            print 'Added test cert'
+        except SystemError:
+            print 'Self-signed certs are not supported'
+            has_cert = False
     else:
         print 'cert already exists'
 
-    cert = list(store.find_by_name('test2'))[0]
-    print cert.name()
-    mess = csp.CryptMsg(ctx)
-    mess.add_signer_cert(cert)
-    data = mess.sign_data(b'hurblewurble', True)
-    print 'length of signature:', len(data)
-    sgn = csp.Signature(data)
-    for n in range(sgn.num_signers):
-        if sgn.verify_data(b'hurblewurble', n):
-            print 'sign', n, 'correct'
-        else:
-            print 'sign', n, 'failed!'
+    if has_cert:
+        cert = list(store.find_by_name('test3'))[0]
+        print cert.name()
+        mess = csp.CryptMsg(ctx)
+        mess.add_signer_cert(cert)
+        data = mess.sign_data(b'hurblewurble', True)
+        print 'length of signature:', len(data)
+        sgn = csp.Signature(data)
+        for n in range(sgn.num_signers):
+            if sgn.verify_data(b'hurblewurble', n):
+                print 'sign', n, 'correct'
+            else:
+                print 'sign', n, 'failed!'
 
     req = csp.CertRequest(ctx, b'CN=test3')
-    data = req.get_data();
+    data = req.get_data()
     print len(data)
     open('request.req', 'wb').write(b64encode(req.get_data()))
 

@@ -6,6 +6,8 @@
 %newobject Crypt::import_key;
 %newobject Crypt::create_key;
 %newobject Crypt::name;
+%newobject Crypt::prov_name;
+%newobject Crypt::uniq_name;
 %newobject ::Context;
 
 %include "context.hpp"

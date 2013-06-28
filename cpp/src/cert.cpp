@@ -196,13 +196,13 @@ CertStore::CertStore(Crypt *parent, LPCTSTR protocol) throw(CSPException)
     hstore = CertOpenStore(
                  CERT_STORE_PROV_SYSTEM_A,          // The store provider type
                  0,                               // The encoding type is
-                 // not needed
+                                                    // not needed
                  hprov,                            // Use the default HCRYPTPROV
-                 // Set the store location in a
-                 // registry location
+                                                    // Set the store location in a
+                                                    // registry location
                  CERT_STORE_NO_CRYPT_RELEASE_FLAG | CERT_SYSTEM_STORE_CURRENT_USER,
                  protocol                            // The store name as a Unicode
-                 // string
+                                                    // string
              );
     if (!hstore) {
         throw CSPException("Couldn't open certificate store");
@@ -400,4 +400,40 @@ CertStore::~CertStore() throw(CSPException)
         ctx->unref();
     }
     LOG("Deleted store %p\n", this);
+}
+
+static void cleanup_ckpi(CRYPT_KEY_PROV_INFO *ckpi) {
+    if (ckpi) {
+        if (ckpi->pwszContainerName) {
+            delete[] ckpi->pwszContainerName;
+        }
+        if (ckpi->pwszProvName) {
+            delete[] ckpi->pwszProvName;
+        }
+    }
+}
+
+void Cert::bind(Crypt *ctx, DWORD keyspec) {
+    CRYPT_KEY_PROV_INFO ckpi;
+    ZeroMemory(&ckpi, sizeof(ckpi));
+    try {
+        char ctx_name = ctx->uniq_name();
+        ckpi.pwszContainerName = new wchar_t[strlen(ctx_name)];
+        mbstowcs(ckpi.pwszContainerName, ctx_name, strlen())
+        puts((char *)ckpi.pwszContainerName);
+        ckpi.pwszProvName = (LPWSTR) ctx->prov_name();
+        ckpi.dwProvType = ctx->prov_type();
+    }
+    catch (...) {
+        cleanup_ckpi(&ckpi);
+        throw;
+    }
+    ckpi.dwFlags = CERT_SET_KEY_PROV_HANDLE_PROP_ID;
+    ckpi.dwKeySpec = keyspec;
+    if (!CertSetCertificateContextProperty(pcert, CERT_KEY_PROV_INFO_PROP_ID, 0, &ckpi)) {
+        DWORD err = GetLastError();
+        cleanup_ckpi(&ckpi);
+        throw CSPException("Couldn't set certificate context property", err);
+    }
+    cleanup_ckpi(&ckpi);
 }
