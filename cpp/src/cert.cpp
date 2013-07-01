@@ -196,13 +196,13 @@ CertStore::CertStore(Crypt *parent, LPCTSTR protocol) throw(CSPException)
     hstore = CertOpenStore(
                  CERT_STORE_PROV_SYSTEM_A,          // The store provider type
                  0,                               // The encoding type is
-                 // not needed
+                                                    // not needed
                  hprov,                            // Use the default HCRYPTPROV
-                 // Set the store location in a
-                 // registry location
+                                                    // Set the store location in a
+                                                    // registry location
                  CERT_STORE_NO_CRYPT_RELEASE_FLAG | CERT_SYSTEM_STORE_CURRENT_USER,
                  protocol                            // The store name as a Unicode
-                 // string
+                                                    // string
              );
     if (!hstore) {
         throw CSPException("Couldn't open certificate store");
@@ -400,4 +400,35 @@ CertStore::~CertStore() throw(CSPException)
         ctx->unref();
     }
     LOG("Deleted store %p\n", this);
+}
+
+void Cert::bind(Crypt *ctx, DWORD keyspec) {
+    CRYPT_KEY_PROV_INFO ckpi;
+    wchar_t w_ctx_name[1000];
+    wchar_t w_prov_name[1000];
+    ZeroMemory(&ckpi, sizeof(ckpi));
+    ckpi.pwszContainerName = w_ctx_name;
+    ckpi.pwszProvName = w_prov_name;
+
+    char *ctx_name, *prov_name;
+
+    ctx_name = ctx->uniq_name();
+    mbstowcs(ckpi.pwszContainerName, ctx_name, 1000);
+    try {
+        prov_name = ctx->prov_name();
+    } catch (...) {
+        free(ctx_name);
+        throw;
+    }
+    mbstowcs(ckpi.pwszProvName, prov_name, 1000);
+    ckpi.dwProvType = ctx->prov_type();
+    ckpi.dwFlags = CERT_SET_KEY_PROV_HANDLE_PROP_ID;
+    ckpi.dwKeySpec = keyspec;
+
+    if (!CertSetCertificateContextProperty(pcert, CERT_KEY_PROV_INFO_PROP_ID, 0, &ckpi)) {
+        DWORD err = GetLastError();
+        throw CSPException("Couldn't set certificate context property", err);
+    }
+    free(prov_name);
+    free(ctx_name);
 }

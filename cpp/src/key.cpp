@@ -13,7 +13,7 @@ Key::~Key() throw(CSPException) {
     if (hkey) {
         bool res = CryptDestroyKey(hkey);
         if (!res) {
-            //throw CSPException("Couldn't destroy key");
+            throw CSPException("Couldn't destroy key");
         }
     }
     parent->unref();

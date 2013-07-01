@@ -19,6 +19,9 @@ public:
     ~Crypt() throw(CSPException);
 
     char *name();
+    char *uniq_name();
+    char *prov_name();
+    DWORD prov_type();
 
     Key *create_key(DWORD flags, DWORD keyspec=AT_SIGNATURE) throw(CSPException);
 
