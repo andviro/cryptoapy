@@ -22,4 +22,5 @@ class CertRequest
         void set_usage(bool auth=true, bool sign=true, bool encrypt=true) throw (CSPException);
         ~CertRequest() throw (CSPException);
 };
+
 #endif

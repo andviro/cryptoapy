@@ -41,6 +41,8 @@ def main():
 
     cert = list(store.find_by_name('test2'))[0]
     print cert.name()
+    data = cert.extract()
+    open('self-sign.cer', 'wb').write(data)
     mess = csp.CryptMsg(ctx)
     mess.add_signer_cert(cert)
     data = mess.sign_data(b'hurblewurble', True)
@@ -53,7 +55,7 @@ def main():
             print 'sign', n, 'failed!'
 
     req = csp.CertRequest(ctx, b'CN=test3')
-    data = req.get_data();
+    data = req.get_data()
     print len(data)
     open('request.req', 'wb').write(b64encode(req.get_data()))
 

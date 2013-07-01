@@ -243,7 +243,7 @@ def test_extract_cert():
     return cdata
 
 
-def _test_cert_from_data():
+def test_cert_from_data():
     '''
     Конструктор `Cert(s)`, при передаче ему байтовой строки `s`, декодирует и
     загружает из нее новый экземпляр сертификата, не сохраненный в хранилище.
@@ -318,7 +318,7 @@ def test_cert_find_by_name():
     assert len(res)
 
 
-def _test_memory_store():
+def test_memory_store():
     '''
     Test: memory store
     Хранилище сертификатов может быть создано в памяти вызовом конструктора
@@ -630,7 +630,7 @@ def test_decrypt_data():
     assert res == b'murblehurblewurble'
 
 
-def _test_add_remove_cert():
+def test_add_remove_cert():
     '''
     Test add_cert
     Метод `CertStore.add_cert(cert) добавляет сертификат `cert` в хранилище.
