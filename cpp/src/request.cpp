@@ -1,6 +1,9 @@
 #include "common.hpp"
 #include "context.hpp"
 #include "request.hpp"
+#include <vector>
+
+using namespace std;
 
 class EncodedObject {
     LPVOID struct_info;
@@ -16,7 +19,7 @@ class EncodedObject {
             struct_type = type;
         }
 
-        void *encode(BYTE **s, DWORD *slen) {
+        void encode(BYTE **s, DWORD *slen) {
             if (!CryptEncodeObject(MY_ENC_TYPE,
                 struct_type,
                 struct_info,
@@ -37,31 +40,56 @@ class EncodedObject {
                 throw(CSPException("Couldn't encode object"));
             }
         }
+};
 
-}
-
-class CertExtension : public EncodedObject {
+class CertExtension : protected EncodedObject {
         CERT_EXTENSION data;
     public:
-        CertExtension(LPCSTR oid, bool critical) {
+        CertExtension(LPCSTR oid, bool critical=FALSE) {
             ZeroMemory(&data, sizeof(data));
-            data.pszObjId = oid;
+            data.pszObjId = (LPSTR)oid;
             data.fCritical = critical;
         }
 
-        ~CertExtension() {
+        virtual ~CertExtension() {
             if (data.Value.pbData) {
                 free(data.Value.pbData);
             }
         }
 
-        CERT_EXTENSION *encode() {
+        CERT_EXTENSION *get_data() {
             if (data.Value.pbData) {
                 free(data.Value.pbData);
                 data.Value.pbData = NULL;
             }
-            EncodedObject::encode(&data.Value.pbData, &data.Value.cbData);
+            encode(&data.Value.pbData, &data.Value.cbData);
             return &data;
+        }
+    friend class CertExtensions;
+    friend class CertRequest;
+};
+
+class KeyUsage : public CertExtension {
+    CRYPT_BIT_BLOB key_usage;
+    BYTE ByteKeyUsage;
+    public:
+        KeyUsage() : CertExtension(szOID_KEY_USAGE, TRUE){
+            ZeroMemory( &key_usage, sizeof(CRYPT_BIT_BLOB));
+            ByteKeyUsage = 0xFF;
+            key_usage.cbData=1;
+            key_usage.pbData=&ByteKeyUsage;
+            set_struct((void *)&key_usage, X509_KEY_USAGE);
+        }
+
+        virtual ~KeyUsage() {
+        }
+
+        void set_usage(BYTE attr) {
+            ByteKeyUsage |= attr;
+        }
+
+        void reset_usage(BYTE attr) {
+            ByteKeyUsage &= ~attr;
         }
 };
 
@@ -74,7 +102,7 @@ class ExtKeyUsage : public CertExtension
             set_struct((void *)&usage_data, X509_ENHANCED_KEY_USAGE);
         }
 
-        ~ExtKeyUsage() {
+        virtual ~ExtKeyUsage() {
             if (usage_data.rgpszUsageIdentifier) {
                 free(usage_data.rgpszUsageIdentifier);
             }
@@ -82,25 +110,57 @@ class ExtKeyUsage : public CertExtension
 
         void add_usage_oid(LPCSTR oid) {
             if (oid) {
-                usage_data.rgpszUsageIdentifier = (LPSTR*)realloc(CertEnhKeyUsage.rgpszUsageIdentifier,
-                        sizeof(LPSTR)*(CertEnhKeyUsage.cUsageIdentifier + 1));
-                usage_data.rgpszUsageIdentifier[CertEnhKeyUsage.cUsageIdentifier] = oid;
+                usage_data.rgpszUsageIdentifier = (LPSTR*)realloc(usage_data.rgpszUsageIdentifier,
+                        sizeof(LPSTR)*(usage_data.cUsageIdentifier + 1));
+                usage_data.rgpszUsageIdentifier[usage_data.cUsageIdentifier] = (LPSTR)oid;
                 usage_data.cUsageIdentifier++;
+            }
+        }
+    friend class CertRequest;
+};
+
+class CertExtensions : public EncodedObject
+{
+    vector<CertExtension *> exts;
+    CERT_EXTENSIONS cexts;
+    public:
+        CertExtensions() {
+            ZeroMemory(&cexts, sizeof(cexts));
+            set_struct((void *)&cexts, X509_EXTENSIONS);
+        }
+
+        virtual ~CertExtensions() {
+        }
+
+        void encode(BYTE **s, DWORD *slen) {
+            cexts.cExtension = exts.size();
+            cexts.rgExtension = new CERT_EXTENSION[cexts.cExtension];
+            try {
+                vector<CertExtension *>::const_iterator cii;
+                int idx = 0;
+
+                for(cii=exts.begin(); cii!=exts.end(); cii++) {
+                    memcpy(&cexts.rgExtension[idx], (*cii)->get_data(), sizeof(CERT_EXTENSION));
+                }
+                EncodedObject::encode(s, slen);
+            } catch (...) {
+                free(cexts.rgExtension);
+                throw;
+            }
+            free(cexts.rgExtension);
+        }
+
+        void add(CertExtension *e) {
+            if (e) {
+                exts.push_back(e);
             }
         }
 };
 
-class CertAttribute : public EncodedObject
-{
-
-
-}
-
-
-
 CertRequest::CertRequest(Crypt *ctx, BYTE *STRING, DWORD LENGTH) throw (CSPException) : ctx(ctx) {
-    if (ctx)
+    if (ctx) {
         ctx -> ref();
+    }
     cbNameEncoded = 0;
     pbNameEncoded = NULL;
 
@@ -126,12 +186,32 @@ CertRequest::CertRequest(Crypt *ctx, BYTE *STRING, DWORD LENGTH) throw (CSPExcep
     if (STRING && LENGTH) {
         set_name(STRING, LENGTH);
     }
+    //
+    // XXX
+    //
+    ZeroMemory(&attr_blobs, sizeof(attr_blobs));
+    ext_attr.pszObjId = (LPSTR) szOID_CERT_EXTENSIONS;
+    ext_attr.cValue = 1;
+    ext_attr.rgValue = attr_blobs;
 
-    ZeroMemory(&CertEnhKeyUsage, sizeof(CertEnhKeyUsage));
-    set_usage();
+    exts = new CertExtensions();
+    eku = new ExtKeyUsage();
+    ku = new KeyUsage();
+    exts->add(ku);
+    exts->add(eku);
+    CertReqInfo.cAttribute = 1;
+    CertReqInfo.rgAttribute = &ext_attr;
+}
+
+void CertRequest::add_eku(LPCSTR oid) throw (CSPException) {
+    eku -> add_usage_oid(oid);
 }
 
 CertRequest::~CertRequest() throw (CSPException) {
+    delete exts;
+    delete eku;
+    delete ku;
+
     if (ctx) {
         ctx -> unref();
     }
@@ -141,14 +221,7 @@ CertRequest::~CertRequest() throw (CSPException) {
     if (pbPublicKeyInfo) {
         free(pbPublicKeyInfo);
     }
-    if (CertEnhKeyUsage.rgpszUsageIdentifier) {
-        free(CertEnhKeyUsage.rgpszUsageIdentifier);
-    }
 }
-
-void add_extension() {
-}
-
 
 void CertRequest::set_name(BYTE *STRING, DWORD LENGTH) throw (CSPException) {
     bool res = CertStrToName(
@@ -187,15 +260,10 @@ void CertRequest::set_name(BYTE *STRING, DWORD LENGTH) throw (CSPException) {
 }
 
 void CertRequest::get_data(BYTE **s, DWORD *slen) throw (CSPException) {
-
-// Раздел Расширения сертификатов и в него включаю Улучшенный ключ и Использование ключа
-CRYPT_ATTRIBUTE rgAttrib = {0};
-rgAttrib.pszObjId = szOID_CERT_EXTENSIONS;
-rgAttrib.cValue = 2;
-rgAttrib.rgValue = CertAttrBlob;
-CertReqInfo.cAttribute = 1;
-CertReqInfo.rgAttribute = &rgAttrib;
-
+    //
+    // XXX
+    //
+    exts->encode(&attr_blobs[0].pbData, &attr_blobs[0].cbData);
 
     bool res = CryptSignAndEncodeCertificate(
         ctx->hprov, AT_SIGNATURE, MY_ENC_TYPE,
@@ -211,6 +279,9 @@ CertReqInfo.rgAttribute = &rgAttrib;
         ctx->hprov, AT_SIGNATURE, MY_ENC_TYPE,
         X509_CERT_REQUEST_TO_BE_SIGNED, &CertReqInfo,
         &SigAlg, NULL, *s, slen );
+
+    free(attr_blobs[0].pbData);
+    ZeroMemory(&attr_blobs, sizeof(attr_blobs));
 
     if(!res) {
         throw CSPException("Couldn't encode certificate request");
@@ -396,5 +467,18 @@ void Cert::request() throw(CSPException)
     CryptAttribute.pszObjId = szOID_CERT_EXTENSIONS;
     CryptAttribute.cValue = 1;
     CryptAttribute.rgValue = AttributesBlobArr;
+    //
+    //
+// Раздел Расширения сертификатов и в него включаю Улучшенный ключ и Использование ключа
+//
+CRYPT_ATTRIBUTE rgAttrib = {0};
+rgAttrib.pszObjId = szOID_CERT_EXTENSIONS;
+rgAttrib.cValue = 2;
+rgAttrib.rgValue = CertAttrBlob;
+
+CertReqInfo.cAttribute = 1;
+CertReqInfo.rgAttribute = &rgAttrib;
+
+
 }
 */
