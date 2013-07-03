@@ -18,7 +18,7 @@ class CertRequest
     CERT_PUBLIC_KEY_INFO *pbPublicKeyInfo;
     DWORD cbPublicKeyInfo;
     Crypt *ctx;
-    CRYPT_ATTR_BLOB attr_blobs[1];
+    CRYPT_ATTR_BLOB attr_blobs[2];
     CRYPT_ATTRIBUTE ext_attr;
     CertExtensions *exts;
     ExtKeyUsage *eku;

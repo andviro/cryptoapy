@@ -15,6 +15,7 @@ class EncodedObject {
         }
 
         void set_struct(LPVOID info, LPCSTR type) {
+            LOG("EncodedObject::set_struct(%p, %s\n)", info, type);
             struct_info = info;
             struct_type = type;
         }
@@ -46,14 +47,17 @@ class CertExtension : protected EncodedObject {
         CERT_EXTENSION data;
     public:
         CertExtension(LPCSTR oid, bool critical=FALSE) {
+            LOG("CertExtension::CertExtension(%s, %i\n)", oid, critical);
             ZeroMemory(&data, sizeof(data));
             data.pszObjId = (LPSTR)oid;
             data.fCritical = critical;
         }
 
         virtual ~CertExtension() {
+            LOG("CertExtension::~CertExtension(%p)\n", this);
             if (data.Value.pbData) {
                 free(data.Value.pbData);
+                data.Value.pbData = NULL;
             }
         }
 
@@ -99,16 +103,18 @@ class ExtKeyUsage : public CertExtension
     public:
         ExtKeyUsage() : CertExtension(szOID_ENHANCED_KEY_USAGE, FALSE) {
             ZeroMemory(&usage_data, sizeof(usage_data));
-            set_struct((void *)&usage_data, X509_ENHANCED_KEY_USAGE);
+            set_struct(&usage_data, X509_ENHANCED_KEY_USAGE);
         }
 
         virtual ~ExtKeyUsage() {
             if (usage_data.rgpszUsageIdentifier) {
                 free(usage_data.rgpszUsageIdentifier);
+                usage_data.rgpszUsageIdentifier = NULL;
             }
         }
 
         void add_usage_oid(LPCSTR oid) {
+            LOG("ExtKeyUsage::add_usage_oid(%s)\n", oid);
             if (oid) {
                 usage_data.rgpszUsageIdentifier = (LPSTR*)realloc(usage_data.rgpszUsageIdentifier,
                         sizeof(LPSTR)*(usage_data.cUsageIdentifier + 1));
@@ -125,40 +131,35 @@ class CertExtensions : public EncodedObject
     CERT_EXTENSIONS cexts;
     public:
         CertExtensions() {
+            LOG("CertExtensions::CertExtensions()\n");
             ZeroMemory(&cexts, sizeof(cexts));
-            set_struct((void *)&cexts, X509_EXTENSIONS);
+            set_struct(&cexts, X509_EXTENSIONS);
         }
 
         virtual ~CertExtensions() {
         }
 
         void encode(BYTE **s, DWORD *slen) {
-            puts("11");
+            LOG("CertExtensions::encode()\n");
             cexts.cExtension = exts.size();
-            puts("12");
             cexts.rgExtension = new CERT_EXTENSION[cexts.cExtension];
-            puts("13");
             try {
-            puts("14");
                 vector<CertExtension *>::const_iterator cii;
                 int idx = 0;
                 for(cii=exts.begin(); cii!=exts.end(); cii++) {
                     memcpy(&cexts.rgExtension[idx], (*cii)->get_data(), sizeof(CERT_EXTENSION));
                     idx ++;
                 }
-            puts("15");
                 EncodedObject::encode(s, slen);
-            puts("16");
             } catch (...) {
                 delete[] cexts.rgExtension;
                 throw;
             }
-            puts("17");
             delete[] cexts.rgExtension;
-            puts("18");
         }
 
         void add(CertExtension *e) {
+            LOG("CertExtensions::add(%p)\n", e);
             if (e) {
                 exts.push_back(e);
             }
@@ -166,6 +167,7 @@ class CertExtensions : public EncodedObject
 };
 
 CertRequest::CertRequest(Crypt *ctx, BYTE *STRING, DWORD LENGTH) throw (CSPException) : ctx(ctx) {
+    LOG("CertRequest::CertRequest(%p, %s)\n", ctx, STRING);
     if (ctx) {
         ctx -> ref();
     }
@@ -197,16 +199,24 @@ CertRequest::CertRequest(Crypt *ctx, BYTE *STRING, DWORD LENGTH) throw (CSPExcep
     //
     // XXX
     //
-    ZeroMemory(&attr_blobs, sizeof(attr_blobs));
+    LOG("    begin init extensions\n");
+    ZeroMemory(attr_blobs, sizeof(attr_blobs));
+    LOG("    zeroed %i of %i bytes of attr blobs\n", sizeof(attr_blobs), sizeof(CRYPT_ATTR_BLOB)*2);
     ext_attr.pszObjId = (LPSTR) szOID_CERT_EXTENSIONS;
     ext_attr.cValue = 1;
     ext_attr.rgValue = attr_blobs;
 
+    LOG("    new exts\n");
     exts = new CertExtensions();
+    LOG("    new eku\n");
     eku = new ExtKeyUsage();
+    LOG("    new ku\n");
     ku = new KeyUsage();
+    LOG("    add ku\n");
     exts->add(ku);
+    LOG("    add eku\n");
     exts->add(eku);
+    LOG("    set rgAttribute\n");
     CertReqInfo.cAttribute = 1;
     CertReqInfo.rgAttribute = &ext_attr;
 }
@@ -224,15 +234,16 @@ void CertRequest::add_eku(LPCSTR oid) throw (CSPException) {
 }
 
 CertRequest::~CertRequest() throw (CSPException) {
-    delete exts;
+    LOG("CertRequest::~CertRequest(%p)\n", this);
     delete eku;
     delete ku;
+    delete exts;
 
     if (ctx) {
         ctx -> unref();
     }
-    if (pbNameEncoded) {
-        delete[] pbNameEncoded;
+    if (CertReqInfo.Subject.pbData) {
+        free(CertReqInfo.Subject.pbData);
     }
     if (pbPublicKeyInfo) {
         free(pbPublicKeyInfo);
@@ -240,6 +251,7 @@ CertRequest::~CertRequest() throw (CSPException) {
 }
 
 void CertRequest::set_name(BYTE *STRING, DWORD LENGTH) throw (CSPException) {
+    LOG("CertRequest::set_name(%s)\n", STRING);
     bool res = CertStrToName(
         MY_ENC_TYPE,
         (LPCSTR) STRING,
@@ -247,41 +259,39 @@ void CertRequest::set_name(BYTE *STRING, DWORD LENGTH) throw (CSPException) {
         CERT_OID_NAME_STR,
         NULL,
         NULL,
-        &cbNameEncoded,
+        &CertReqInfo.Subject.cbData,
         NULL );
     if(!res) {
         throw CSPException("Couldn't determine encoded name length");
     }
 
-    if (pbNameEncoded) {
-        delete[] pbNameEncoded;
-        pbNameEncoded = NULL;
+    if (CertReqInfo.Subject.pbData) {
+        free(CertReqInfo.Subject.pbData);
+        CertReqInfo.Subject.pbData = NULL;
     }
-    
-    pbNameEncoded = new BYTE[cbNameEncoded];
+
+    CertReqInfo.Subject.pbData = (BYTE *)malloc(CertReqInfo.Subject.cbData);
+
     res = CertStrToName(
         MY_ENC_TYPE,
         (LPCSTR) STRING,
         //CERT_OID_NAME_STR | CERT_NAME_STR_REVERSE_FLAG,
         CERT_OID_NAME_STR,
         NULL,
-        pbNameEncoded,
-        &cbNameEncoded,
+        CertReqInfo.Subject.pbData,
+        &CertReqInfo.Subject.cbData,
         NULL );
     if(!res) {
         throw CSPException("Couldn't encode subject name string");
     }
-    CertReqInfo.Subject.cbData = cbNameEncoded;
-    CertReqInfo.Subject.pbData = pbNameEncoded;
 }
 
 void CertRequest::get_data(BYTE **s, DWORD *slen) throw (CSPException) {
     //
     // XXX
     //
-    puts("1");
+    LOG("CertRequest::get_data()\n");
     exts->encode(&attr_blobs[0].pbData, &attr_blobs[0].cbData);
-    puts("2");
 
     bool res = CryptSignAndEncodeCertificate(
         ctx->hprov, AT_SIGNATURE, MY_ENC_TYPE,
@@ -299,206 +309,9 @@ void CertRequest::get_data(BYTE **s, DWORD *slen) throw (CSPException) {
         &SigAlg, NULL, *s, slen );
 
     free(attr_blobs[0].pbData);
-    ZeroMemory(&attr_blobs, sizeof(attr_blobs));
+    ZeroMemory(attr_blobs, sizeof(attr_blobs));
 
-    puts("3");
     if(!res) {
-    puts("4");
         throw CSPException("Couldn't encode certificate request");
     }
 }
-
-/*
- *
- *
- *
- *
- *
-CERT_EXTENSION CertExtEnhKeyUsage = {0};
-
-//кодируем
-bResult = CryptEncodeObject(MY_ENCODING_TYPE,
-X509_ENHANCED_KEY_USAGE,
-(LPVOID)&CertEnhKeyUsage,
-CertExtEnhKeyUsage.Value.pbData,
-&CertExtEnhKeyUsage.Value.cbData);
-
-free(CertEnhKeyUsage.rgpszUsageIdentifier);
-
-CERT_EXTENSIONS CertExtentions;
-CertExtEnhKeyUsage.pszObjId = szOID_ENHANCED_KEY_USAGE;
-CertExtEnhKeyUsage.fCritical = FALSE;
-CertExtentions.cExtension = 1;
-CertExtentions.rgExtension = &CertExtEnhKeyUsage;
-
-CRYPT_ATTR_BLOB CertAttrBlob = {0, NULL};
-bResult = CryptEncodeObject(
-MY_ENCODING_TYPE,
-szOID_CERT_EXTENSIONS,
-&CertExtentions,
-NULL,
-&CertAttrBlob.cbData);
-
-CertAttrBlob.pbData = (LPBYTE)malloc(CertAttrBlob.cbData);
-bResult = CryptEncodeObject(
-MY_ENCODING_TYPE,
-szOID_CERT_EXTENSIONS,
-&CertExtentions,
-CertAttrBlob.pbData,
-&CertAttrBlob.cbData);
-
-free(CertExtEnhKeyUsage.Value.pbData);
-
-CRYPT_ATTRIBUTE rgAttrib = {szOID_CERT_EXTENSIONS, 1, &CertAttrBlob};
-CertReqInfo.cAttribute = 1;
-CertReqInfo.rgAttribute = &rgAttrib;
-//
-//
-//
-//
-//
-//
-//
-//
-void Cert::request() throw(CSPException)
-{
-
-    //
-    // fill CERT_PRIVATE_KEY_VALIDITY
-    //
-    FILETIME ftBegin(...), ftEnd(...);
-    CERT_PRIVATE_KEY_VALIDITY CertPrivateKeyValitity;
-    CertPrivateKeyValitity.NotBefore = ftBegin;
-    CertPrivateKeyValitity.NotAfter = ftEnd;
-
-    // fill CRYPT_BIT_BLOB
-    BYTE bRepudiation[2] = {(CERT_NON_REPUDIATION_KEY_USAGE | CERT_DIGITAL_SIGNATURE_KEY_USAGE | CERT_DATA_ENCIPHERMENT_KEY_USAGE), 0};
-
-    CRYPT_BIT_BLOB CryptBitBlob;
-    CryptBitBlob.cbData = 2;
-    CryptBitBlob.pbData = bRepudiation;
-    CryptBitBlob.cUnusedBits = 0;
-
-    DWORD dwHashSize(0);
-    bReturn = CryptHashPublicKeyInfo(hCryptProv, CALG_SHA1, 0, PKCS_7_ASN_ENCODING, pbPublicKeyInfo, NULL, &dwHashSize);
-
-    BYTE* pbHashVal = new BYTE[dwHashSize];
-    bReturn = CryptHashPublicKeyInfo(hCryptProv, CALG_SHA1, 0, PKCS_7_ASN_ENCODING, pbPublicKeyInfo, pbHashVal, &dwHashSize);
-
-
-    // fill CRYPT_DATA_BLOB
-    CRYPT_DATA_BLOB CryptDataBlob;
-    CryptDataBlob.cbData = dwHashSize;
-    CryptDataBlob.pbData = pbHashVal;
-
-    // fill CERT_KEY_ATTRIBUTES_INFO
-    CERT_KEY_ATTRIBUTES_INFO CertKeyAttrInfo;
-    CertKeyAttrInfo.pPrivateKeyUsagePeriod = &CertPrivateKeyValitity;
-    CertKeyAttrInfo.IntendedKeyUsage = CryptBitBlob;
-    CertKeyAttrInfo.KeyId = CryptDataBlob;
-
-
-    DWORD cbKeyAttrEncoded(0);
-
-    bReturn = CryptEncodeObject(
-    PKCS_7_ASN_ENCODING // Encoding type
-    , X509_KEY_ATTRIBUTES // Structure type
-    , &CertKeyAttrInfo // Address of CERT_KEY_ATTRIBUTES_INFO structure
-    , NULL // pbEncoded
-    , &cbKeyAttrEncoded); // pbEncoded size
-
-
-    //-------------------------------------------------------------------
-    // Allocate memory for the encoded struct.
-    BYTE* pbKeyAttrEncoded(NULL);
-
-    pbKeyAttrEncoded = (BYTE*)malloc(cbKeyAttrEncoded);
-
-    //-------------------------------------------------------------------
-    // Call CryptEncodeObject to do the actual encoding of the struct.
-
-    bReturn = CryptEncodeObject(
-    PKCS_7_ASN_ENCODING // Encoding type
-    , X509_KEY_ATTRIBUTES // Structure type
-    , &CertKeyAttrInfo // Address of CERT_KEY_ATTRIBUTES_INFO structure
-    , pbKeyAttrEncoded // pbEncoded
-    , &cbKeyAttrEncoded); // pbEncoded size
-
-
-
-    // fill CRYPTOAPI_BLOB
-    CRYPT_OBJID_BLOB CryptObjidBlob;
-    CryptObjidBlob.cbData = cbKeyAttrEncoded;
-    CryptObjidBlob.pbData = pbKeyAttrEncoded;
-
-
-    CERT_EXTENSION CertExtension[] =
-    {
-    {
-    szOID_KEY_ATTRIBUTES,
-    TRUE,
-    CryptObjidBlob
-    }
-    };
-
-
-    CERT_EXTENSIONS CertExtensions;
-    CertExtensions.cExtension = 1;
-    CertExtensions.rgExtension = &CertExtension[0];
-
-
-    DWORD cbCertExtensionsEncoded(0);
-
-    bReturn = CryptEncodeObject(
-    PKCS_7_ASN_ENCODING // Encoding type
-    , X509_EXTENSIONS // Structure type
-    , &CertExtensions // Address of CERT_EXTENSIONS structure
-    , NULL // pbEncoded
-    , &cbCertExtensionsEncoded); // pbEncoded size
-
-    //-------------------------------------------------------------------
-    // Allocate memory for the encoded struct.
-    BYTE* pbCertExtensionsEncoded(NULL);
-
-    pbCertExtensionsEncoded = (BYTE*)malloc(cbCertExtensionsEncoded);
-
-    //-------------------------------------------------------------------
-    // Call CryptEncodeObject to do the actual encoding of the struct.
-
-    bReturn = CryptEncodeObject(
-    PKCS_7_ASN_ENCODING // Encoding type
-    , X509_EXTENSIONS // Structure type
-    , &CertExtensions // Address of CERT_EXTENSIONS structure
-    , pbCertExtensionsEncoded // pbEncoded
-    , &cbCertExtensionsEncoded); // pbEncoded size
-    ////////////////////////////////////////////////////////////////////////
-
-    // fill CRYPTOAPI_BLOB
-    CRYPT_ATTR_BLOB AttributesBlobArr[] =
-    {
-    {
-    cbCertExtensionsEncoded,
-    pbCertExtensionsEncoded
-    }
-    };
-
-    // fill CRYPT_ATTRIBUTE
-    CRYPT_ATTRIBUTE CryptAttribute;
-    CryptAttribute.pszObjId = szOID_CERT_EXTENSIONS;
-    CryptAttribute.cValue = 1;
-    CryptAttribute.rgValue = AttributesBlobArr;
-    //
-    //
-// Раздел Расширения сертификатов и в него включаю Улучшенный ключ и Использование ключа
-//
-CRYPT_ATTRIBUTE rgAttrib = {0};
-rgAttrib.pszObjId = szOID_CERT_EXTENSIONS;
-rgAttrib.cValue = 2;
-rgAttrib.rgValue = CertAttrBlob;
-
-CertReqInfo.cAttribute = 1;
-CertReqInfo.rgAttribute = &rgAttrib;
-
-
-}
-*/
