@@ -22,6 +22,7 @@ def main():
     data = req.get_data()
     print(3)
     print len(data)
+    req.set_usage(0xff)
     open('request.req', 'wb').write(b64encode(req.get_data()))
 
 if __name__ == "__main__":

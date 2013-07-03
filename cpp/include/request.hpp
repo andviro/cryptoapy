@@ -30,6 +30,8 @@ class CertRequest
         //void set_usage_bit(BYTE usage) throw (CSPException);
         ~CertRequest() throw (CSPException);
         void add_eku(LPCSTR oid) throw (CSPException);
+        void set_usage(BYTE usage) throw (CSPException);
+        void reset_usage(BYTE usage) throw (CSPException);
 };
 
 #endif

@@ -74,8 +74,8 @@ class KeyUsage : public CertExtension {
     BYTE ByteKeyUsage;
     public:
         KeyUsage() : CertExtension(szOID_KEY_USAGE, TRUE){
-            ZeroMemory( &key_usage, sizeof(CRYPT_BIT_BLOB));
-            ByteKeyUsage = 0xFF;
+            ZeroMemory(&key_usage, sizeof(key_usage));
+            ByteKeyUsage = 0x0;
             key_usage.cbData=1;
             key_usage.pbData=&ByteKeyUsage;
             set_struct((void *)&key_usage, X509_KEY_USAGE);
@@ -133,21 +133,29 @@ class CertExtensions : public EncodedObject
         }
 
         void encode(BYTE **s, DWORD *slen) {
+            puts("11");
             cexts.cExtension = exts.size();
+            puts("12");
             cexts.rgExtension = new CERT_EXTENSION[cexts.cExtension];
+            puts("13");
             try {
+            puts("14");
                 vector<CertExtension *>::const_iterator cii;
                 int idx = 0;
-
                 for(cii=exts.begin(); cii!=exts.end(); cii++) {
                     memcpy(&cexts.rgExtension[idx], (*cii)->get_data(), sizeof(CERT_EXTENSION));
+                    idx ++;
                 }
+            puts("15");
                 EncodedObject::encode(s, slen);
+            puts("16");
             } catch (...) {
-                free(cexts.rgExtension);
+                delete[] cexts.rgExtension;
                 throw;
             }
-            free(cexts.rgExtension);
+            puts("17");
+            delete[] cexts.rgExtension;
+            puts("18");
         }
 
         void add(CertExtension *e) {
@@ -201,6 +209,14 @@ CertRequest::CertRequest(Crypt *ctx, BYTE *STRING, DWORD LENGTH) throw (CSPExcep
     exts->add(eku);
     CertReqInfo.cAttribute = 1;
     CertReqInfo.rgAttribute = &ext_attr;
+}
+
+void CertRequest::set_usage(BYTE usage) throw (CSPException) {
+    ku -> set_usage(usage);
+}
+
+void CertRequest::reset_usage(BYTE usage) throw (CSPException) {
+    ku -> reset_usage(usage);
 }
 
 void CertRequest::add_eku(LPCSTR oid) throw (CSPException) {
@@ -263,7 +279,9 @@ void CertRequest::get_data(BYTE **s, DWORD *slen) throw (CSPException) {
     //
     // XXX
     //
+    puts("1");
     exts->encode(&attr_blobs[0].pbData, &attr_blobs[0].cbData);
+    puts("2");
 
     bool res = CryptSignAndEncodeCertificate(
         ctx->hprov, AT_SIGNATURE, MY_ENC_TYPE,
@@ -283,7 +301,9 @@ void CertRequest::get_data(BYTE **s, DWORD *slen) throw (CSPException) {
     free(attr_blobs[0].pbData);
     ZeroMemory(&attr_blobs, sizeof(attr_blobs));
 
+    puts("3");
     if(!res) {
+    puts("4");
         throw CSPException("Couldn't encode certificate request");
     }
 }
