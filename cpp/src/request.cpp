@@ -15,7 +15,7 @@ class EncodedObject {
         }
 
         void set_struct(LPVOID info, LPCSTR type) {
-            LOG("EncodedObject::set_struct(%p, %s\n)", info, type);
+            LOG("EncodedObject::set_struct(%p, %x)\n", info, type );
             struct_info = info;
             struct_type = type;
         }
@@ -47,7 +47,7 @@ class CertExtension : protected EncodedObject {
         CERT_EXTENSION data;
     public:
         CertExtension(LPCSTR oid, bool critical=FALSE) {
-            LOG("CertExtension::CertExtension(%s, %i\n)", oid, critical);
+            LOG("CertExtension::CertExtension(%s, %i)\n", oid, critical);
             ZeroMemory(&data, sizeof(data));
             data.pszObjId = (LPSTR)oid;
             data.fCritical = critical;
