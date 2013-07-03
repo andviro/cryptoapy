@@ -170,6 +170,8 @@ CertRequest::CertRequest(Crypt *ctx, BYTE *STRING, DWORD LENGTH) throw (CSPExcep
     LOG("CertRequest::CertRequest(%p, %s)\n", ctx, STRING);
     if (ctx) {
         ctx -> ref();
+    } else {
+        throw CSPException("Null key container can not generate requests", -1);
     }
     cbNameEncoded = 0;
     pbNameEncoded = NULL;

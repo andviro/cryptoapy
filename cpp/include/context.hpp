@@ -33,9 +33,9 @@ public:
     friend class CryptMsg;
     friend class CertStore;
     friend class CertRequest;
-    friend Crypt *Context(char *, DWORD , DWORD, char*) throw (CSPException);
+    friend Crypt *Context(char *, DWORD , DWORD, char*) throw (CSPException, CSPNotFound);
 };
 
-Crypt *Context(char *container, DWORD type, DWORD flags, char *name=NULL) throw(CSPException);
+Crypt *Context(char *container, DWORD type, DWORD flags, char *name=NULL) throw(CSPException, CSPNotFound);
 
 #endif

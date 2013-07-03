@@ -217,7 +217,7 @@ Cert *CertStore::get_cert_by_info(CERT_INFO *psi) throw(CSPException)
     if (!res) {
         DWORD err = GetLastError();
         if (err == CRYPT_E_NOT_FOUND) {
-            return NULL;
+            throw CSPNotFound("Subject cert not found", err);
         }
         throw CSPException("Error gettin subject certificate from store", err);
     }

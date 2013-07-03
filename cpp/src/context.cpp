@@ -79,7 +79,7 @@ char *Crypt::uniq_name() {
     return s;
 }
 
-Crypt *Context(char *container, DWORD type, DWORD flags, char *name) throw(CSPException)
+Crypt *Context(char *container, DWORD type, DWORD flags, char *name) throw(CSPException, CSPNotFound)
 {
     HCRYPTPROV hp;
     Crypt *res;
@@ -90,8 +90,9 @@ Crypt *Context(char *container, DWORD type, DWORD flags, char *name) throw(CSPEx
         DWORD err = GetLastError();
         switch (err) {
         case NTE_KEYSET_NOT_DEF:
+            throw CSPNotFound("Keyset not defined", err);
         case NTE_BAD_KEYSET_PARAM:
-            return NULL;
+            throw CSPNotFound("Bad keyset parameters or container not found", err);
         default:
             throw CSPException("Couldn't acquire context", err);
         }
@@ -110,7 +111,7 @@ Key *Crypt::get_key(DWORD keyspec) throw(CSPException)
     if(!CryptGetUserKey(hprov, keyspec, &hkey)) {
         DWORD err = GetLastError();
         if (err == NTE_NO_KEY) {
-            return NULL;
+            throw CSPNotFound("Key not found", err);
         } else {
             throw CSPException("Couldn't acquire user pub key", err);
         }
