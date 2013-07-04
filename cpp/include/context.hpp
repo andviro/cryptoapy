@@ -29,6 +29,8 @@ public:
 
     Key *import_key(BYTE *STRING, DWORD LENGTH, Key *decrypt=NULL) throw(CSPException);
 
+    void set_password(BYTE *STRING, DWORD LENGTH, DWORD keyspec=AT_SIGNATURE) throw(CSPException);
+
     friend class Cert;
     friend class CryptMsg;
     friend class CertStore;

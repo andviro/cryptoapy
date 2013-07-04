@@ -79,6 +79,20 @@ char *Crypt::uniq_name() {
     return s;
 }
 
+void Crypt::set_password(BYTE *STRING, DWORD LENGTH, DWORD keyspec) throw (CSPException) {
+    DWORD param;
+
+    if (keyspec == AT_SIGNATURE) {
+        param = PP_SIGNATURE_PIN;
+    } else {
+        param = PP_KEYEXCHANGE_PIN;
+    }
+
+    if(!CryptSetProvParam( hprov, param, STRING, 0)) {
+        throw CSPException("Couldn't set password");
+    }
+}
+
 Crypt *Context(char *container, DWORD type, DWORD flags, char *name) throw(CSPException, CSPNotFound)
 {
     HCRYPTPROV hp;

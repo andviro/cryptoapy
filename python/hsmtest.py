@@ -8,29 +8,29 @@ from base64 import b64encode
 ctxname = None
 
 
-ctxname = 'test'
-# provider = "Crypto-Pro HSM CSP"
+ctxname = 'test7'
+#provider = "Crypto-Pro HSM CSP"
+provider = "Crypto-Pro CSP"
 provider = None
-# silent = csp.CRYPT_SILENT
+#silent = csp.CRYPT_SILENT
 silent = 0
 
 
 def main():
     global ctxname
     try:
-        ctx = csp.Context(ctxname, csp.PROV_GOST_2001_DH, 0 | silent,
-                          provider)
-    except ValueError:
+        ctx = csp.Context(r'{0}'.format(ctxname), csp.PROV_GOST_2001_DH, 0 | silent, provider)
+    except:
         ctx = None
     if ctx is None:
         print 'creating context:', ctxname
         ctx = csp.Context(
-            r'\\.\hdimage\{0}'.format(ctxname), csp.PROV_GOST_2001_DH,
-            csp.CRYPT_NEWKEYSET | silent, provider)
+            r'{0}'.format(ctxname), csp.PROV_GOST_2001_DH, csp.CRYPT_NEWKEYSET | silent, provider)
         print 'created context:', ctx.uniq_name()
     else:
         print 'container', ctx.uniq_name(), 'exists'
 
+    ctx.set_password(b'zhopa')
     try:
         key = ctx.get_key()
     except ValueError:
@@ -38,7 +38,7 @@ def main():
 
     if key is None:
         print 'creating signature key'
-        key = ctx.create_key(csp.CRYPT_EXPORTABLE)
+        key = ctx.create_key(csp.CRYPT_EXPORTABLE, csp.AT_SIGNATURE)
 
     try:
         ekey = ctx.get_key(csp.AT_KEYEXCHANGE)
@@ -51,9 +51,9 @@ def main():
 
     has_cert = True
     store = csp.CertStore(ctx, "MY")
-    if not len(list(store.find_by_name('test3'))):
+    if not len(list(store.find_by_name('test4'))):
         try:
-            c = csp.Cert.self_sign(ctx, b'CN=test3')
+            c = csp.Cert.self_sign(ctx, b'CN=test4')
             store.add_cert(c)
             print 'Added test cert'
         except SystemError:
@@ -63,7 +63,7 @@ def main():
         print 'cert already exists'
 
     if has_cert:
-        cert = list(store.find_by_name('test3'))[0]
+        cert = list(store.find_by_name('test4'))[0]
         print cert.name()
         mess = csp.CryptMsg(ctx)
         mess.add_signer_cert(cert)
