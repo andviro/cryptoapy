@@ -209,7 +209,7 @@ CertStore::CertStore(Crypt *parent, LPCTSTR protocol) throw(CSPException)
     }
 }
 
-Cert *CertStore::get_cert_by_info(CERT_INFO *psi) throw(CSPException)
+Cert *CertStore::get_cert_by_info(CERT_INFO *psi) throw(CSPException, CSPNotFound)
 {
     PCCERT_CONTEXT res;
     LOG("CertStore::get_cert_by_info(%p)\n", psi);

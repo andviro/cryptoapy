@@ -105,7 +105,7 @@ Crypt *Context(char *container, DWORD type, DWORD flags, char *name) throw(CSPEx
     return res;
 };
 
-Key *Crypt::get_key(DWORD keyspec) throw(CSPException)
+Key *Crypt::get_key(DWORD keyspec) throw(CSPException, CSPNotFound)
 {
     HCRYPTKEY hkey = 0;
     if(!CryptGetUserKey(hprov, keyspec, &hkey)) {

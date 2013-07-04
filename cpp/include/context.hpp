@@ -25,7 +25,7 @@ public:
 
     Key *create_key(DWORD flags, DWORD keyspec=AT_SIGNATURE) throw(CSPException);
 
-    Key *get_key(DWORD keyspec=AT_SIGNATURE) throw(CSPException);
+    Key *get_key(DWORD keyspec=AT_SIGNATURE) throw(CSPException, CSPNotFound);
 
     Key *import_key(BYTE *STRING, DWORD LENGTH, Key *decrypt=NULL) throw(CSPException);
 

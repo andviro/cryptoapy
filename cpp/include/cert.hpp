@@ -106,7 +106,7 @@ public:
 
     CertFind *find_by_name(BYTE *STRING, DWORD LENGTH) throw(CSPException);
 
-    Cert *get_cert_by_info(CERT_INFO *psi) throw(CSPException);
+    Cert *get_cert_by_info(CERT_INFO *psi) throw(CSPException, CSPNotFound);
 
     Cert *add_cert(Cert *c) throw(CSPException);
 

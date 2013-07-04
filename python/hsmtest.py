@@ -9,27 +9,42 @@ ctxname = None
 
 
 ctxname = 'test'
-#provider = "Crypto-Pro HSM CSP"
+# provider = "Crypto-Pro HSM CSP"
 provider = None
+# silent = csp.CRYPT_SILENT
+silent = 0
 
 
 def main():
     global ctxname
-    ctx = csp.Context(ctxname, csp.PROV_GOST_2001_DH, 0 | csp.CRYPT_SILENT,
-                      provider)
+    try:
+        ctx = csp.Context(ctxname, csp.PROV_GOST_2001_DH, 0 | silent,
+                          provider)
+    except ValueError:
+        ctx = None
     if ctx is None:
         print 'creating context:', ctxname
         ctx = csp.Context(
-            r'\\.\hsm\{0}'.format(ctxname), csp.PROV_GOST_2001_DH,
-            csp.CRYPT_NEWKEYSET | csp.CRYPT_SILENT, provider)
-        print 'created context:', ctx
+            r'\\.\hdimage\{0}'.format(ctxname), csp.PROV_GOST_2001_DH,
+            csp.CRYPT_NEWKEYSET | silent, provider)
+        print 'created context:', ctx.uniq_name()
     else:
         print 'container', ctx.uniq_name(), 'exists'
-    key = ctx.get_key()
+
+    try:
+        key = ctx.get_key()
+    except ValueError:
+        key = None
+
     if key is None:
         print 'creating signature key'
         key = ctx.create_key(csp.CRYPT_EXPORTABLE)
-    ekey = ctx.get_key(csp.AT_KEYEXCHANGE)
+
+    try:
+        ekey = ctx.get_key(csp.AT_KEYEXCHANGE)
+    except ValueError:
+        ekey = None
+
     if ekey is None:
         print 'creating exchange key'
         ekey = ctx.create_key(csp.CRYPT_EXPORTABLE, csp.AT_KEYEXCHANGE)
