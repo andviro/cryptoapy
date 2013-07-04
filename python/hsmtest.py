@@ -19,13 +19,13 @@ silent = 0
 def main():
     global ctxname
     try:
-        ctx = csp.Context(r'{0}'.format(ctxname), csp.PROV_GOST_2001_DH, 0 | silent, provider)
+        ctx = csp.Context(r'\\.\hdimage\{0}'.format(ctxname), csp.PROV_GOST_2001_DH, 0 | silent, provider)
     except:
         ctx = None
     if ctx is None:
         print 'creating context:', ctxname
         ctx = csp.Context(
-            r'{0}'.format(ctxname), csp.PROV_GOST_2001_DH, csp.CRYPT_NEWKEYSET | silent, provider)
+            r'\\.\hdimage\{0}'.format(ctxname), csp.PROV_GOST_2001_DH, csp.CRYPT_NEWKEYSET | silent, provider)
         print 'created context:', ctx.uniq_name()
     else:
         print 'container', ctx.uniq_name(), 'exists'

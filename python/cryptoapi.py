@@ -75,15 +75,17 @@ def create_request(cont, descriptor, local=True):
     :returns: строка base64, пустая строка в случае ошибки (???)
 
     """
-    provider = "Crypto-Pro HSM CSP" if not local else None
-    ctx = csp.Context(cont, csp.PROV_GOST_2001_DH, 0, provider)
-    req = csp.CertRequest(ctx, b'CN=test')
-    req.add_eku(csp.szOID_PKIX_KP_EMAIL_PROTECTION)
-    req.set_usage(0xff)
-    return b64encode(req.get_data())
+    try:
+        provider = "Crypto-Pro HSM CSP" if not local else None
+        ctx = csp.Context(cont, csp.PROV_GOST_2001_DH, 0, provider)
+        req = csp.CertRequest(ctx, b'CN=test')
+        req.add_eku(csp.szOID_PKIX_KP_EMAIL_PROTECTION)
+        req.set_usage(0xff)
+        return b64encode(req.get_data())
+    except:
+        return ""
 
-#cont = uuid4().hex
-cont = b'964a766ffa744f4b90ac06908792eea2'
+cont = uuid4().hex
 print(gen_key(cont))
 print(create_request(cont, 'CN=test'))
-#print(remove_key(cont))
+print(remove_key(cont))
