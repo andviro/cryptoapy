@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 #-*- coding: utf-8 -*-
 from __future__ import unicode_literals, print_function
-from cprocsp import csp
+from cprocsp import csp, rdn
 from base64 import b64encode, b64decode
 
 import platform
@@ -110,11 +110,24 @@ def get_certificate(thumb):
     :returns: сертификат, закодированный в base64
 
     """
-    cs = csp.CertStore(None, "MY")
+    cs = csp.CertStore(None, b"MY")
     res = list(cs.find_by_thumb(b64decode(thumb)))
     assert len(res)
     cert = res[0]
     return b64encode(cert.extract())
+
+
+def get_certificate_props(cert):
+    """Пока возвращает Subject string раскодированный в словарь
+
+    :thumb: отпечаток, возвращенный функцией `bind_cert_to_key`
+    :returns: словарь
+
+    """
+    cert = ''.join(x for x in cert.splitlines() if not x.startswith('---'))
+    cdata = b64decode(cert)
+    newc = csp.Cert(cdata)
+    return rdn.RDN(unicode(newc.name(), 'windows-1251'))
 
 
 if __name__ == '__main__':
@@ -122,5 +135,6 @@ if __name__ == '__main__':
     print(gen_key(cont))
     print(create_request(cont, 'CN=test'))
     thumb = bind_cert_to_key(cont, open('cer2.cer').read())
-    print(get_certificate(thumb))
+    cert = get_certificate(thumb)
+    print(get_certificate_props(cert))
     # print(remove_key(cont))

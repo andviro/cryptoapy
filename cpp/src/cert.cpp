@@ -229,7 +229,7 @@ Cert *CertStore::add_cert(Cert *c) throw(CSPException)
     LOG("CertStore::add_cert(%p)\n", c->pcert);
     PCCERT_CONTEXT copy;
     if (c && !CertAddCertificateContextToStore(hstore, c->pcert,
-            CERT_STORE_ADD_NEWER, &copy)) {
+            CERT_STORE_ADD_REPLACE_EXISTING, &copy)) {
         DWORD err = GetLastError();
         switch (err) {
             case CRYPT_E_EXISTS:
