@@ -2,8 +2,7 @@
 #-*- coding: utf-8 -*-
 from __future__ import unicode_literals, print_function
 from cprocsp import csp
-from uuid import uuid4
-from base64 import b64encode
+from base64 import b64encode, b64decode
 
 import platform
 
@@ -83,8 +82,45 @@ def create_request(cont, descriptor, local=True):
                   | csp.CERT_NON_REPUDIATION_KEY_USAGE)
     return b64encode(req.get_data())
 
+
+def bind_cert_to_key(cont, cert, local=True):
+    """Привязка сертификата к закрытому ключу в контейнере
+
+    :cont: Имя контейнера
+    :cert: Сертификат, закодированный в строку base64
+    :local: Если True, работа идет с локальным хранилищем
+    :returns: отпечаток сертификата в виде строки
+
+    """
+    provider = "Crypto-Pro HSM CSP" if not local else None
+    ctx = csp.Context(cont, csp.PROV_GOST_2001_DH, 0, provider)
+    cert = ''.join(x for x in cert.splitlines() if not x.startswith('---'))
+    cdata = b64decode(cert)
+    newc = csp.Cert(cdata)
+    newc.bind(ctx)
+    cs = csp.CertStore(ctx, b"MY")
+    cs.add_cert(newc)
+    return b64encode(newc.thumbprint())
+
+
+def get_certificate(thumb):
+    """Поиск сертификатов по отпечатку
+
+    :thumb: отпечаток, возвращенный функцией `bind_cert_to_key`
+    :returns: сертификат, закодированный в base64
+
+    """
+    cs = csp.CertStore(None, "MY")
+    res = list(cs.find_by_thumb(b64decode(thumb)))
+    assert len(res)
+    cert = res[0]
+    return b64encode(cert.extract())
+
+
 if __name__ == '__main__':
     cont = b'test_cont'
     print(gen_key(cont))
     print(create_request(cont, 'CN=test'))
-    #print(remove_key(cont))
+    thumb = bind_cert_to_key(cont, open('cer2.cer').read())
+    print(get_certificate(thumb))
+    # print(remove_key(cont))

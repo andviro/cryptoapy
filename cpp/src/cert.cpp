@@ -229,8 +229,14 @@ Cert *CertStore::add_cert(Cert *c) throw(CSPException)
     LOG("CertStore::add_cert(%p)\n", c->pcert);
     PCCERT_CONTEXT copy;
     if (c && !CertAddCertificateContextToStore(hstore, c->pcert,
-            CERT_STORE_ADD_ALWAYS, &copy)) {
-        throw CSPException("Couldn't add cert to store");
+            CERT_STORE_ADD_NEWER, &copy)) {
+        DWORD err = GetLastError();
+        switch (err) {
+            case CRYPT_E_EXISTS:
+                throw CSPException("Matching or newer cerificate already exist in store", err);
+            default:
+                throw CSPException("Couldn't add cert to store");
+        }
     }
     return new Cert(copy, this);
 }
