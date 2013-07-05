@@ -130,6 +130,77 @@ def get_certificate_props(cert):
     return rdn.RDN(unicode(newc.name(), 'windows-1251'))
 
 
+def sign(cert, data, include_data, local=True):
+    """Подписывание данных сертификатом
+
+    :cert: сертификат, закодированный в base64
+    :data: бинарные данные, закодированные в base64
+    :include_data: булев флаг, если True -- данные прицепляются вместе с подписью
+    :local: Если True, работа идет с локальным хранилищем
+    :returns: данные и/или подпись, закодированные в base64
+
+    """
+    provider = "Crypto-Pro HSM CSP" if not local else None
+
+    ctx = csp.Context(None, csp.PROV_GOST_2001_DH, 0, provider)
+    cert = ''.join(x for x in cert.splitlines() if not x.startswith('---'))
+    cdata = b64decode(cert)
+    signcert = csp.Cert(cdata)
+    mess = csp.CryptMsg(ctx)
+    mess.add_signer_cert(signcert)
+    sign_data = mess.sign_data(b64decode(data), include_data)
+    return b64encode(sign_data)
+
+
+def check_signature(cert, sig, data, local=True):
+    """Проверка подписи под данными
+
+    :cert: сертификат, закодированный в base64
+    :data: бинарные данные, закодированные в base64
+    :sig: данные подписи в base64
+    :local: Если True, работа идет с локальным хранилищем
+    :returns: True или False
+
+    """
+    provider = "Crypto-Pro HSM CSP" if not local else None
+    ctx = csp.Context(None, csp.PROV_GOST_2001_DH, csp.CRYPT_VERIFYCONTEXT |
+                      csp.CRYPT_SILENT, provider)
+    sign = csp.Signature(b64decode(sig), ctx)
+    cert = ''.join(x for x in cert.splitlines() if not x.startswith('---'))
+    data = b64decode(data)
+    cdata = b64decode(cert)
+    cert_thumb = csp.Cert(cdata).thumbprint()
+    cs = csp.CertStore(sign)
+    for n in range(sign.num_signers):
+        psi = sign.get_nth_signer_info(n)
+        nthcert = cs.get_cert_by_info(psi)
+        if nthcert.thumbprint() == cert_thumb:
+            return sign.verify_data(data, n)
+    return False
+
+
+def encrypt(certs, data):
+    """Шифрование данных на сертификатах получателей
+
+    :certs: список сертификатов в base64
+    :data: данные в base64
+    :returns: шифрованные данные в base64
+
+    """
+    bin_data = b64decode(data)
+    msg = csp.CryptMsg()
+    print(1)
+    for c in certs:
+        print(c)
+        certdata = ''.join(x for x in c.splitlines() if not x.startswith('---'))
+        cert = csp.Cert(b64decode(certdata))
+        msg.add_recipient_cert(cert)
+        print(2)
+    print(3)
+    encrypted = msg.encrypt_data(bin_data)
+    return b64encode(encrypted)
+
+
 if __name__ == '__main__':
     cont = b'test_cont'
     print(gen_key(cont))
@@ -137,4 +208,13 @@ if __name__ == '__main__':
     thumb = bind_cert_to_key(cont, open('cer2.cer').read())
     cert = get_certificate(thumb)
     print(get_certificate_props(cert))
+    data = b64encode('Ahaahahahah!!!')
+    wrong_data = b64encode('Ahaahahahah???')
+    signdata = sign(cert, data, True)
+    print(check_signature(cert, signdata, data))
+    print(check_signature(cert, signdata, wrong_data))
+    msg = b64encode('Hello, dolly!')
+    encmsg = encrypt([cert], msg)
+    print(encmsg)
+
     # print(remove_key(cont))
