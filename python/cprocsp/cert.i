@@ -14,6 +14,8 @@
 %newobject CertIter::next;
 %newobject CertFind::next;
 
+%feature("ref") Cert "$this->ref();"
+%feature("unref") Cert "$this->unref();"
 %feature("ref") CertStore "$this->ref();"
 %feature("unref") CertStore "$this->unref();"
 %feature("python:slot", "tp_iter", functype="getiterfunc") CertStore::__iter__;

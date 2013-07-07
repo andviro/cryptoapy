@@ -7,7 +7,7 @@
 class CertStore;
 class Crypt;
 class CryptMsg;
-class Cert
+class Cert : public RCObj
 {
 private:
     PCCERT_CONTEXT pcert;

@@ -383,10 +383,10 @@ CertStore::CertStore(CryptMsg *parent) throw(CSPException)
     if (msg) {
         msg->ref();
     }
-    hstore = CertOpenStore(CERT_STORE_PROV_MSG, MY_ENC_TYPE, 0, 0, msg->hmsg);
-    if (!hstore) {
-        throw CSPException("Couldn't open message certificate store");
-    }
+    //hstore = CertOpenStore(CERT_STORE_PROV_MSG, MY_ENC_TYPE, 0, 0, msg->hmsg);
+    //if (!hstore) {
+        //throw CSPException("Couldn't open message certificate store");
+    //}
 }
 
 CertStore::~CertStore() throw(CSPException)

@@ -20,7 +20,7 @@ def main():
     print ctx.prov_name()
     print ctx.uniq_name()
     print ctx.prov_type()
-    cdata = open('certnew(1).cer', 'rb').read()
+    cdata = open('certnew.cer', 'rb').read()
     newc = csp.Cert(cdata)
     newc.bind(ctx)
     cs = csp.CertStore(ctx, "MY")
