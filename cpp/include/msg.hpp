@@ -33,7 +33,7 @@ public:
     void decrypt_data(BYTE *STRING, DWORD LENGTH, BYTE **s, DWORD *slen) throw(CSPException);
     virtual void sign_data(BYTE *STRING, DWORD LENGTH, BYTE **s, DWORD *slen,
             Cert *signer, bool detach=0) throw(CSPException);
-    bool verify_sign(int n) throw(CSPException);
+    bool verify_sign(DWORD n) throw(CSPException);
 
     friend class CertStore;
 };

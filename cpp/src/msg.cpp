@@ -10,18 +10,17 @@ bool CryptMsg::verify_cert(Cert *c) throw(CSPException)
 
 }
 
-bool CryptMsg::verify_sign(int n) throw(CSPException)
+bool CryptMsg::verify_sign(DWORD n) throw(CSPException)
 {
     CRYPT_VERIFY_MESSAGE_PARA VerifyParams;
     DWORD res, msg_size = 0;
     printf("%p, %i, %p\n", data, data_length, &msg_size);
 
     // Initialize the VerifyParams data structure.
+    ZeroMemory(&VerifyParams, sizeof(VerifyParams));
     VerifyParams.cbSize = sizeof(CRYPT_VERIFY_MESSAGE_PARA);
     VerifyParams.dwMsgAndCertEncodingType = MY_ENCODING_TYPE;
     VerifyParams.hCryptProv = cprov->hprov;
-    VerifyParams.pfnGetSignerCertificate = NULL;
-    VerifyParams.pvGetArg = NULL;
 
     res = CryptVerifyMessageSignature(
               &VerifyParams,
@@ -31,6 +30,7 @@ bool CryptMsg::verify_sign(int n) throw(CSPException)
               NULL,
               &msg_size,
               NULL);
+    printf("%u\n", res);
     if(!res) {
         printf("%x\n", GetLastError());
     }
@@ -49,6 +49,15 @@ void CryptMsg::init(Crypt *ctx) throw(CSPException)
     LOG("    initialized msg: %p\n", this);
 
 }
+
+CryptMsg::CryptMsg(BYTE *STRING, DWORD LENGTH, Crypt *ctx) throw(CSPException)
+{
+    LOG("CryptMsg::CryptMsg(%p, %lu, %p)\n", STRING, LENGTH, ctx);
+    init(ctx);
+    data = new BYTE[LENGTH];
+    data_length = LENGTH;
+    memcpy(data, STRING, LENGTH);
+};
 
 CryptMsg::CryptMsg(Crypt *ctx) throw(CSPException)
 {
@@ -245,15 +254,6 @@ void CryptMsg::sign_data(BYTE *STRING, DWORD LENGTH, BYTE **s, DWORD *slen, Cert
     }
 }
 
-CryptMsg::CryptMsg(BYTE *STRING, DWORD LENGTH, Crypt *ctx) throw(CSPException)
-{
-    LOG("CryptMsg::CryptMsg(%p, %lu, %p)\n", STRING, LENGTH, ctx);
-    init(ctx);
-    data = new BYTE[LENGTH];
-    data_length = LENGTH;
-    memcpy(data, STRING, LENGTH);
-};
-
 CryptMsg::~CryptMsg() throw(CSPException)
 {
     LOG("CryptMsg::~CryptMsg(%p)\n", this);
@@ -262,10 +262,12 @@ CryptMsg::~CryptMsg() throw(CSPException)
     }
     vector<Cert *>::const_iterator cii;
     for(cii=signers.begin(); cii!=signers.end(); cii++) {
-        (*cii)->unref();
+        if (*cii)
+            (*cii)->unref();
     }
     for(cii=recipients.begin(); cii!=recipients.end(); cii++) {
-        (*cii)->unref();
+        if (*cii)
+            (*cii)->unref();
     }
     if (data) {
         delete[] data;

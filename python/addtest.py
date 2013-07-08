@@ -11,8 +11,7 @@ provider = None
 
 def main():
     global ctxname
-    ctx = csp.Context(ctxname, csp.PROV_GOST_2001_DH, 0 | csp.CRYPT_SILENT,
-                      provider)
+    ctx = csp.Context(ctxname, csp.PROV_GOST_2001_DH, 0 | csp.CRYPT_SILENT, provider)
     if not ctx:
         print 'Container', ctxname, 'not found!'
         return

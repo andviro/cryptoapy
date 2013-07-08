@@ -8,9 +8,9 @@ from base64 import b64encode
 ctxname = None
 
 
-ctxname = 'test7'
+ctxname = 'test'
 #provider = "Crypto-Pro HSM CSP"
-provider = "Crypto-Pro CSP"
+#provider = "Crypto-Pro CSP"
 provider = None
 #silent = csp.CRYPT_SILENT
 silent = 0
@@ -19,18 +19,18 @@ silent = 0
 def main():
     global ctxname
     try:
-        ctx = csp.Context(r'\\.\hdimage\{0}'.format(ctxname), csp.PROV_GOST_2001_DH, 0 | silent, provider)
+        ctx = csp.Context(r'{0}'.format(ctxname), csp.PROV_GOST_2001_DH, 0 | silent, provider)
     except:
         ctx = None
     if ctx is None:
         print 'creating context:', ctxname
         ctx = csp.Context(
-            r'\\.\hdimage\{0}'.format(ctxname), csp.PROV_GOST_2001_DH, csp.CRYPT_NEWKEYSET | silent, provider)
+            r'{0}'.format(ctxname), csp.PROV_GOST_2001_DH, csp.CRYPT_NEWKEYSET | silent, provider)
         print 'created context:', ctx.uniq_name()
     else:
         print 'container', ctx.uniq_name(), 'exists'
 
-    ctx.set_password(b'zhopa')
+    ctx.set_password(b'')
     try:
         key = ctx.get_key()
     except ValueError:
@@ -51,9 +51,9 @@ def main():
 
     has_cert = True
     store = csp.CertStore(ctx, "MY")
-    if not len(list(store.find_by_name('test4'))):
+    if not len(list(store.find_by_name('test_self'))):
         try:
-            c = csp.Cert.self_sign(ctx, b'CN=test4')
+            c = csp.Cert.self_sign(ctx, b'CN=test_self')
             store.add_cert(c)
             print 'Added test cert'
         except SystemError:
@@ -63,18 +63,19 @@ def main():
         print 'cert already exists'
 
     if has_cert:
-        cert = list(store.find_by_name('test4'))[0]
+        cert = list(store.find_by_name('test'))[0]
         print cert.name()
         mess = csp.CryptMsg(ctx)
-        mess.add_signer_cert(cert)
-        data = mess.sign_data(b'hurblewurble', True)
+        #mess.add_signer_cert(cert)
+        data = mess.sign_data(b'hurblewurble', cert, False)
         print 'length of signature:', len(data)
-        sgn = csp.Signature(data)
-        for n in range(sgn.num_signers):
-            if sgn.verify_data(b'hurblewurble', n):
-                print 'sign', n, 'correct'
-            else:
-                print 'sign', n, 'failed!'
+        sgn = csp.CryptMsg(data)
+        print sgn.verify_sign(0)
+        #for n in range(sgn.num_signers):
+            #if sgn.verify_data(b'hurblewurble', n):
+                #print 'sign', n, 'correct'
+            #else:
+                #print 'sign', n, 'failed!'
 
     req = csp.CertRequest(ctx, b'CN=test3')
     data = req.get_data()
