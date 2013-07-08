@@ -5,7 +5,7 @@ from cprocsp import csp
 
 
 #ctxname = 'test2'
-ctxname = b'test'
+ctxname = b'123456789abcdef'
 #provider = "Crypto-Pro HSM CSP"
 provider = None
 silent = csp.CRYPT_SILENT
@@ -14,27 +14,32 @@ silent = csp.CRYPT_SILENT
 def main():
     global ctxname
     try:
-        ctx = csp.Context(b'{0}'.format(ctxname), csp.PROV_GOST_2001_DH, 0 | silent, provider)
+        ctx = csp.Crypt(b'{0}'.format(ctxname), csp.PROV_GOST_2001_DH, 0 | silent, provider)
     except:
         ctx = None
     if ctx is None:
-        ctx = csp.Context(b'{0}'.format(ctxname), csp.PROV_GOST_2001_DH, csp.CRYPT_NEWKEYSET | silent, provider)
+        ctx = csp.Crypt(b'{0}'.format(ctxname), csp.PROV_GOST_2001_DH, csp.CRYPT_NEWKEYSET | silent, provider)
     msg = csp.CryptMsg(ctx)
     cs = csp.CertStore(ctx, b"My")
-    rec_c = list(cs.find_by_name(b'test_self'))[0]
+
+    rec_c = list(cs.find_by_name(b'123456789abcdef'))[0]
     print(rec_c.name())
-    msg.add_recipient_cert(rec_c)
+
+    msg.add_recipient(rec_c)
     data = msg.encrypt_data(b'Test byte string')
     print(len(data))
-    return_data = msg.decrypt_data(data)
+
+    encrypted = csp.CryptMsg(data, ctx)
+    return_data = encrypted.decrypt()
     print(return_data)
-    #msg.add_signer_cert(rec_c)
+
     signed = msg.sign_data(b'Test signed data', rec_c)
     print(len(signed))
+
     print(1)
     msg2 = csp.CryptMsg(signed, ctx)
     print(2)
-    print(msg2.verify_sign(0))
+    print(msg2.verify(0))
     print(3)
     detached = msg.sign_data(b'Test signed data', rec_c, True)
     print(4)

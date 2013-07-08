@@ -7,6 +7,7 @@ void CertStore::init()
 {
     ctx = NULL;
     msg = NULL;
+    hmsg = 0;
     hstore = 0;
     LOG("CertStore::init %p\n", this);
 }
@@ -279,12 +280,10 @@ CertFind::~CertFind() throw (CSPException)
     LOG("CertFind::~CertFind()\n");
     if (findtype == CERT_FIND_SUBJECT_STR) {
         if (param) {
-            LOG("hohoho\n");
             free(param);
         }
     } else {
         if (chb.pbData) {
-            LOG("hahaha\n");
             free(chb.pbData);
         }
     }
@@ -383,10 +382,21 @@ CertStore::CertStore(CryptMsg *parent) throw(CSPException)
     if (msg) {
         msg->ref();
     }
-    //hstore = CertOpenStore(CERT_STORE_PROV_MSG, MY_ENC_TYPE, 0, 0, msg->hmsg);
-    //if (!hstore) {
-        //throw CSPException("Couldn't open message certificate store");
-    //}
+    if (hmsg && !CryptMsgClose(hmsg)) {
+        throw CSPException("Couldn't close previous message");
+    }
+    hmsg = CryptMsgOpenToDecode(MY_ENC_TYPE, 0, 0, NULL, NULL, NULL);
+    if (!hmsg) {
+        throw CSPException("Couldn't open message for decode");
+    }
+    if ( !CryptMsgUpdate(hmsg, msg->data, msg->data_length, TRUE) ) {
+        throw CSPException("Couldn't update message");
+    }
+    hstore = CertOpenStore(CERT_STORE_PROV_MSG, MY_ENC_TYPE, 0, 0, hmsg);
+    //hstore = CryptGetMessageCertificates( MY_ENC_TYPE, ctx? ctx->hprov : 0, 0, msg->data, msg->data_length);
+    if (!hstore) {
+        throw CSPException("Couldn't open message certificate store");
+    }
 }
 
 CertStore::~CertStore() throw(CSPException)
@@ -404,6 +414,9 @@ CertStore::~CertStore() throw(CSPException)
     }
     if (ctx) {
         ctx->unref();
+    }
+    if (hmsg && !CryptMsgClose(hmsg)) {
+        throw CSPException("Couldn't close message");
     }
     LOG("Deleted store %p\n", this);
 }

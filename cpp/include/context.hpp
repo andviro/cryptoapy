@@ -9,13 +9,12 @@ class Key;
 class Crypt : public RCObj
 {
     HCRYPTPROV hprov;
+    char *cont_name;
+    char *pr_name;
 
-    Crypt(HCRYPTPROV hp) throw(CSPException) {
-        hprov = hp;
-        LOG("Crypt::Crypt(): %p (%lx)\n", this, hprov);
-    };
 public:
 
+    Crypt (char *container, DWORD type, DWORD flags, char *name) throw(CSPException, CSPNotFound);
     ~Crypt() throw(CSPException);
 
     char *name();
@@ -33,11 +32,9 @@ public:
 
     friend class Cert;
     friend class CryptMsg;
+    friend class Signature;
     friend class CertStore;
     friend class CertRequest;
-    friend Crypt *Context(char *, DWORD , DWORD, char*) throw (CSPException, CSPNotFound);
 };
-
-Crypt *Context(char *container, DWORD type, DWORD flags, char *name=NULL) throw(CSPException, CSPNotFound);
 
 #endif

@@ -183,13 +183,13 @@ CertRequest::CertRequest(Crypt *ctx, BYTE *STRING, DWORD LENGTH) throw (CSPExcep
     SigAlg.pszObjId = (char *)szOID_CP_GOST_R3411_R3410EL;
 
     pbPublicKeyInfo = NULL;
-    bool res = CryptExportPublicKeyInfo( ctx->hprov, AT_SIGNATURE, MY_ENC_TYPE,
+    bool res = CryptExportPublicKeyInfo( ctx->hprov, AT_KEYEXCHANGE, MY_ENC_TYPE,
             NULL, &cbPublicKeyInfo );
     if (!res) {
         throw CSPException("Couldn't determine exported key info length");
     }
     pbPublicKeyInfo = (CERT_PUBLIC_KEY_INFO*) malloc( cbPublicKeyInfo );
-    res = CryptExportPublicKeyInfo( ctx->hprov, AT_SIGNATURE,
+    res = CryptExportPublicKeyInfo( ctx->hprov, AT_KEYEXCHANGE,
                               MY_ENC_TYPE, pbPublicKeyInfo, &cbPublicKeyInfo );
     if (!res) {
         throw CSPException("Couldn't export public key info");
@@ -296,7 +296,7 @@ void CertRequest::get_data(BYTE **s, DWORD *slen) throw (CSPException) {
     exts->encode(&attr_blobs[0].pbData, &attr_blobs[0].cbData);
 
     bool res = CryptSignAndEncodeCertificate(
-        ctx->hprov, AT_SIGNATURE, MY_ENC_TYPE,
+        ctx->hprov, AT_KEYEXCHANGE, MY_ENC_TYPE,
         X509_CERT_REQUEST_TO_BE_SIGNED, &CertReqInfo,
         &SigAlg, NULL, NULL, slen );
     if(!res) {
@@ -306,7 +306,7 @@ void CertRequest::get_data(BYTE **s, DWORD *slen) throw (CSPException) {
     *s = (BYTE *)malloc(*slen);
 
     res = CryptSignAndEncodeCertificate(
-        ctx->hprov, AT_SIGNATURE, MY_ENC_TYPE,
+        ctx->hprov, AT_KEYEXCHANGE, MY_ENC_TYPE,
         X509_CERT_REQUEST_TO_BE_SIGNED, &CertReqInfo,
         &SigAlg, NULL, *s, slen );
 

@@ -41,7 +41,7 @@ public:
 
     void issuer(BYTE **s, DWORD *slen) throw(CSPException);
 
-    void bind(Crypt *ctx, DWORD keyspec=AT_SIGNATURE);
+    void bind(Crypt *ctx, DWORD keyspec=AT_KEYEXCHANGE);
 
     friend class CryptMsg;
     friend class CertStore;
@@ -88,6 +88,7 @@ private:
     Crypt *ctx;
     CryptMsg *msg;
     HCERTSTORE hstore;
+    HCRYPTMSG hmsg;
 
     void init();
 public:

@@ -4,17 +4,20 @@
 using namespace std;
 #define MY_ENCODING_TYPE  (PKCS_7_ASN_ENCODING | X509_ASN_ENCODING)
 
-bool CryptMsg::verify_cert(Cert *c) throw(CSPException)
-{
-    return FALSE;
 
+int CryptMsg::num_signers() throw(CSPException) {
+    if (data && data_length) {
+        return CryptGetMessageSignerCount(MY_ENCODING_TYPE, data, data_length);
+    } else {
+        return 0;
+    }
 }
 
-bool CryptMsg::verify_sign(DWORD n) throw(CSPException)
+bool CryptMsg::verify(DWORD n) throw(CSPException)
 {
     CRYPT_VERIFY_MESSAGE_PARA VerifyParams;
     DWORD res, msg_size = 0;
-    printf("%p, %i, %p\n", data, data_length, &msg_size);
+    LOG("CryptMsg::verify_sign(%lu)\n", n);
 
     // Initialize the VerifyParams data structure.
     ZeroMemory(&VerifyParams, sizeof(VerifyParams));
@@ -32,6 +35,7 @@ bool CryptMsg::verify_sign(DWORD n) throw(CSPException)
               NULL,
               &msg_size,
               NULL);
+    LOG("    verification result: %lu, %lu\n", n, msg_size);
     return res && msg_size;
 }
 
@@ -58,10 +62,11 @@ CryptMsg::CryptMsg(BYTE *STRING, DWORD LENGTH, Crypt *ctx) throw(CSPException)
 
 CryptMsg::CryptMsg(Crypt *ctx) throw(CSPException)
 {
+    LOG("CryptMsg::CryptMsg(%p)\n", ctx);
     init(ctx);
 }
 
-void CryptMsg::add_recipient_cert(Cert *c) throw(CSPException)
+void CryptMsg::add_recipient(Cert *c) throw(CSPException)
 {
     if (c) {
         c->ref();
@@ -90,7 +95,9 @@ void CryptMsg::encrypt_data(BYTE *STRING, DWORD LENGTH, BYTE **s, DWORD *slen) t
     memset(&EncryptParams, 0, sizeof(CRYPT_ENCRYPT_MESSAGE_PARA));
     EncryptParams.cbSize =  sizeof(CRYPT_ENCRYPT_MESSAGE_PARA);
     EncryptParams.dwMsgEncodingType = MY_ENCODING_TYPE;
-    EncryptParams.hCryptProv = cprov->hprov;
+    if (cprov) {
+        EncryptParams.hCryptProv = cprov->hprov;
+    }
     EncryptParams.ContentEncryptionAlgorithm = EncryptAlgorithm;
 
     // Вызов функции CryptEncryptMessage.
@@ -108,6 +115,7 @@ void CryptMsg::encrypt_data(BYTE *STRING, DWORD LENGTH, BYTE **s, DWORD *slen) t
     }
     // Распределение памяти под возвращаемый BLOB.
     *s = (BYTE*)malloc(*slen);
+    printf("slen: %i\n", *slen);
 
     if(!*s) {
         DWORD err = GetLastError();
@@ -128,13 +136,14 @@ void CryptMsg::encrypt_data(BYTE *STRING, DWORD LENGTH, BYTE **s, DWORD *slen) t
         delete[] pRecipientCert;
         throw CSPException("Encryption failed.", err);
     }
+    printf("slen: %i\n", *slen);
     delete[] pRecipientCert;
 }
 
-void CryptMsg::decrypt_data(BYTE *STRING, DWORD LENGTH, BYTE **s, DWORD *slen) throw(CSPException)
+void CryptMsg::decrypt(BYTE **s, DWORD *slen) throw(CSPException)
 {
     HCERTSTORE hStoreHandle = 0;      // дескриптор хранилища сертификатов
-    hStoreHandle = CertOpenSystemStore(cprov->hprov, "MY");
+    hStoreHandle = CertOpenSystemStore(cprov? cprov->hprov:0, "MY");
     if(!hStoreHandle) {
         throw CSPException( "Error getting store handle.");
     }
@@ -152,8 +161,8 @@ void CryptMsg::decrypt_data(BYTE *STRING, DWORD LENGTH, BYTE **s, DWORD *slen) t
     //  Вызов фнукции CryptDecryptMessage для получения возвращаемого размера данных.
     if(!CryptDecryptMessage(
                 &decryptParams,
-                STRING,
-                LENGTH,
+                data,
+                data_length,
                 NULL,
                 slen,
                 NULL)) {
@@ -172,8 +181,8 @@ void CryptMsg::decrypt_data(BYTE *STRING, DWORD LENGTH, BYTE **s, DWORD *slen) t
     // Вызов функции CryptDecryptMessage для расшифрования данных.
     if(!CryptDecryptMessage(
                 &decryptParams,
-                STRING,
-                LENGTH,
+                data,
+                data_length,
                 *s,
                 slen,
                 NULL)) {
@@ -185,13 +194,13 @@ void CryptMsg::decrypt_data(BYTE *STRING, DWORD LENGTH, BYTE **s, DWORD *slen) t
     CertCloseStore( hStoreHandle, CERT_CLOSE_STORE_FORCE_FLAG );
 }
 
-void CryptMsg::add_signer_cert(Cert *c) throw(CSPException)
-{
-    if (c) {
-        c->ref();
-        signers.push_back(c);
-    }
-}
+//void CryptMsg::add_signer_cert(Cert *c) throw(CSPException)
+//{
+    //if (c) {
+        //c->ref();
+        //signers.push_back(c);
+    //}
+//}
 
 void CryptMsg::get_data(BYTE **s, DWORD *slen) throw(CSPException)
 {
@@ -254,17 +263,17 @@ void CryptMsg::sign_data(BYTE *STRING, DWORD LENGTH, BYTE **s, DWORD *slen, Cert
 CryptMsg::~CryptMsg() throw(CSPException)
 {
     LOG("CryptMsg::~CryptMsg(%p)\n", this);
-    if (cprov) {
-        cprov->unref();
-    }
     vector<Cert *>::const_iterator cii;
-    for(cii=signers.begin(); cii!=signers.end(); cii++) {
-        if (*cii)
-            (*cii)->unref();
-    }
+    //for(cii=signers.begin(); cii!=signers.end(); cii++) {
+        //if (*cii)
+            //(*cii)->unref();
+    //}
     for(cii=recipients.begin(); cii!=recipients.end(); cii++) {
         if (*cii)
             (*cii)->unref();
+    }
+    if (cprov) {
+        cprov->unref();
     }
     if (data) {
         delete[] data;

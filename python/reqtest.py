@@ -23,17 +23,17 @@ def main():
             csp.CRYPT_NEWKEYSET | csp.CRYPT_SILENT, provider)
         assert ctx
         print('created context:', ctx)
-    req = csp.CertRequest(ctx, b'CN=test')
+    req = csp.CertRequest(ctx, b'CN=test10')
+    req.set_usage(0xf0)
     print(2)
     req.add_eku(csp.szOID_PKIX_KP_EMAIL_PROTECTION)
     print(3)
-    req.set_usage(0xff)
     data = req.get_data()
     print(4)
     print(len(data), 'bytes generated')
     print(5)
     print(6)
-    open('request.req', 'wb').write(b64encode(req.get_data()))
+    open('req_my.req', 'wb').write(b64encode(req.get_data()))
     print(7)
 
 if __name__ == "__main__":

@@ -23,14 +23,14 @@ def gen_key(cont, local=True, silent=False):
     provider = "Crypto-Pro HSM CSP" if not local else None
 
     try:
-        ctx = csp.Context(cont, csp.PROV_GOST_2001_DH, silent_flag, provider)
+        ctx = csp.Crypt(cont, csp.PROV_GOST_2001_DH, silent_flag, provider)
     except (ValueError, SystemError):
 
         if platform.system() == 'Linux' and local:
             cont = bytes(r'\\.\HDIMAGE\{0}'.format(cont))
 
-        ctx = csp.Context(cont, csp.PROV_GOST_2001_DH, csp.CRYPT_NEWKEYSET |
-                          silent_flag, provider)
+        ctx = csp.Crypt(cont, csp.PROV_GOST_2001_DH, csp.CRYPT_NEWKEYSET |
+                        silent_flag, provider)
 
     ctx.set_password(b'')
     ctx.set_password(b'', csp.AT_KEYEXCHANGE)
@@ -60,7 +60,7 @@ def remove_key(cont, local=True):
 
     '''
     provider = "Crypto-Pro HSM CSP" if not local else None
-    csp.Context(cont, csp.PROV_GOST_2001_DH, csp.CRYPT_DELETEKEYSET, provider)
+    csp.Crypt(cont, csp.PROV_GOST_2001_DH, csp.CRYPT_DELETEKEYSET, provider)
     return True
 
 
@@ -74,12 +74,10 @@ def create_request(cont, descriptor, local=True):
 
     """
     provider = "Crypto-Pro HSM CSP" if not local else None
-    ctx = csp.Context(cont, csp.PROV_GOST_2001_DH, 0, provider)
-    req = csp.CertRequest(ctx, b'CN=test')
+    ctx = csp.Crypt(cont, csp.PROV_GOST_2001_DH, 0, provider)
+    req = csp.CertRequest(ctx, descriptor)
     req.add_eku(csp.szOID_PKIX_KP_EMAIL_PROTECTION)
-    req.set_usage(csp.CERT_DIGITAL_SIGNATURE_KEY_USAGE
-                  | csp.CERT_DATA_ENCIPHERMENT_KEY_USAGE
-                  | csp.CERT_NON_REPUDIATION_KEY_USAGE)
+    req.set_usage(0xf0)
     return b64encode(req.get_data())
 
 
@@ -93,7 +91,7 @@ def bind_cert_to_key(cont, cert, local=True):
 
     """
     provider = "Crypto-Pro HSM CSP" if not local else None
-    ctx = csp.Context(cont, csp.PROV_GOST_2001_DH, 0, provider)
+    ctx = csp.Crypt(cont, csp.PROV_GOST_2001_DH, 0, provider)
     cert = ''.join(x for x in cert.splitlines() if not x.startswith('---'))
     cdata = b64decode(cert)
     newc = csp.Cert(cdata)
@@ -142,13 +140,15 @@ def sign(cert, data, include_data, local=True):
     """
     provider = "Crypto-Pro HSM CSP" if not local else None
 
-    ctx = csp.Context(None, csp.PROV_GOST_2001_DH, 0, provider)
+    #ctx = csp.Crypt(b'test_cont', csp.PROV_GOST_2001_DH, 0, provider)
     cert = ''.join(x for x in cert.splitlines() if not x.startswith('---'))
     cdata = b64decode(cert)
-    signcert = csp.Cert(cdata)
-    mess = csp.CryptMsg(ctx)
-    mess.add_signer_cert(signcert)
-    sign_data = mess.sign_data(b64decode(data), include_data)
+    signcert_thumb = csp.Cert(cdata).thumbprint()
+    cs = csp.CertStore(None, b"MY")
+    signcert = list(cs.find_by_thumb(signcert_thumb))[0]
+    mess = csp.CryptMsg()
+    #mess.add_signer_cert(signcert)
+    sign_data = mess.sign_data(b64decode(data), signcert, include_data)
     return b64encode(sign_data)
 
 
@@ -163,20 +163,22 @@ def check_signature(cert, sig, data, local=True):
 
     """
     provider = "Crypto-Pro HSM CSP" if not local else None
-    ctx = csp.Context(None, csp.PROV_GOST_2001_DH, csp.CRYPT_VERIFYCONTEXT |
-                      csp.CRYPT_SILENT, provider)
+    ctx = csp.Crypt(None, csp.PROV_GOST_2001_DH, csp.CRYPT_VERIFYCONTEXT |
+                    csp.CRYPT_SILENT, provider)
     sign = csp.Signature(b64decode(sig), ctx)
     cert = ''.join(x for x in cert.splitlines() if not x.startswith('---'))
     data = b64decode(data)
     cdata = b64decode(cert)
     cert_thumb = csp.Cert(cdata).thumbprint()
+    print(1)
     cs = csp.CertStore(sign)
-    for n in range(sign.num_signers):
-        psi = sign.get_nth_signer_info(n)
-        nthcert = cs.get_cert_by_info(psi)
-        if nthcert.thumbprint() == cert_thumb:
-            return sign.verify_data(data, n)
-    return False
+    print(2)
+    if cert_thumb not in set(x.thumbprint() for x in cs):
+        return False
+    for n in range(sign.num_signers()):
+        if not sign.verify_data(data, n):
+            return False
+    return True
 
 
 def encrypt(certs, data):
@@ -189,32 +191,51 @@ def encrypt(certs, data):
     """
     bin_data = b64decode(data)
     msg = csp.CryptMsg()
-    print(1)
     for c in certs:
-        print(c)
         certdata = ''.join(x for x in c.splitlines() if not x.startswith('---'))
         cert = csp.Cert(b64decode(certdata))
-        msg.add_recipient_cert(cert)
-        print(2)
-    print(3)
+        msg.add_recipient(cert)
     encrypted = msg.encrypt_data(bin_data)
     return b64encode(encrypted)
 
+def decrypt(data):
+    """Дешифрование данных из сообщения
+
+    :data: данные в base64
+    :returns: шифрованные данные в base64
+
+    """
+    print(1)
+    ctx = csp.Crypt(b'test', csp.PROV_GOST_2001_DH, 0, None)
+    print(2)
+    bin_data = b64decode(data)
+    print(3)
+    msg = csp.CryptMsg(bin_data, ctx)
+    print(4)
+    decrypted = msg.decrypt()
+    print(decrypted)
+    print(5)
+    return b64encode(decrypted)
+
 
 if __name__ == '__main__':
-    cont = b'test_cont'
+    cont = b'123456789abcdef'
     print(gen_key(cont))
-    print(create_request(cont, 'CN=test'))
-    thumb = bind_cert_to_key(cont, open('cer2.cer').read())
+    req = create_request(cont, b'CN=123456789abcdef')
+    print(req)
+    open('cer_test.req', 'wb').write(req)
+    thumb = bind_cert_to_key(cont, b64encode(open('cer_test.cer').read()))
     cert = get_certificate(thumb)
     print(get_certificate_props(cert))
     data = b64encode('Ahaahahahah!!!')
     wrong_data = b64encode('Ahaahahahah???')
     signdata = sign(cert, data, True)
     print(check_signature(cert, signdata, data))
-    print(check_signature(cert, signdata, wrong_data))
+    #print(check_signature(cert, signdata, wrong_data))
     msg = b64encode('Hello, dolly!')
     encmsg = encrypt([cert], msg)
     print(encmsg)
+    decmsg = decrypt(encmsg)
+    print(b64decode(decmsg))
 
     # print(remove_key(cont))

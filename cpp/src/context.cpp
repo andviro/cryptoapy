@@ -5,12 +5,19 @@
 Crypt::~Crypt() throw(CSPException) {
     LOG("Crypt::~Crypt(%p)\n", this);
     if (hprov) {
+        LOG("    begin close %x\n", hprov);
         bool res = CryptReleaseContext(hprov, 0);
         if (!res) {
             DWORD err = GetLastError();
-            LOG("Crypt::~Crypt(%p): error %x\n", this, err);
+            LOG("     error closing context %x\n", err);
             throw CSPException("Couldn't release context", err);
         }
+    }
+    if (cont_name) {
+        free(cont_name);
+    }
+    if (pr_name) {
+        free(pr_name);
     }
     LOG("    Freed ctx %p (%x)\n", this, hprov);
 }
@@ -93,14 +100,16 @@ void Crypt::set_password(BYTE *STRING, DWORD LENGTH, DWORD keyspec) throw (CSPEx
     }
 }
 
-Crypt *Context(char *container, DWORD type, DWORD flags, char *name) throw(CSPException, CSPNotFound)
+Crypt::Crypt(char *container, DWORD type, DWORD flags, char *name) throw(CSPException, CSPNotFound)
 {
-    HCRYPTPROV hp;
-    Crypt *res;
+    LOG("Crypt::Crypt(%s, %u, %x, %s)\n", container, type, flags, name);
+    cont_name = container? strdup(container) : NULL;
+    pr_name = name? strdup(name) : NULL;
 
-    LOG("Context(%s, %u, %x, %s)\n", container, type, flags, name);
-    /*printf("%x\n", flags);*/
-    if (!CryptAcquireContext(&hp, container, name, type, flags)) {
+    if (flags & CRYPT_DELETEKEYSET) {
+        throw CSPException("Delete flag not allowed in Crypt::Crypt()", -1);
+    }
+    if (!CryptAcquireContext(&hprov, cont_name, pr_name, type, flags)) {
         DWORD err = GetLastError();
         switch (err) {
         case NTE_KEYSET_NOT_DEF:
@@ -111,13 +120,7 @@ Crypt *Context(char *container, DWORD type, DWORD flags, char *name) throw(CSPEx
             throw CSPException("Couldn't acquire context", err);
         }
     }
-    if (flags & CRYPT_DELETEKEYSET) {
-        res = NULL;
-    } else {
-        res = new Crypt(hp);
-    }
-    return res;
-};
+}
 
 Key *Crypt::get_key(DWORD keyspec) throw(CSPException, CSPNotFound)
 {
