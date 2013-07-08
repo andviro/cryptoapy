@@ -20,7 +20,9 @@ bool CryptMsg::verify_sign(DWORD n) throw(CSPException)
     ZeroMemory(&VerifyParams, sizeof(VerifyParams));
     VerifyParams.cbSize = sizeof(CRYPT_VERIFY_MESSAGE_PARA);
     VerifyParams.dwMsgAndCertEncodingType = MY_ENCODING_TYPE;
-    VerifyParams.hCryptProv = cprov->hprov;
+    if (cprov) {
+        VerifyParams.hCryptProv = cprov->hprov;
+    }
 
     res = CryptVerifyMessageSignature(
               &VerifyParams,
@@ -30,11 +32,6 @@ bool CryptMsg::verify_sign(DWORD n) throw(CSPException)
               NULL,
               &msg_size,
               NULL);
-    printf("%u\n", res);
-    if(!res) {
-        printf("%x\n", GetLastError());
-    }
-    printf("%i, %i\n", res, msg_size);
     return res && msg_size;
 }
 
