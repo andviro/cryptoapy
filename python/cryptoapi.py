@@ -192,9 +192,7 @@ def check_signature(cert, sig, data, local=True):
     data = b64decode(data)
     cdata = b64decode(cert)
     cert_thumb = csp.Cert(cdata).thumbprint()
-    print(1)
     cs = csp.CertStore(sign)
-    print(2)
     if cert_thumb not in set(x.thumbprint() for x in cs):
         return False
     for n in range(sign.num_signers()):
