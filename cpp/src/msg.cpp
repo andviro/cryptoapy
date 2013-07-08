@@ -143,10 +143,7 @@ void CryptMsg::encrypt_data(BYTE *STRING, DWORD LENGTH, BYTE **s, DWORD *slen) t
 void CryptMsg::decrypt(BYTE **s, DWORD *slen) throw(CSPException)
 {
     HCERTSTORE hStoreHandle = 0;      // дескриптор хранилища сертификатов
-    hStoreHandle = CertOpenSystemStore(cprov? cprov->hprov:0, "MY");
-    if(!hStoreHandle) {
-        throw CSPException( "Error getting store handle.");
-    }
+    CertStore mystore(cprov, "MY");
 
     CRYPT_DECRYPT_MESSAGE_PARA  decryptParams;
     //   Инициализация структуры CRYPT_DECRYPT_MESSAGE_PARA.
@@ -154,7 +151,7 @@ void CryptMsg::decrypt(BYTE **s, DWORD *slen) throw(CSPException)
     decryptParams.cbSize = sizeof(CRYPT_DECRYPT_MESSAGE_PARA);
     decryptParams.dwMsgAndCertEncodingType = MY_ENCODING_TYPE;
     decryptParams.cCertStore = 1;
-    decryptParams.rghCertStore = &hStoreHandle;
+    decryptParams.rghCertStore = &mystore.hstore;
 
     //  Расшифрование сообщения
 
@@ -167,7 +164,6 @@ void CryptMsg::decrypt(BYTE **s, DWORD *slen) throw(CSPException)
                 slen,
                 NULL)) {
         DWORD err = GetLastError();
-        CertCloseStore( hStoreHandle, CERT_CLOSE_STORE_FORCE_FLAG );
         throw CSPException( "Error getting decrypted message size", err);
     }
 
@@ -175,7 +171,6 @@ void CryptMsg::decrypt(BYTE **s, DWORD *slen) throw(CSPException)
     *s = (BYTE*)malloc(*slen);
     if(!*s) {
         DWORD err = GetLastError();
-        CertCloseStore( hStoreHandle, CERT_CLOSE_STORE_FORCE_FLAG );
         throw CSPException( "Memory allocation error while decrypting", err);
     }
     // Вызов функции CryptDecryptMessage для расшифрования данных.
@@ -187,11 +182,9 @@ void CryptMsg::decrypt(BYTE **s, DWORD *slen) throw(CSPException)
                 slen,
                 NULL)) {
         DWORD err = GetLastError();
-        CertCloseStore( hStoreHandle, CERT_CLOSE_STORE_FORCE_FLAG );
         free(*s);
         throw CSPException( "Error decrypting the message", err);
     }
-    CertCloseStore( hStoreHandle, CERT_CLOSE_STORE_FORCE_FLAG );
 }
 
 //void CryptMsg::add_signer_cert(Cert *c) throw(CSPException)

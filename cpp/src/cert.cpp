@@ -448,6 +448,6 @@ void Cert::bind(Crypt *ctx, DWORD keyspec) {
         DWORD err = GetLastError();
         throw CSPException("Couldn't set certificate context property", err);
     }
-    free(prov_name);
-    free(ctx_name);
+    delete[] prov_name;
+    delete[] ctx_name;
 }

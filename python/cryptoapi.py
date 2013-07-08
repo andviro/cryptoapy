@@ -138,18 +138,40 @@ def sign(cert, data, include_data, local=True):
     :returns: данные и/или подпись, закодированные в base64
 
     """
-    provider = "Crypto-Pro HSM CSP" if not local else None
-
-    #ctx = csp.Crypt(b'test_cont', csp.PROV_GOST_2001_DH, 0, provider)
     cert = ''.join(x for x in cert.splitlines() if not x.startswith('---'))
     cdata = b64decode(cert)
     signcert_thumb = csp.Cert(cdata).thumbprint()
     cs = csp.CertStore(None, b"MY")
     signcert = list(cs.find_by_thumb(signcert_thumb))[0]
     mess = csp.CryptMsg()
-    #mess.add_signer_cert(signcert)
+    # mess.add_signer_cert(signcert)
     sign_data = mess.sign_data(b64decode(data), signcert, include_data)
     return b64encode(sign_data)
+
+
+def sign_and_encrypt(signcert, certs, data, local=True):
+    """Подписывание данных сертификатом
+
+    :cert: сертификат подписывания, закодированный в base64
+    :certs: список сертификатов получателей
+    :data: бинарные данные, закодированные в base64
+    :local: Если True, работа идет с локальным хранилищем
+    :returns: данные и подпись, зашифрованные и закодированные в base64
+
+    """
+    cert = ''.join(x for x in signcert.splitlines() if not x.startswith('---'))
+    cdata = b64decode(cert)
+    signcert_thumb = csp.Cert(cdata).thumbprint()
+    cs = csp.CertStore(None, b"MY")
+    signcert = list(cs.find_by_thumb(signcert_thumb))[0]
+    mess = csp.CryptMsg()
+    for c in certs:
+        certdata = ''.join(x for x in c.splitlines() if not x.startswith('---'))
+        cert = csp.Cert(b64decode(certdata))
+        mess.add_recipient(cert)
+    sign_data = mess.sign_data(b64decode(data), signcert)
+    encrypted = mess.encrypt_data(sign_data)
+    return b64encode(encrypted)
 
 
 def check_signature(cert, sig, data, local=True):
@@ -198,6 +220,7 @@ def encrypt(certs, data):
     encrypted = msg.encrypt_data(bin_data)
     return b64encode(encrypted)
 
+
 def decrypt(data):
     """Дешифрование данных из сообщения
 
@@ -205,16 +228,10 @@ def decrypt(data):
     :returns: шифрованные данные в base64
 
     """
-    print(1)
     ctx = csp.Crypt(b'test', csp.PROV_GOST_2001_DH, 0, None)
-    print(2)
     bin_data = b64decode(data)
-    print(3)
     msg = csp.CryptMsg(bin_data, ctx)
-    print(4)
     decrypted = msg.decrypt()
-    print(decrypted)
-    print(5)
     return b64encode(decrypted)
 
 
@@ -230,12 +247,13 @@ if __name__ == '__main__':
     data = b64encode('Ahaahahahah!!!')
     wrong_data = b64encode('Ahaahahahah???')
     signdata = sign(cert, data, True)
-    print(check_signature(cert, signdata, data))
-    #print(check_signature(cert, signdata, wrong_data))
+    # print(check_signature(cert, signdata, data))
+    # print(check_signature(cert, signdata, wrong_data))
     msg = b64encode('Hello, dolly!')
     encmsg = encrypt([cert], msg)
-    print(encmsg)
+    print(len(encmsg))
     decmsg = decrypt(encmsg)
     print(b64decode(decmsg))
-
+    sencdata = sign_and_encrypt(cert, [cert], data)
+    print(len(sencdata))
     # print(remove_key(cont))
