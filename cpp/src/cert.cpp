@@ -169,11 +169,14 @@ CertStore::CertStore(Crypt *parent, LPCTSTR protocol) throw(CSPException)
     }
 }
 
-Cert *CertStore::get_cert_by_info(CERT_INFO *psi) throw(CSPException, CSPNotFound)
+Cert *CertStore::get_cert_by_info(CertInfo *ci) throw(CSPException, CSPNotFound)
 {
     PCCERT_CONTEXT res;
-    LOG("CertStore::get_cert_by_info(%p)\n", psi);
-    res = CertGetSubjectCertificateFromStore(hstore, MY_ENC_TYPE, psi);
+    LOG("CertStore::get_cert_by_info(%p)\n", ci);
+    if (!ci) {
+        throw CSPNotFound("NULL cert info", -1);
+    }
+    res = CertGetSubjectCertificateFromStore(hstore, MY_ENC_TYPE, ci->psi);
     if (!res) {
         DWORD err = GetLastError();
         if (err == CRYPT_E_NOT_FOUND) {

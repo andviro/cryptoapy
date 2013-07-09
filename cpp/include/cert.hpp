@@ -1,12 +1,14 @@
 #ifndef CERT_HPP_INCLUDED
 #define CERT_HPP_INCLUDED
 
+#include "certinfo.hpp"
 #include "except.hpp"
 #include "rcobj.hpp"
 
 class CertStore;
 class Crypt;
 class CryptMsg;
+
 class Cert : public RCObj
 {
 private:
@@ -100,7 +102,7 @@ public:
 
     CertFind *find_by_name(BYTE *STRING, DWORD LENGTH) throw(CSPException);
 
-    Cert *get_cert_by_info(CERT_INFO *psi) throw(CSPException, CSPNotFound);
+    Cert *get_cert_by_info(CertInfo *ci) throw(CSPException, CSPNotFound);
 
     Cert *add_cert(Cert *c) throw(CSPException);
 
