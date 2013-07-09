@@ -5,7 +5,23 @@ using namespace std;
 #define MY_ENCODING_TYPE  (PKCS_7_ASN_ENCODING | X509_ASN_ENCODING)
 
 
+HCRYPTMSG CryptMsg::get_handle() throw (CSPException) {
+    LOG("CryptMsg::get_handle()\n");
+    if (hmsg) {
+        return hmsg;
+    }
+    hmsg = CryptMsgOpenToDecode(MY_ENC_TYPE, 0, 0, cprov? cprov->hprov:0, NULL, NULL);
+    if (!hmsg) {
+        throw CSPException("Couldn't open message for decode");
+    }
+    if ( !CryptMsgUpdate(hmsg, data, data_length, TRUE) ) {
+        throw CSPException("Couldn't update message");
+    }
+    return hmsg;
+}
+
 int CryptMsg::num_signers() throw(CSPException) {
+    LOG("CryptMsg::num_signers()\n");
     if (data && data_length) {
         return CryptGetMessageSignerCount(MY_ENCODING_TYPE, data, data_length);
     } else {
@@ -17,7 +33,7 @@ bool CryptMsg::verify(DWORD n) throw(CSPException)
 {
     CRYPT_VERIFY_MESSAGE_PARA VerifyParams;
     DWORD res, msg_size = 0;
-    LOG("CryptMsg::verify_sign(%lu)\n", n);
+    LOG("CryptMsg::verify(%lu)\n", n);
 
     // Initialize the VerifyParams data structure.
     ZeroMemory(&VerifyParams, sizeof(VerifyParams));
@@ -42,11 +58,12 @@ bool CryptMsg::verify(DWORD n) throw(CSPException)
 void CryptMsg::init(Crypt *ctx) throw(CSPException)
 {
     cprov = ctx;
+    data = NULL;
+    data_length = 0;
+    hmsg = 0;
     if (ctx) {
         ctx->ref();
     }
-    data = NULL;
-    data_length = 0;
     LOG("    initialized msg: %p\n", this);
 
 }
@@ -115,7 +132,6 @@ void CryptMsg::encrypt_data(BYTE *STRING, DWORD LENGTH, BYTE **s, DWORD *slen) t
     }
     // Распределение памяти под возвращаемый BLOB.
     *s = (BYTE*)malloc(*slen);
-    printf("slen: %i\n", *slen);
 
     if(!*s) {
         DWORD err = GetLastError();
@@ -134,9 +150,9 @@ void CryptMsg::encrypt_data(BYTE *STRING, DWORD LENGTH, BYTE **s, DWORD *slen) t
                 slen)) {
         DWORD err = GetLastError();
         delete[] pRecipientCert;
+        free((void *)*s);
         throw CSPException("Encryption failed.", err);
     }
-    printf("slen: %i\n", *slen);
     delete[] pRecipientCert;
 }
 
@@ -184,7 +200,7 @@ void CryptMsg::decrypt(BYTE **s, DWORD *slen, CertStore *store) throw(CSPExcepti
                 slen,
                 NULL)) {
         DWORD err = GetLastError();
-        free(*s);
+        free((void *)*s);
         throw CSPException( "Error decrypting the message", err);
     }
 }
@@ -197,8 +213,45 @@ void CryptMsg::decrypt(BYTE **s, DWORD *slen, CertStore *store) throw(CSPExcepti
     //}
 //}
 
+bool CryptMsg::verify_cert(Cert *c) throw(CSPException)
+{
+    HCRYPTMSG hmsg = get_handle();
+    return CryptMsgControl(hmsg, 0, CMSG_CTRL_VERIFY_SIGNATURE, c->pcert->pCertInfo);
+}
+
+DWORD CryptMsg::get_type() throw(CSPException)
+{
+    DWORD type = 0, temp = sizeof(DWORD);
+    HCRYPTMSG hmsg = get_handle();
+    if (!CryptMsgGetParam(hmsg, CMSG_TYPE_PARAM, 0, &type, &temp)) {
+        throw CSPException("Couldn't get message type");
+    }
+    return type;
+}
+
 void CryptMsg::get_data(BYTE **s, DWORD *slen) throw(CSPException)
 {
+    HCRYPTMSG hmsg = get_handle();
+    if(!CryptMsgGetParam(
+                hmsg,                      /* Handle to the message*/
+                CMSG_CONTENT_PARAM,        /* Parameter type*/
+                0,                         /* Index*/
+                NULL,             /* Pointer to the blob*/
+                slen)) {
+        /* Size of the blob*/
+        throw CSPException("Couldn't get decoded data size");
+    }
+    *s = (BYTE *) malloc(*slen);
+    if(!CryptMsgGetParam(
+                hmsg,                      /* Handle to the message*/
+                CMSG_CONTENT_PARAM,        /* Parameter type*/
+                0,                         /* Index*/
+                *s,             /* Pointer to the blob*/
+                slen)) {
+        /* Size of the blob*/
+        free((void *)*s);
+        throw CSPException("Couldn't get decoded data");
+    }
 }
 
 void CryptMsg::sign_data(BYTE *STRING, DWORD LENGTH, BYTE **s, DWORD *slen, Cert *signer, bool detach) throw(CSPException)
@@ -251,6 +304,7 @@ void CryptMsg::sign_data(BYTE *STRING, DWORD LENGTH, BYTE **s, DWORD *slen, Cert
                 *s,
                 slen)) {
         DWORD err = GetLastError();
+        free((void *)*s);
         throw CSPException("Error getting signed BLOB", err);
     }
 }
@@ -273,4 +327,8 @@ CryptMsg::~CryptMsg() throw(CSPException)
     if (data) {
         delete[] data;
     }
+    if (hmsg && !CryptMsgClose(hmsg)) {
+        throw CSPException("Couldn't close message");
+    }
+
 };

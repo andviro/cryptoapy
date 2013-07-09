@@ -17,7 +17,6 @@ private:
         parent = NULL;
     }
 
-    void decode_name_blob(PCERT_NAME_BLOB pNameBlob, BYTE **s, DWORD *slen);
 public:
     Cert* duplicate() throw(CSPException);
 
@@ -35,16 +34,11 @@ public:
 
     void thumbprint(BYTE **s, DWORD *slen) throw(CSPException);
 
-    char *sign_algorithm();
-
-    void name(BYTE **s, DWORD *slen) throw(CSPException);
-
-    void issuer(BYTE **s, DWORD *slen) throw(CSPException);
-
     void bind(Crypt *ctx, DWORD keyspec=AT_KEYEXCHANGE);
 
     friend class CryptMsg;
     friend class CertStore;
+    friend class CertInfo;
 };
 
 class CertIter
@@ -88,7 +82,6 @@ private:
     Crypt *ctx;
     CryptMsg *msg;
     HCERTSTORE hstore;
-    HCRYPTMSG hmsg;
 
     void init();
 public:

@@ -1,7 +1,5 @@
 /* vim: ft=swig
 */
-%newobject Cert::name;
-%newobject Cert::issuer;
 %newobject Cert::thumbprint;
 %newobject Cert::duplicate;
 %newobject Cert::extract;

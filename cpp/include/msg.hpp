@@ -7,16 +7,19 @@
 #include <vector>
 
 class SignerIter;
+class CertInfo;
 class CryptMsg : public RCObj
 {
 private:
     std::vector<Cert *> signers;
     std::vector<Cert *> recipients;
     void init(Crypt *ctx) throw(CSPException);
+    HCRYPTMSG hmsg;
 protected:
     Crypt *cprov;
     BYTE *data;
     DWORD data_length;
+    HCRYPTMSG get_handle() throw (CSPException);
 public:
     // инициализация сообщения для декодирования
     CryptMsg(BYTE *STRING, DWORD LENGTH, Crypt *ctx=NULL) throw(CSPException);
@@ -27,6 +30,8 @@ public:
     virtual ~CryptMsg() throw(CSPException);
     int num_signers() throw(CSPException);
     void get_data(BYTE **s, DWORD *slen) throw(CSPException);
+    bool verify_cert(Cert *c) throw(CSPException);
+    DWORD get_type() throw(CSPException);
     void add_recipient(Cert *c) throw(CSPException);
     void encrypt_data(BYTE *STRING, DWORD LENGTH, BYTE **s, DWORD *slen) throw(CSPException);
     void decrypt(BYTE **s, DWORD *slen, CertStore *store) throw(CSPException, CSPNotFound);
@@ -35,6 +40,7 @@ public:
     bool verify(DWORD n) throw(CSPException);
 
     friend class CertStore;
+    friend class CertInfo;
 };
 
 #endif

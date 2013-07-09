@@ -72,6 +72,7 @@
 %{
 #include "common.hpp"
 #include "cert.hpp"
+#include "certinfo.hpp"
 #include "context.hpp"
 #include "except.hpp"
 #include "key.hpp"
@@ -89,6 +90,7 @@
 %include "context.i"
 %include "key.i"
 %include "cert.i"
+%include "certinfo.i"
 %include "msg.i"
 %include "sign.i"
 %include "request.i"

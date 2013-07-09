@@ -7,30 +7,8 @@ void CertStore::init()
 {
     ctx = NULL;
     msg = NULL;
-    hmsg = 0;
     hstore = 0;
     LOG("CertStore::init %p\n", this);
-}
-
-void Cert::decode_name_blob(PCERT_NAME_BLOB pNameBlob, BYTE **s, DWORD *slen)
-{
-    DWORD flags = CERT_X500_NAME_STR | CERT_NAME_STR_NO_PLUS_FLAG;
-    LOG("Cert::decode_name_blob %p\n", pNameBlob);
-
-    *slen = CertNameToStr( X509_ASN_ENCODING, pNameBlob, flags, NULL, 0);
-    if (*slen <= 1) {
-        throw CSPException("Wrong size for blob decoded data");
-    }
-
-    *s = (BYTE *)malloc(*slen);
-
-    *slen = CertNameToStr(X509_ASN_ENCODING, pNameBlob, flags, (char *)*s, *slen);
-
-    if (*slen <= 1) {
-        free(*s);
-        throw CSPException("Couldn't decode cert blob");
-    }
-    (*slen)--;
 }
 
 Cert* Cert::duplicate() throw(CSPException)
@@ -135,25 +113,6 @@ void Cert::thumbprint(BYTE **s, DWORD *slen) throw(CSPException)
         throw CSPException("Couldn't get certificate thumbprint");
     }
 }
-
-char *Cert::sign_algorithm()
-{
-    LOG("Cert::sign_algorithm\n");
-    return pcert->pCertInfo->SignatureAlgorithm.pszObjId;
-}
-
-void Cert::name(BYTE **s, DWORD *slen) throw(CSPException)
-{
-    LOG("Cert::name()\n");
-    decode_name_blob(&pcert->pCertInfo->Subject, s, slen);
-}
-
-void Cert::issuer(BYTE **s, DWORD *slen) throw(CSPException)
-{
-    LOG("Cert::issuer()\n");
-    decode_name_blob(&pcert->pCertInfo->Issuer, s, slen);
-}
-
 CertFind::CertFind(CertStore *p, DWORD et, DWORD ft, BYTE *STRING, DWORD LENGTH) : CertIter(p)
 {
     LOG("CertFind::CertFind(%p, %u, %u, %u)\n", p, et, ft, LENGTH);
@@ -379,21 +338,8 @@ CertStore::CertStore(CryptMsg *parent) throw(CSPException)
         LOG("Error init message store, %x\n",err);
         throw CSPException("Invalid message for cert store", err);
     }
-    if (msg) {
-        msg->ref();
-    }
-    if (hmsg && !CryptMsgClose(hmsg)) {
-        throw CSPException("Couldn't close previous message");
-    }
-    hmsg = CryptMsgOpenToDecode(MY_ENC_TYPE, 0, 0, NULL, NULL, NULL);
-    if (!hmsg) {
-        throw CSPException("Couldn't open message for decode");
-    }
-    if ( !CryptMsgUpdate(hmsg, msg->data, msg->data_length, TRUE) ) {
-        throw CSPException("Couldn't update message");
-    }
-    hstore = CertOpenStore(CERT_STORE_PROV_MSG, MY_ENC_TYPE, 0, 0, hmsg);
-    //hstore = CryptGetMessageCertificates( MY_ENC_TYPE, ctx? ctx->hprov : 0, 0, msg->data, msg->data_length);
+    msg->ref();
+    hstore = CertOpenStore(CERT_STORE_PROV_MSG, MY_ENC_TYPE, 0, 0, msg->get_handle());
     if (!hstore) {
         throw CSPException("Couldn't open message certificate store");
     }
@@ -414,9 +360,6 @@ CertStore::~CertStore() throw(CSPException)
     }
     if (ctx) {
         ctx->unref();
-    }
-    if (hmsg && !CryptMsgClose(hmsg)) {
-        throw CSPException("Couldn't close message");
     }
     LOG("Deleted store %p\n", this);
 }
