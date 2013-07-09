@@ -5,9 +5,6 @@
 #include "cert.hpp"
 #include "msg.hpp"
 
-class Cert;
-class CertStore;
-class CryptMsg;
 class CertInfo
 {
 public:

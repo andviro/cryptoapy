@@ -2,6 +2,7 @@
 #include "context.hpp"
 #include "msg.hpp"
 #include "cert.hpp"
+#include "certinfo.hpp"
 
 void CertStore::init()
 {
@@ -182,7 +183,7 @@ Cert *CertStore::get_cert_by_info(CertInfo *ci) throw(CSPException, CSPNotFound)
         if (err == CRYPT_E_NOT_FOUND) {
             throw CSPNotFound("Subject cert not found", err);
         }
-        throw CSPException("Error gettin subject certificate from store", err);
+        throw CSPException("Error getting subject certificate from store", err);
     }
     return new Cert(res, this);
 }

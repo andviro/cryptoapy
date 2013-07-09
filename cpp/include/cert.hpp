@@ -1,13 +1,13 @@
 #ifndef CERT_HPP_INCLUDED
 #define CERT_HPP_INCLUDED
 
-#include "certinfo.hpp"
 #include "except.hpp"
 #include "rcobj.hpp"
 
 class CertStore;
 class Crypt;
 class CryptMsg;
+class CertInfo;
 
 class Cert : public RCObj
 {
