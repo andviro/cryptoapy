@@ -27,6 +27,7 @@ def main():
     rec_c = list(cs.find_by_name(b'123456789abcdef'))[0]
     ci = csp.CertInfo(rec_c)
     print(ci.name(), ci.issuer(), hexlify(ci.serial()))
+    print(ci.not_before(), ci.not_after())
 
     msg.add_recipient(rec_c)
     data = msg.encrypt_data(b'Test byte string')

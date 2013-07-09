@@ -92,5 +92,6 @@
 %include "cert.i"
 %include "certinfo.i"
 %include "msg.i"
+%include "ext.i"
 %include "sign.i"
 %include "request.i"

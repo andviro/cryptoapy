@@ -10,6 +10,7 @@
 %newobject CertStore::find_by_name;
 %newobject CertStore::get_cert_by_info;
 %newobject CertIter::next;
+%newobject CertIter::__iter__;
 %newobject CertFind::next;
 
 %feature("ref") Cert "$this->ref();"

@@ -1,11 +1,13 @@
 #!/usr/bin/env python
 #-*- coding: utf-8 -*-
 from __future__ import unicode_literals, print_function
-from cprocsp import csp, rdn
+from cprocsp import csp
 from base64 import b64encode, b64decode
 
 import platform
 from binascii import hexlify, unhexlify
+from filetimes import filetime_to_dt
+import struct
 
 
 def gen_key(cont, local=True, silent=False):
@@ -114,20 +116,6 @@ def get_certificate(thumb):
     assert len(res)
     cert = res[0]
     return b64encode(cert.extract())
-
-
-def get_certificate_props(cert):
-    """Пока возвращает Subject string раскодированный в словарь
-
-    :thumb: отпечаток, возвращенный функцией `bind_cert_to_key`
-    :returns: словарь
-
-    """
-    cert = ''.join(x for x in cert.splitlines() if not x.startswith('---'))
-    cdata = b64decode(cert)
-    newc = csp.Cert(cdata)
-    info = csp.CertInfo(newc)
-    return unicode(info.name(), 'windows-1251')
 
 
 def sign(cert, data, include_data):
@@ -249,7 +237,48 @@ def pkcs7_info(data):
     res['certs'] = list(b64encode(x.extract()) for x in csp.CertStore(msg))
     for i in range(msg.num_signers()):
         info = csp.CertInfo(msg, i)
-        res['signers'].append((info.issuer(), hexlify(info.serial())))
+        res['signers'].append((unicode(info.issuer(), 'cp1251', 'replace'),
+                               hexlify(info.serial())))
+    return res
+
+
+def _filetime(ft):
+    ft_dec = struct.unpack(b'<Q', ft)[0]
+    return filetime_to_dt(ft_dec)
+
+
+def cert_info(cert):
+    """Информация о сертификате
+
+    :cert: сертификат в base64
+    :returns: словарь с информацией следующего вида:
+    {
+        'Version' : версия сертификата,
+        'ValidFrom' : ДатаНачала (тип datetime),
+        'ValidTo' : ДатаОкончания (тип datetime),
+        'Issuer': Издатель,
+        'UseToSign':ИспользоватьДляПодписи,
+        'UseToEncrypt' :ИспользоватьДляШифрования,
+        'Thumbprint': Отпечаток,
+        'SerialNumber': СерийныйНомер,
+        'Subject': Субъект,
+        'Extensions': [РасширенныеСвойства, ...]
+    }
+
+    """
+    cert = ''.join(x for x in cert.splitlines() if not x.startswith('---'))
+    cert = csp.Cert(b64decode(cert))
+    info = csp.CertInfo(cert)
+    res = dict(
+        Version=info.version(),
+        ValidFrom=_filetime(info.not_before()),
+        ValidTo=_filetime(info.not_after()),
+        Subject=unicode(info.name(), 'cp1251', 'replace'),
+        Issuer=unicode(info.issuer(), 'cp1251', 'replace'),
+        Thumbprint=hexlify(cert.thumbprint()),
+        SerialNumber=hexlify(info.serial()),
+        Extensions=list(x.oid() for x in info.extensions()),
+    )
     return res
 
 
@@ -262,7 +291,7 @@ if __name__ == '__main__':
     thumb = bind_cert_to_key(cont, b64encode(open('cer_test.cer').read()))
     print(thumb)
     cert = get_certificate(thumb)
-    print(get_certificate_props(cert))
+    print(cert_info(cert))
     data = b64encode('Ahaahahahah!!!')
     wrong_data = b64encode('Ahaahahahah???')
     signdata = sign(cert, data, True)
