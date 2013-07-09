@@ -29,7 +29,7 @@ public:
     void get_data(BYTE **s, DWORD *slen) throw(CSPException);
     void add_recipient(Cert *c) throw(CSPException);
     void encrypt_data(BYTE *STRING, DWORD LENGTH, BYTE **s, DWORD *slen) throw(CSPException);
-    void decrypt(BYTE **s, DWORD *slen) throw(CSPException);
+    void decrypt(BYTE **s, DWORD *slen, CertStore *store) throw(CSPException, CSPNotFound);
     virtual void sign_data(BYTE *STRING, DWORD LENGTH, BYTE **s, DWORD *slen,
             Cert *signer, bool detach=0) throw(CSPException);
     bool verify(DWORD n) throw(CSPException);

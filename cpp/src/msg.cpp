@@ -140,18 +140,15 @@ void CryptMsg::encrypt_data(BYTE *STRING, DWORD LENGTH, BYTE **s, DWORD *slen) t
     delete[] pRecipientCert;
 }
 
-void CryptMsg::decrypt(BYTE **s, DWORD *slen) throw(CSPException)
+void CryptMsg::decrypt(BYTE **s, DWORD *slen, CertStore *store) throw(CSPException, CSPNotFound)
 {
-    HCERTSTORE hStoreHandle = 0;      // дескриптор хранилища сертификатов
-    CertStore mystore(cprov, "MY");
-
     CRYPT_DECRYPT_MESSAGE_PARA  decryptParams;
     //   Инициализация структуры CRYPT_DECRYPT_MESSAGE_PARA.
     memset(&decryptParams, 0, sizeof(CRYPT_DECRYPT_MESSAGE_PARA));
     decryptParams.cbSize = sizeof(CRYPT_DECRYPT_MESSAGE_PARA);
     decryptParams.dwMsgAndCertEncodingType = MY_ENCODING_TYPE;
     decryptParams.cCertStore = 1;
-    decryptParams.rghCertStore = &mystore.hstore;
+    decryptParams.rghCertStore = &store->hstore;
 
     //  Расшифрование сообщения
 
@@ -164,7 +161,12 @@ void CryptMsg::decrypt(BYTE **s, DWORD *slen) throw(CSPException)
                 slen,
                 NULL)) {
         DWORD err = GetLastError();
-        throw CSPException( "Error getting decrypted message size", err);
+        switch (err) {
+            case CRYPT_E_NO_DECRYPT_CERT:
+                throw CSPNotFound( "No certificate for decryption", err);
+            default:
+                throw CSPException( "Error getting decrypted message size", err);
+        }
     }
 
     // Выделение памяти под возвращаемые расшифрованные данные.
@@ -187,7 +189,7 @@ void CryptMsg::decrypt(BYTE **s, DWORD *slen) throw(CSPException)
     }
 }
 
-//void CryptMsg::add_signer_cert(Cert *c) throw(CSPException)
+//void CryptMsg::add_signer(Cert *c) throw(CSPException)
 //{
     //if (c) {
         //c->ref();

@@ -4,9 +4,9 @@ from __future__ import unicode_literals, print_function
 from cprocsp import csp
 
 
-#ctxname = 'test2'
+# ctxname = 'test2'
 ctxname = b'123456789abcdef'
-#provider = "Crypto-Pro HSM CSP"
+# provider = "Crypto-Pro HSM CSP"
 provider = None
 silent = csp.CRYPT_SILENT
 
@@ -18,19 +18,23 @@ def main():
     except:
         ctx = None
     if ctx is None:
-        ctx = csp.Crypt(b'{0}'.format(ctxname), csp.PROV_GOST_2001_DH, csp.CRYPT_NEWKEYSET | silent, provider)
+        ctx = csp.Crypt(
+            b'{0}'.format(ctxname), csp.PROV_GOST_2001_DH, csp.CRYPT_NEWKEYSET | silent, provider)
     msg = csp.CryptMsg(ctx)
     cs = csp.CertStore(ctx, b"My")
 
     rec_c = list(cs.find_by_name(b'123456789abcdef'))[0]
+    wrong_c = list(cs.find_by_name(b'test'))[0]
     print(rec_c.name())
 
     msg.add_recipient(rec_c)
     data = msg.encrypt_data(b'Test byte string')
     print(len(data))
 
-    encrypted = csp.CryptMsg(data, ctx)
-    return_data = encrypted.decrypt()
+    cs2 = csp.CertStore()
+    cs2.add_cert(wrong_c)
+    encrypted = csp.CryptMsg(data)
+    return_data = encrypted.decrypt(cs2)
     print(return_data)
 
     signed = msg.sign_data(b'Test signed data', rec_c)

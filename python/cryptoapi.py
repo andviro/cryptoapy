@@ -219,17 +219,22 @@ def encrypt(certs, data):
     return b64encode(encrypted)
 
 
-def decrypt(data):
+def decrypt(data, thumb):
     """Дешифрование данных из сообщения
 
+    :thumb: отпечаток сертификата для расшифровки
     :data: данные в base64
     :returns: шифрованные данные в base64
 
     """
-    ctx = csp.Crypt(b'test', csp.PROV_GOST_2001_DH, 0, None)
+    cs = csp.CertStore(None, b"MY")
+    certs = list(cs.find_by_thumb(b64decode(thumb)))
+    assert len(certs), 'Certificate for thumbprint not found'
+    decrcs = csp.CertStore()
+    decrcs.add_cert(certs[0])
     bin_data = b64decode(data)
-    msg = csp.CryptMsg(bin_data, ctx)
-    decrypted = msg.decrypt()
+    msg = csp.CryptMsg(bin_data)
+    decrypted = msg.decrypt(decrcs)
     return b64encode(decrypted)
 
 
@@ -250,7 +255,7 @@ if __name__ == '__main__':
     msg = b64encode('Hello, dolly!')
     encmsg = encrypt([cert], msg)
     print(len(encmsg))
-    decmsg = decrypt(encmsg)
+    decmsg = decrypt(encmsg, thumb)
     print(b64decode(decmsg))
     sencdata = sign_and_encrypt(cert, [cert], data)
     print(len(sencdata))
