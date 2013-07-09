@@ -53,7 +53,7 @@ public:
     CertIter(CertStore *p) throw (CSPException);
 
     CertIter *__iter__() {
-        return this;
+        return new CertIter(parent);
     }
 
     virtual ~CertIter() throw (CSPException);

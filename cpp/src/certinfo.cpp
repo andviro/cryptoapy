@@ -87,6 +87,20 @@ void CertInfo::serial(BYTE **s, DWORD *slen) throw(CSPException)
     memcpy(*s, psi->SerialNumber.pbData, *slen);
 }
 
+void CertInfo::not_before(BYTE **s, DWORD *slen) throw(CSPException)
+{
+    *slen = sizeof(FILETIME);
+    *s = (BYTE *)malloc(*slen);
+    memcpy(*s, &psi->NotBefore, *slen);
+}
+
+void CertInfo::not_after(BYTE **s, DWORD *slen) throw(CSPException)
+{
+    *slen = sizeof(FILETIME);
+    *s = (BYTE *)malloc(*slen);
+    memcpy(*s, &psi->NotAfter, *slen);
+}
+
 void CertInfo::decode_name_blob(PCERT_NAME_BLOB pNameBlob, BYTE **s, DWORD *slen)
 {
     DWORD flags = CERT_X500_NAME_STR | CERT_NAME_STR_NO_PLUS_FLAG;
@@ -108,3 +122,35 @@ void CertInfo::decode_name_blob(PCERT_NAME_BLOB pNameBlob, BYTE **s, DWORD *slen
     (*slen)--;
 }
 
+ExtIter *CertInfo::extensions() throw(CSPException) {
+    return new ExtIter(this);
+}
+
+ExtIter::ExtIter(CertInfo *p) throw (CSPException)
+    : parent(p), i(0)
+{
+    LOG("ExtIter::ExtIter(%p)\n", parent);
+    if(!parent) {
+        throw CSPException("NULL reference to CertInfo", -1);
+    }
+    parent->ref();
+    n = parent->psi->cExtension;
+    ext = parent->psi->rgExtension;
+}
+
+ExtIter::~ExtIter() throw (CSPException) {
+    LOG("ExtIter::~ExtIter(%p)\n", this);
+    if (parent)
+        parent->unref();
+}
+
+CertExtension *ExtIter::next() throw (Stop_Iteration, CSPException) {
+    LOG("ExtIter::next()\n");
+    if (i >= n) {
+        LOG("    Stop iter\n");
+        throw Stop_Iteration();
+    }
+    CertExtension *res = new CertExtension(&ext[i], parent);
+    i ++;
+    return res;
+}

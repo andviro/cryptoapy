@@ -2,10 +2,13 @@
 #define CERTINFO_HPP_INCLUDED
 
 #include "common.hpp"
+#include "rcobj.hpp"
 #include "cert.hpp"
 #include "msg.hpp"
+#include "ext.hpp"
 
-class CertInfo
+class ExtIter;
+class CertInfo : public RCObj
 {
 public:
     CertInfo (Cert  *c) throw(CSPException);
@@ -15,8 +18,11 @@ public:
     DWORD version();
     void issuer(BYTE **s, DWORD *slen) throw(CSPException);
     void name(BYTE **s, DWORD *slen) throw(CSPException);
+    void not_before(BYTE **s, DWORD *slen) throw(CSPException);
+    void not_after(BYTE **s, DWORD *slen) throw(CSPException);
     char *sign_algorithm();
     void serial(BYTE **s, DWORD *slen) throw(CSPException);
+    ExtIter *extensions() throw(CSPException);
 
 
 private:
@@ -27,6 +33,26 @@ private:
     CryptMsg *msg;
 
     friend class CertStore;
+    friend class ExtIter;
+};
+
+class ExtIter
+{
+private:
+    CertInfo *parent;
+    int n, i;
+    CERT_EXTENSION *ext;
+public:
+
+    ExtIter(CertInfo *p) throw (CSPException);
+
+    ExtIter *__iter__() {
+        return new ExtIter(parent);
+    }
+
+    virtual ~ExtIter() throw (CSPException);
+
+    virtual CertExtension *next() throw (Stop_Iteration, CSPException);
 };
 
 

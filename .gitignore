@@ -1,6 +1,9 @@
 doc/_*
 build
 dist
+*.log
+*.cer
+*.req
 wiki
 *.exe
 *.egg
