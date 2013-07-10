@@ -8,6 +8,42 @@ import platform
 from binascii import hexlify, unhexlify
 from filetimes import filetime_to_dt
 import struct
+import sys
+
+from datetime import datetime
+from pyasn1.type import univ, useful
+from pyasn1.codec.der import encoder, decoder
+from pyasn1_modules import rfc2251
+
+
+class CertAttribute(object):
+    """Атрибут запроса на сертификат
+
+    в закодированном виде добавляется в запрос методом
+    CertRequest.add_attribute()
+    """
+    def __init__(self, oid, value):
+        """@todo: to be defined """
+        self.asn = rfc2251.Attribute()
+        self.asn.setComponentByName('type', encoder.encode(univ.ObjectIdentifier(oid)))
+        val = rfc2251.AttributeValue(encoder.encode(value))
+        valset = univ.SetOf()
+        valset.setComponentByPosition(0, val)
+        self.asn.setComponentByName('vals', valset)
+
+    def encode(self):
+        return encoder.encode(self.asn)
+
+
+class CertValidity(CertAttribute):
+    """Атрибут для установки интервала действия серта в запросе"""
+
+    def __init__(self, not_before, not_after):
+        """@todo: to be defined """
+        val = univ.Sequence()
+        for i, x in enumerate((not_before, not_after)):
+            val.setComponentByPosition(i, useful.UTCTime(x.strftime('%Y%m%d%H%M%SZ%Z')))
+        super(CertValidity, self).__init__(b'1.2.643.2.4.1.1.1.1.2', val)
 
 
 def gen_key(cont, local=True, silent=False):
@@ -67,7 +103,7 @@ def remove_key(cont, local=True):
     return True
 
 
-def create_request(cont, descriptor, local=True):
+def create_request(cont, descriptor, not_before, not_after, local=True):
     """Создание запроса на сертификат
 
     :cont: Имя контейнера
@@ -79,8 +115,8 @@ def create_request(cont, descriptor, local=True):
     provider = "Crypto-Pro HSM CSP" if not local else None
     ctx = csp.Crypt(cont, csp.PROV_GOST_2001_DH, 0, provider)
     req = csp.CertRequest(ctx, descriptor)
-    req.add_eku(csp.szOID_PKIX_KP_EMAIL_PROTECTION)
-    req.set_usage(0xf0)
+    validity = CertValidity(not_before, not_after)
+    req.add_attr(validity.encode())
     return b64encode(req.get_data())
 
 
@@ -295,7 +331,10 @@ def cert_info(cert):
 if __name__ == '__main__':
     cont = b'123456789abcdef'
     print(gen_key(cont))
-    req = create_request(cont, b'CN=123456789abcdef')
+    req = create_request(cont,
+                         b'CN=123456789abcdef',
+                         not_before=datetime.utcnow(),
+                         not_after=datetime(2014, 1, 1))
     print('request data:', req)
     open('cer_test.req', 'wb').write(req)
     thumb = bind_cert_to_key(cont, b64encode(open('cer_test.cer').read()))

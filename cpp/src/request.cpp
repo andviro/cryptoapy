@@ -39,49 +39,12 @@ CertRequest::CertRequest(Crypt *ctx, BYTE *STRING, DWORD LENGTH) throw (CSPExcep
     if (STRING && LENGTH) {
         set_name(STRING, LENGTH);
     }
-    //
-    // XXX
-    //
-    LOG("    begin init extensions\n");
-    ZeroMemory(attr_blobs, sizeof(attr_blobs));
-    LOG("    zeroed %i of %i bytes of attr blobs\n", sizeof(attr_blobs), sizeof(CRYPT_ATTR_BLOB)*2);
-    ext_attr.pszObjId = (LPSTR) szOID_CERT_EXTENSIONS;
-    ext_attr.cValue = 1;
-    ext_attr.rgValue = attr_blobs;
-
-    LOG("    new exts\n");
-    exts = new CertExtensions();
-    LOG("    new eku\n");
-    eku = new ExtKeyUsage();
-    LOG("    new ku\n");
-    ku = new KeyUsage();
-    LOG("    add ku\n");
-    exts->add(ku);
-    LOG("    add eku\n");
-    exts->add(eku);
-    LOG("    set rgAttribute\n");
-    CertReqInfo.cAttribute = 1;
-    CertReqInfo.rgAttribute = &ext_attr;
-}
-
-void CertRequest::set_usage(BYTE usage) throw (CSPException) {
-    ku -> set_usage(usage);
-}
-
-void CertRequest::reset_usage(BYTE usage) throw (CSPException) {
-    ku -> reset_usage(usage);
-}
-
-void CertRequest::add_eku(LPCSTR oid) throw (CSPException) {
-    eku -> add_usage_oid(oid);
+    CertReqInfo.cAttribute = 0;
+    CertReqInfo.rgAttribute = NULL;
 }
 
 CertRequest::~CertRequest() throw (CSPException) {
     LOG("CertRequest::~CertRequest(%p)\n", this);
-    delete eku;
-    delete ku;
-    delete exts;
-
     if (ctx) {
         ctx -> unref();
     }
@@ -95,6 +58,7 @@ CertRequest::~CertRequest() throw (CSPException) {
 
 void CertRequest::set_name(BYTE *STRING, DWORD LENGTH) throw (CSPException) {
     LOG("CertRequest::set_name(%s)\n", STRING);
+
     bool res = CertStrToName(
         MY_ENC_TYPE,
         (LPCSTR) STRING,
@@ -134,7 +98,6 @@ void CertRequest::get_data(BYTE **s, DWORD *slen) throw (CSPException) {
     // XXX
     //
     LOG("CertRequest::get_data()\n");
-    exts->encode(&attr_blobs[0].pbData, &attr_blobs[0].cbData);
 
     bool res = CryptSignAndEncodeCertificate(
         ctx->hprov, AT_KEYEXCHANGE, MY_ENC_TYPE,
@@ -150,9 +113,6 @@ void CertRequest::get_data(BYTE **s, DWORD *slen) throw (CSPException) {
         ctx->hprov, AT_KEYEXCHANGE, MY_ENC_TYPE,
         X509_CERT_REQUEST_TO_BE_SIGNED, &CertReqInfo,
         &SigAlg, NULL, *s, slen );
-
-    free(attr_blobs[0].pbData);
-    ZeroMemory(attr_blobs, sizeof(attr_blobs));
 
     if(!res) {
         throw CSPException("Couldn't encode certificate request");

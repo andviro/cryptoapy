@@ -18,20 +18,11 @@ class CertRequest
     CERT_PUBLIC_KEY_INFO *pbPublicKeyInfo;
     DWORD cbPublicKeyInfo;
     Crypt *ctx;
-    CRYPT_ATTR_BLOB attr_blobs[2];
-    CRYPT_ATTRIBUTE ext_attr;
-    CertExtensions *exts;
-    ExtKeyUsage *eku;
-    KeyUsage *ku;
     public:
         CertRequest(Crypt *ctx, BYTE *STRING=NULL, DWORD LENGTH=0) throw (CSPException);
         void set_name(BYTE *STRING, DWORD LENGTH) throw (CSPException);
         void get_data(BYTE **s, DWORD *slen) throw (CSPException);
-        //void set_usage_bit(BYTE usage) throw (CSPException);
         ~CertRequest() throw (CSPException);
-        void add_eku(LPCSTR oid) throw (CSPException);
-        void set_usage(BYTE usage) throw (CSPException);
-        void reset_usage(BYTE usage) throw (CSPException);
 };
 
 #endif
