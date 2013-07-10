@@ -307,7 +307,7 @@ Cert::Cert(PCCERT_CONTEXT pc, CertStore *parent) throw(CSPException) : parent(pa
 Cert::~Cert() throw(CSPException)
 {
     LOG("Cert::~Cert(%p)\n", pcert);
-    if (!CertFreeCertificateContext(pcert)) {
+    if (pcert && !CertFreeCertificateContext(pcert)) {
         throw CSPException("Couldn't free certificate context");
     }
     if (parent) {
