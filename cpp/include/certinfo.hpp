@@ -20,6 +20,7 @@ public:
     void name(BYTE **s, DWORD *slen) throw(CSPException);
     void not_before(BYTE **s, DWORD *slen) throw(CSPException);
     void not_after(BYTE **s, DWORD *slen) throw(CSPException);
+    BYTE usage() throw(CSPException);
     char *sign_algorithm();
     void serial(BYTE **s, DWORD *slen) throw(CSPException);
     ExtIter *extensions() throw(CSPException);

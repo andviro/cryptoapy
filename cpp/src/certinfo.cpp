@@ -54,6 +54,13 @@ CertInfo::~CertInfo () throw(CSPException)
     }
 }
 
+BYTE CertInfo::usage() throw(CSPException) {
+    BYTE res = 0;
+    DWORD dummy = 1;
+    CertGetIntendedKeyUsage(MY_ENC_TYPE, psi, &res, dummy);
+    return res;
+}
+
 DWORD CertInfo::version()
 {
     return psi->dwVersion;
@@ -154,3 +161,4 @@ CertExtension *ExtIter::next() throw (Stop_Iteration, CSPException) {
     i ++;
     return res;
 }
+

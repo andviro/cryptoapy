@@ -281,10 +281,11 @@ def cert_info(cert):
         Version=info.version(),
         ValidFrom=_filetime(info.not_before()),
         ValidTo=_filetime(info.not_after()),
-        Subject=unicode(info.name(), 'cp1251', 'replace'),
         Issuer=unicode(info.issuer(), 'cp1251', 'replace'),
         Thumbprint=hexlify(cert.thumbprint()),
+        Usage=info.usage(),
         SerialNumber=hexlify(info.serial()),
+        Subject=unicode(info.name(), 'cp1251', 'replace'),
         Extensions=list(x.oid() for x in info.extensions()),
     )
     return res
