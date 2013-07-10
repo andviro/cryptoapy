@@ -8,6 +8,7 @@ class CertStore;
 class Crypt;
 class CryptMsg;
 class CertInfo;
+class EKUIter;
 
 class Cert : public RCObj
 {
@@ -37,6 +38,8 @@ public:
     void thumbprint(BYTE **s, DWORD *slen) throw(CSPException);
 
     void bind(Crypt *ctx, DWORD keyspec=AT_KEYEXCHANGE);
+
+    EKUIter *eku() throw(CSPException);
 
     friend class CryptMsg;
     friend class CertStore;
@@ -110,6 +113,30 @@ public:
     friend class CryptMsg;
     friend class CertIter;
     friend class CertFind;
+};
+
+class EKUIter
+{
+public:
+    EKUIter (Cert *c);
+    virtual ~EKUIter ();
+    EKUIter *__iter__() {
+        EKUIter *res = new EKUIter(parent);
+        if (pekus) {
+            res -> cbsize = cbsize;
+            res -> pekus = (CERT_ENHKEY_USAGE *)malloc(cbsize);
+            memcpy(res->pekus, pekus, cbsize);
+        }
+        return res;
+    }
+    char *next () throw (CSPException, Stop_Iteration);
+
+private:
+    Cert *parent;
+    CERT_ENHKEY_USAGE *pekus;
+    DWORD cbsize;
+    friend class Cert;
+    int i;
 };
 
 #endif

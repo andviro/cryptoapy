@@ -12,6 +12,8 @@
 %newobject CertIter::next;
 %newobject CertIter::__iter__;
 %newobject CertFind::next;
+%newobject EKUIter::__iter__;
+%newobject EKUIter::next;
 
 %feature("ref") Cert "$this->ref();"
 %feature("unref") Cert "$this->unref();"
@@ -20,5 +22,7 @@
 %feature("python:slot", "tp_iter", functype="getiterfunc") CertStore::__iter__;
 %feature("python:slot", "tp_iter", functype="getiterfunc") CertIter::__iter__;
 %feature("python:slot", "tp_iternext", functype="iternextfunc") CertIter::next;
+%feature("python:slot", "tp_iter", functype="getiterfunc") EKUIter::__iter__;
+%feature("python:slot", "tp_iternext", functype="iternextfunc") EKUIter::next;
 
 %include "cert.hpp"

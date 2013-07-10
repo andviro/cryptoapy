@@ -270,7 +270,7 @@ def cert_info(cert):
         'Thumbprint': Отпечаток,
         'SerialNumber': СерийныйНомер,
         'Subject': Субъект,
-        'Extensions': [РасширенныеСвойства, ...]
+        'Extensions': [Item, Item, ...]
     }
 
     """
@@ -287,7 +287,7 @@ def cert_info(cert):
         UseToEncrypt=bool(info.usage() & csp.CERT_DATA_ENCIPHERMENT_KEY_USAGE),
         SerialNumber=hexlify(info.serial()),
         Subject=unicode(info.name(), 'cp1251', 'replace'),
-        Extensions=list(x.oid() for x in info.extensions()),
+        Extensions=list(cert.eku()),
     )
     return res
 

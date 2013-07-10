@@ -61,6 +61,7 @@ BYTE CertInfo::usage() throw(CSPException) {
     return res;
 }
 
+
 DWORD CertInfo::version()
 {
     return psi->dwVersion;

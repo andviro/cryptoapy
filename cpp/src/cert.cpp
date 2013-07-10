@@ -398,3 +398,55 @@ void Cert::bind(Crypt *ctx, DWORD keyspec) {
     delete[] prov_name;
     delete[] ctx_name;
 }
+
+EKUIter *Cert::eku() throw(CSPException) {
+   EKUIter *res = new EKUIter(this);
+   if (!CertGetEnhancedKeyUsage(pcert, 0, NULL, &res->cbsize)) {
+       res->pekus = NULL;
+       res->cbsize = 0;
+       return res;
+   }
+
+   res->pekus = (CERT_ENHKEY_USAGE *)malloc(res->cbsize);
+
+   if (!CertGetEnhancedKeyUsage(pcert, 0, res->pekus, &res->cbsize)) {
+       free(res->pekus);
+       res->pekus= NULL;
+       res->cbsize = 0;
+   }
+   return res;
+}
+
+
+EKUIter::EKUIter (Cert *c)
+    :parent(c)
+{
+    if (parent)
+        parent -> ref();
+
+    pekus = NULL;
+    i = 0;
+    cbsize = 0;
+}
+
+char *EKUIter::next () throw (CSPException, Stop_Iteration)
+{
+    LOG("EKUIter::next()\n");
+    if (!pekus || i >= pekus->cUsageIdentifier) {
+        LOG("    Stop iter\n");
+        throw Stop_Iteration();
+    }
+    char *res = strdup((char *)pekus->rgpszUsageIdentifier[i]);
+    i ++;
+    return res;
+}
+
+
+EKUIter::~EKUIter ()
+{
+    if (pekus) {
+        free(pekus);
+    }
+    if (parent)
+        parent -> unref();
+}
