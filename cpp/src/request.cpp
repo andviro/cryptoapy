@@ -10,19 +10,23 @@ int CertRequest::add_attribute(BYTE *STRING, DWORD LENGTH) throw (CSPException)
 {
     CRYPT_ATTRIBUTE *pa;
     DWORD n = CertReqInfo.cAttribute;
+    LOG("CertRequest::add_attribute(%s)\n", STRING);
 
     CertReqInfo.rgAttribute = (CRYPT_ATTRIBUTE *)realloc(CertReqInfo.rgAttribute, (n + 1) * sizeof(CRYPT_ATTRIBUTE));
     pa = &CertReqInfo.rgAttribute[n];
+    ZeroMemory(pa, sizeof(CRYPT_ATTRIBUTE));
     CertReqInfo.cAttribute ++;
     pa -> pszObjId = (LPSTR) STRING;
     pa -> cValue = 0;
     pa -> rgValue = NULL;
+    LOG("    added attribute %i\n", n);
     return n;
 }
 
 void CertRequest::add_attribute_value(int n, BYTE *STRING, DWORD LENGTH) throw (CSPException) {
     CRYPT_ATTRIBUTE *pa;
     CRYPT_ATTR_BLOB *pdata;
+    LOG("CertRequest::add_attribute_value(%i, %p, %u)\n", n, STRING, LENGTH);
 
     if (n >= CertReqInfo.cAttribute) {
         throw CSPException("Attribute index out of range", -1);
@@ -30,7 +34,9 @@ void CertRequest::add_attribute_value(int n, BYTE *STRING, DWORD LENGTH) throw (
     pa = &CertReqInfo.rgAttribute[n];
     pa -> rgValue = (PCRYPT_ATTR_BLOB) malloc(sizeof(CRYPT_ATTR_BLOB) * (pa -> cValue + 1) );
     pdata = &(pa -> rgValue[pa -> cValue]);
+    ZeroMemory(pdata, sizeof(CRYPT_ATTR_BLOB));
     (pa -> cValue) ++;
+
     pdata -> cbData = LENGTH;
     pdata -> pbData = (BYTE *)malloc(LENGTH);
     memcpy(pdata->pbData, STRING, LENGTH);
@@ -83,6 +89,21 @@ CertRequest::~CertRequest() throw (CSPException) {
     if (pbPublicKeyInfo) {
         free(pbPublicKeyInfo);
     }
+
+    CRYPT_ATTRIBUTE *pa;
+    CRYPT_ATTR_BLOB *pdata;
+    for (size_t i = 0; i < CertReqInfo.cAttribute; i++)
+    {
+        pa = &CertReqInfo.rgAttribute[i];
+        for (size_t j = 0; j < pa->cValue; j++)
+        {
+            pdata = &(pa -> rgValue[j]);
+            if(pdata -> pbData)
+                free((void *)pdata -> pbData);
+        }
+        free((void*) pa->rgValue);
+    }
+    free((void*) CertReqInfo.rgAttribute);
 }
 
 void CertRequest::set_name(BYTE *STRING, DWORD LENGTH) throw (CSPException) {

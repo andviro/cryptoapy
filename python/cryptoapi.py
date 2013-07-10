@@ -25,12 +25,12 @@ class CertAttribute(object):
     def __init__(self, oid, values):
         """@todo: to be defined """
         self.oid = oid
-        self.vals = [rfc2251.AttributeValue(encoder.encode(v)) for v in values]
+        self.vals = [encoder.encode(v) for v in values]
 
     def add_to(self, req):
-        n = req.add_attr(self.oid)
+        n = req.add_attribute(self.oid)
         for v in self.vals:
-            req.add_attr_value(n, v)
+            req.add_attribute_value(n, v)
 
 
 class CertValidity(CertAttribute):
@@ -41,7 +41,7 @@ class CertValidity(CertAttribute):
         val = univ.Sequence()
         for i, x in enumerate((not_before, not_after)):
             val.setComponentByPosition(i, useful.UTCTime(x.strftime('%Y%m%d%H%M%SZ%Z')))
-        super(CertValidity, self).__init__(b'1.2.643.2.4.1.1.1.1.2', val)
+        super(CertValidity, self).__init__(b'1.2.643.2.4.1.1.1.1.2', [val])
 
 
 def gen_key(cont, local=True, silent=False):
