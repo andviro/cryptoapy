@@ -63,7 +63,7 @@ def remove_key(cont, local=True):
 
     '''
     provider = "Crypto-Pro HSM CSP" if not local else None
-    csp.Crypt(cont, csp.PROV_GOST_2001_DH, csp.CRYPT_DELETEKEYSET, provider)
+    csp.Crypt.remove(cont, csp.PROV_GOST_2001_DH, provider)
     return True
 
 
@@ -178,7 +178,15 @@ def check_signature(cert, sig, data):
     cert = ''.join(x for x in cert.splitlines() if not x.startswith('---'))
     data = b64decode(data)
     cert = csp.Cert(b64decode(cert))
-    return True
+    icert = csp.CertInfo(cert)
+    cissuer = icert.issuer()
+    cserial = icert.serial()
+    for i in range(sign.num_signers()):
+        isign = csp.CertInfo(sign, i)
+        if (cissuer == isign.issuer() and
+                cserial == isign.serial()):
+            return sign.verify_data(data, i)
+    return False
 
 
 def encrypt(certs, data):
@@ -286,24 +294,25 @@ if __name__ == '__main__':
     cont = b'123456789abcdef'
     print(gen_key(cont))
     req = create_request(cont, b'CN=123456789abcdef')
-    print(req)
+    print('request data:', req)
     open('cer_test.req', 'wb').write(req)
     thumb = bind_cert_to_key(cont, b64encode(open('cer_test.cer').read()))
-    print(thumb)
+    print('bound cert thumb:', thumb)
     cert = get_certificate(thumb)
     print(cert_info(cert))
     data = b64encode('Ahaahahahah!!!')
     wrong_data = b64encode('Ahaahahahah???')
     signdata = sign(cert, data, True)
-    print(pkcs7_info(signdata))
-    # print(check_signature(cert, signdata, data))
-    # print(check_signature(cert, signdata, wrong_data))
-    msg = b64encode('Hello, dolly!')
+    print('sign info:', pkcs7_info(signdata))
+    print('verify "{0}":'.format(data), check_signature(cert, signdata, data))
+    print('verify "{0}":'.format(wrong_data), check_signature(cert, signdata, wrong_data))
+    message = 'Hello, dolly!'
+    msg = b64encode(message)
     encmsg = encrypt([cert], msg)
-    print(len(encmsg))
+    print('encrypted len of "{0}":'.format(message), len(encmsg))
     decmsg = decrypt(encmsg, thumb)
-    print(b64decode(decmsg))
+    print('decrypted:', b64decode(decmsg))
     sencdata = sign_and_encrypt(cert, [cert], data)
-    print(len(sencdata))
-    print(pkcs7_info(sencdata))
+    print('signed and encrypted len:', len(sencdata))
+    print('info of s_a_e:', pkcs7_info(sencdata))
     # print(remove_key(cont))

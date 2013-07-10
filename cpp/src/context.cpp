@@ -155,3 +155,18 @@ Key *Crypt::import_key(BYTE *STRING, DWORD LENGTH, Key *decrypt) throw(CSPExcept
     }
     return new Key(this, hkey);
 }
+
+void Crypt::remove(char *container, DWORD type, char *name) throw(CSPException, CSPNotFound) {
+    HCRYPTPROV dummy;
+    if (!CryptAcquireContext(&dummy, container, name, type, CRYPT_DELETEKEYSET)) {
+        DWORD err = GetLastError();
+        switch (err) {
+        case NTE_KEYSET_NOT_DEF:
+            throw CSPNotFound("Keyset not defined", err);
+        case NTE_BAD_KEYSET_PARAM:
+            throw CSPNotFound("Bad keyset parameters or container not found", err);
+        default:
+            throw CSPException("Couldn't delete container", err);
+        }
+    }
+}

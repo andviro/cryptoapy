@@ -30,11 +30,14 @@ public:
 
     void set_password(BYTE *STRING, DWORD LENGTH, DWORD keyspec=AT_SIGNATURE) throw(CSPException);
 
+    static void remove(char *container, DWORD type, char *name) throw(CSPException, CSPNotFound);
+
     friend class Cert;
     friend class CryptMsg;
     friend class Signature;
     friend class CertStore;
     friend class CertRequest;
 };
+
 
 #endif
