@@ -22,17 +22,15 @@ class CertAttribute(object):
     в закодированном виде добавляется в запрос методом
     CertRequest.add_attribute()
     """
-    def __init__(self, oid, value):
+    def __init__(self, oid, values):
         """@todo: to be defined """
-        self.asn = rfc2251.Attribute()
-        self.asn.setComponentByName('type', encoder.encode(univ.ObjectIdentifier(oid)))
-        val = rfc2251.AttributeValue(encoder.encode(value))
-        valset = univ.SetOf()
-        valset.setComponentByPosition(0, val)
-        self.asn.setComponentByName('vals', valset)
+        self.oid = oid
+        self.vals = [rfc2251.AttributeValue(encoder.encode(v)) for v in values]
 
-    def encode(self):
-        return encoder.encode(self.asn)
+    def add_to(self, req):
+        n = req.add_attr(self.oid)
+        for v in self.vals:
+            req.add_attr_value(n, v)
 
 
 class CertValidity(CertAttribute):
@@ -116,7 +114,7 @@ def create_request(cont, descriptor, not_before, not_after, local=True):
     ctx = csp.Crypt(cont, csp.PROV_GOST_2001_DH, 0, provider)
     req = csp.CertRequest(ctx, descriptor)
     validity = CertValidity(not_before, not_after)
-    req.add_attr(validity.encode())
+    validity.add_to(req)
     return b64encode(req.get_data())
 
 

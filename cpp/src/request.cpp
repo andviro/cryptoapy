@@ -6,15 +6,34 @@
 
 using namespace std;
 
-void CertRequest::add_attribute(char *oid, BYTE *STRING, DWORD LENGTH) throw (CSPException) {
+int CertRequest::add_attribute(BYTE *STRING, DWORD LENGTH) throw (CSPException)
+{
     CRYPT_ATTRIBUTE *pa;
-    CertReqInfo.rgAttribute = realloc((CertReqInfo.cAttribute + 1) * sizeof(CRYPT_ATTRIBUTE));
-    pa = &CertReqInfo.rgAttribute[CertReqInfo.cAttribute];
-    CertReqInfo.cAttribute ++;
-    pa -> pszObjId = strdup(oid);
-    pa -> cValue = 1;
-    pa -> rgValue = new CRYPT_ATTR_BLOB;
+    DWORD n = CertReqInfo.cAttribute;
 
+    CertReqInfo.rgAttribute = (CRYPT_ATTRIBUTE *)realloc(CertReqInfo.rgAttribute, (n + 1) * sizeof(CRYPT_ATTRIBUTE));
+    pa = &CertReqInfo.rgAttribute[n];
+    CertReqInfo.cAttribute ++;
+    pa -> pszObjId = (LPSTR) STRING;
+    pa -> cValue = 0;
+    pa -> rgValue = NULL;
+    return n;
+}
+
+void CertRequest::add_attribute_value(int n, BYTE *STRING, DWORD LENGTH) throw (CSPException) {
+    CRYPT_ATTRIBUTE *pa;
+    CRYPT_ATTR_BLOB *pdata;
+
+    if (n >= CertReqInfo.cAttribute) {
+        throw CSPException("Attribute index out of range", -1);
+    }
+    pa = &CertReqInfo.rgAttribute[n];
+    pa -> rgValue = (PCRYPT_ATTR_BLOB) malloc(sizeof(CRYPT_ATTR_BLOB) * (pa -> cValue + 1) );
+    pdata = &(pa -> rgValue[pa -> cValue]);
+    (pa -> cValue) ++;
+    pdata -> cbData = LENGTH;
+    pdata -> pbData = (BYTE *)malloc(LENGTH);
+    memcpy(pdata->pbData, STRING, LENGTH);
 }
 
 CertRequest::CertRequest(Crypt *ctx, BYTE *STRING, DWORD LENGTH) throw (CSPException) : ctx(ctx) {

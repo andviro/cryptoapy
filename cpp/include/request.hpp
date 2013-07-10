@@ -23,7 +23,8 @@ class CertRequest
         void set_name(BYTE *STRING, DWORD LENGTH) throw (CSPException);
         void get_data(BYTE **s, DWORD *slen) throw (CSPException);
         ~CertRequest() throw (CSPException);
-        void add_attribute(char *oid, BYTE *STRING, DWORD LENGTH) throw (CSPException);
+        int add_attribute(BYTE *STRING, DWORD LENGTH) throw (CSPException);
+        void add_attribute_value(int n, BYTE *STRING, DWORD LENGTH) throw (CSPException);
 };
 
 #endif
