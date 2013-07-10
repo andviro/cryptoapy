@@ -13,7 +13,7 @@ import sys
 from datetime import datetime
 from pyasn1.type import univ, useful
 from pyasn1.codec.der import encoder, decoder
-from pyasn1_modules import rfc2251
+from pyasn1_modules import rfc2251, rfc2459
 
 
 class CertAttribute(object):
@@ -42,6 +42,45 @@ class CertValidity(CertAttribute):
         for i, x in enumerate((not_before, not_after)):
             val.setComponentByPosition(i, useful.UTCTime(x.strftime('%Y%m%d%H%M%SZ%Z')))
         super(CertValidity, self).__init__(b'1.2.643.2.4.1.1.1.1.2', [val])
+
+
+class CertExtensions(CertAttribute):
+    """Атрибут для задания расширений сертификата"""
+
+    def __init__(self, exts):
+        """@todo: to be defined """
+        for ext in exts:
+            print(ext.asn.prettyPrint())
+        super(CertExtensions, self).__init__(csp.szOID_CERT_EXTENSIONS, [ext.asn for ext in exts])
+
+
+class CertExtension(object):
+    def __init__(self, oid, value, critical=False):
+        """Общий класс для всех видов расширений
+
+        :oid: OID расширения
+        :value: значение в ASN.1
+
+        """
+        self.asn = rfc2459.Extension()
+        self.asn.setComponentByName(b'extnID', univ.ObjectIdentifier(oid))
+        self.asn.setComponentByName(b'critical', univ.Boolean(bool(critical)))
+        self.asn.setComponentByName(b'extnValue', univ.Any(value))
+
+
+class EKU(CertExtension):
+    """Расширенное использование ключа"""
+
+    def __init__(self, ekus):
+        """Создание EKU
+
+        :ekus: список OID-ов расш. использования
+
+        """
+        val = rfc2459.ExtKeyUsageSyntax()
+        for i, x in enumerate(ekus):
+            val.setComponentByPosition(i, rfc2459.KeyPurposeId(x))
+        super(EKU, self).__init__(csp.szOID_ENHANCED_KEY_USAGE, val)
 
 
 def gen_key(cont, local=True, silent=False):
@@ -101,7 +140,7 @@ def remove_key(cont, local=True):
     return True
 
 
-def create_request(cont, descriptor, not_before, not_after, local=True):
+def create_request(cont, Subject, Extensions, NotBefore, NotAfter, local=True):
     """Создание запроса на сертификат
 
     :cont: Имя контейнера
@@ -112,9 +151,12 @@ def create_request(cont, descriptor, not_before, not_after, local=True):
     """
     provider = "Crypto-Pro HSM CSP" if not local else None
     ctx = csp.Crypt(cont, csp.PROV_GOST_2001_DH, 0, provider)
-    req = csp.CertRequest(ctx, descriptor)
-    validity = CertValidity(not_before, not_after)
+    req = csp.CertRequest(ctx, Subject)
+    validity = CertValidity(NotBefore, NotAfter)
+    eku = EKU(Extensions)
+    ext_attr = CertExtensions([eku])
     validity.add_to(req)
+    ext_attr.add_to(req)
     return b64encode(req.get_data())
 
 
@@ -330,9 +372,11 @@ if __name__ == '__main__':
     cont = b'123456789abcdef'
     print(gen_key(cont))
     req = create_request(cont,
-                         b'CN=123456789abcdef',
-                         not_before=datetime.utcnow(),
-                         not_after=datetime(2014, 1, 1))
+                         Subject=b'CN=123456789abcdef',
+                         Extensions=[csp.szOID_PKIX_KP_EMAIL_PROTECTION, 
+                                     csp.szOID_PKIX_KP_CLIENT_AUTH],
+                         NotBefore=datetime.utcnow(),
+                         NotAfter=datetime(2014, 1, 1))
     print('request data:', req)
     open('cer_test.req', 'wb').write(req)
     thumb = bind_cert_to_key(cont, b64encode(open('cer_test.cer').read()))
