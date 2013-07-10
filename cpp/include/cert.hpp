@@ -136,7 +136,7 @@ private:
     CERT_ENHKEY_USAGE *pekus;
     DWORD cbsize;
     friend class Cert;
-    int i;
+    DWORD i;
 };
 
 #endif

@@ -180,7 +180,7 @@ Cert *CertStore::get_cert_by_info(CertInfo *ci) throw(CSPException, CSPNotFound)
     res = CertGetSubjectCertificateFromStore(hstore, MY_ENC_TYPE, ci->psi);
     if (!res) {
         DWORD err = GetLastError();
-        if (err == CRYPT_E_NOT_FOUND) {
+        if (err == (DWORD)CRYPT_E_NOT_FOUND) {
             throw CSPNotFound("Subject cert not found", err);
         }
         throw CSPException("Error getting subject certificate from store", err);

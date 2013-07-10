@@ -127,7 +127,7 @@ Key *Crypt::get_key(DWORD keyspec) throw(CSPException, CSPNotFound)
     HCRYPTKEY hkey = 0;
     if(!CryptGetUserKey(hprov, keyspec, &hkey)) {
         DWORD err = GetLastError();
-        if (err == NTE_NO_KEY) {
+        if (err == (DWORD)NTE_NO_KEY) {
             throw CSPNotFound("Key not found", err);
         } else {
             throw CSPException("Couldn't acquire user pub key", err);
