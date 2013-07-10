@@ -4,6 +4,7 @@
 %newobject Cert::duplicate;
 %newobject Cert::extract;
 %newobject Cert::self_sign;
+%newobject Cert::eku;
 %newobject CertStore::__iter__;
 %newobject CertStore::add_cert;
 %newobject CertStore::find_by_thumb;
