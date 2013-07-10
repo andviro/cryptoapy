@@ -40,7 +40,7 @@ class CertValidity(CertAttribute):
         """@todo: to be defined """
         val = univ.Sequence()
         for i, x in enumerate((not_before, not_after)):
-            val.setComponentByPosition(i, useful.UTCTime(x.strftime('%Y%m%d%H%M%SZ%Z')))
+            val.setComponentByPosition(i, useful.UTCTime(bytes(x.strftime('%y%m%d%H%M%SZ'))))
         super(CertValidity, self).__init__(b'1.2.643.2.4.1.1.1.1.2', [val])
 
 
@@ -49,9 +49,11 @@ class CertExtensions(CertAttribute):
 
     def __init__(self, exts):
         """@todo: to be defined """
-        for ext in exts:
-            print(ext.asn.prettyPrint())
-        super(CertExtensions, self).__init__(csp.szOID_CERT_EXTENSIONS, [ext.asn for ext in exts])
+        val = univ.SequenceOf()
+        for i, ext in enumerate(exts):
+            val.setComponentByPosition(i, ext.asn)
+        print(val.prettyPrint())
+        super(CertExtensions, self).__init__(csp.szOID_CERT_EXTENSIONS, [val])
 
 
 class CertExtension(object):
@@ -65,7 +67,7 @@ class CertExtension(object):
         self.asn = rfc2459.Extension()
         self.asn.setComponentByName(b'extnID', univ.ObjectIdentifier(oid))
         self.asn.setComponentByName(b'critical', univ.Boolean(bool(critical)))
-        self.asn.setComponentByName(b'extnValue', univ.Any(value))
+        self.asn.setComponentByName(b'extnValue', univ.OctetString(value))
 
 
 class EKU(CertExtension):
@@ -80,7 +82,7 @@ class EKU(CertExtension):
         val = rfc2459.ExtKeyUsageSyntax()
         for i, x in enumerate(ekus):
             val.setComponentByPosition(i, rfc2459.KeyPurposeId(x))
-        super(EKU, self).__init__(csp.szOID_ENHANCED_KEY_USAGE, val)
+        super(EKU, self).__init__(csp.szOID_ENHANCED_KEY_USAGE, encoder.encode(val))
 
 
 def gen_key(cont, local=True, silent=False):
@@ -379,6 +381,7 @@ if __name__ == '__main__':
                          NotAfter=datetime(2014, 1, 1))
     print('request data:', req)
     open('cer_test.req', 'wb').write(req)
+    open('cer_test.der', 'wb').write(b64decode(req))
     thumb = bind_cert_to_key(cont, b64encode(open('cer_test.cer').read()))
     print('bound cert thumb:', thumb)
     cert = get_certificate(thumb)
