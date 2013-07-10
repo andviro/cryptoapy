@@ -6,6 +6,16 @@
 
 using namespace std;
 
+void CertRequest::add_attribute(char *oid, BYTE *STRING, DWORD LENGTH) throw (CSPException) {
+    CRYPT_ATTRIBUTE *pa;
+    CertReqInfo.rgAttribute = realloc((CertReqInfo.cAttribute + 1) * sizeof(CRYPT_ATTRIBUTE));
+    pa = &CertReqInfo.rgAttribute[CertReqInfo.cAttribute];
+    CertReqInfo.cAttribute ++;
+    pa -> pszObjId = strdup(oid);
+    pa -> cValue = 1;
+    pa -> rgValue = new CRYPT_ATTR_BLOB;
+
+}
 
 CertRequest::CertRequest(Crypt *ctx, BYTE *STRING, DWORD LENGTH) throw (CSPException) : ctx(ctx) {
     LOG("CertRequest::CertRequest(%p, %s)\n", ctx, STRING);
