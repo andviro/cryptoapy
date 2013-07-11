@@ -81,9 +81,11 @@ csp = Extension('cprocsp._csp',
                 libraries=libraries,
                 extra_compile_args=extra_compile_args,)
 setup(name='python{major}.{minor}-cprocsp'.format(major=major, minor=minor),
-      version='0.1',
+      version='0.2',
+      requires=['pyasn1', 'pyasn1_modules'],
       ext_modules=[csp],
       packages=['cprocsp'],
-      py_modules=['cprocsp.csp', 'cprocsp.rdn'],
+      py_modules=['cprocsp.csp', 'cprocsp.rdn', 'cprocsp.cryptoapi',
+                  'cprocsp.filetimes'],
       cmdclass=cmdclass,
       )

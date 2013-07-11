@@ -3,6 +3,7 @@ build
 dist
 *.log
 *.cer
+*.der
 *.req
 wiki
 *.exe

@@ -26,6 +26,7 @@
 """
 from datetime import datetime, timedelta, tzinfo
 from calendar import timegm
+import struct
 
 
 # http://support.microsoft.com/kb/167296
@@ -95,6 +96,11 @@ def filetime_to_dt(ft):
     # Add remainder in as microseconds. Python 3.2 requires an integer
     dt = dt.replace(microsecond=(ns100 // 10))
     return dt
+
+def filetime_from_dec(ft):
+    ft_dec = struct.unpack(b'<Q', ft)[0]
+    return filetime_to_dt(ft_dec)
+
 
 
 if __name__ == "__main__":

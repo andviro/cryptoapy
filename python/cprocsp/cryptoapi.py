@@ -1,146 +1,15 @@
 #!/usr/bin/env python
 #-*- coding: utf-8 -*-
 from __future__ import unicode_literals, print_function
-from cprocsp import csp
-from base64 import b64encode, b64decode
+
+import csp
+from certutils import Attributes, CertValidity, KeyUsage, EKU, CertExtensions
 
 import platform
+from base64 import b64encode, b64decode
 from binascii import hexlify, unhexlify
-from filetimes import filetime_to_dt
-import struct
-
+from filetimes import filetime_from_dec
 from datetime import datetime, timedelta
-from pyasn1.type import univ, useful, char, tag
-from pyasn1.codec.der import encoder
-from pyasn1_modules import rfc2459
-
-
-class CertAttribute(object):
-    """Атрибут запроса на сертификат
-
-    в закодированном виде добавляется в запрос методом
-    CertRequest.add_attribute()
-    """
-    def __init__(self, oid, values):
-        """@todo: to be defined """
-        self.oid = oid
-        self.vals = [encoder.encode(v) for v in values]
-
-    def add_to(self, req):
-        n = req.add_attribute(self.oid)
-        for v in self.vals:
-            req.add_attribute_value(n, v)
-
-
-class CertValidity(CertAttribute):
-    """Атрибут для установки интервала действия серта в запросе"""
-
-    def __init__(self, not_before, not_after):
-        """@todo: to be defined """
-        val = univ.Sequence()
-        for i, x in enumerate((not_before, not_after)):
-            val.setComponentByPosition(i, useful.UTCTime(bytes(x.strftime('%y%m%d%H%M%SZ'))))
-        super(CertValidity, self).__init__(b'1.2.643.2.4.1.1.1.1.2', [val])
-
-
-class CertExtensions(CertAttribute):
-    """Атрибут для задания расширений сертификата"""
-
-    def __init__(self, exts):
-        """@todo: to be defined """
-        val = univ.SequenceOf()
-        for i, ext in enumerate(exts):
-            val.setComponentByPosition(i, ext.asn)
-        super(CertExtensions, self).__init__(csp.szOID_CERT_EXTENSIONS, [val])
-
-
-class CertExtension(object):
-    def __init__(self, oid, value, critical=False):
-        """Общий класс для всех видов расширений
-
-        :oid: OID расширения
-        :value: значение в ASN.1
-
-        """
-        self.asn = rfc2459.Extension()
-        self.asn.setComponentByName(b'extnID', univ.ObjectIdentifier(oid))
-        self.asn.setComponentByName(b'critical', univ.Boolean(bool(critical)))
-        self.asn.setComponentByName(b'extnValue', univ.OctetString(value))
-
-
-class EKU(CertExtension):
-    """Расширенное использование ключа"""
-
-    def __init__(self, ekus):
-        """Создание EKU
-
-        :ekus: список OID-ов расш. использования
-
-        """
-        val = rfc2459.ExtKeyUsageSyntax()
-        for i, x in enumerate(ekus):
-            val.setComponentByPosition(i, rfc2459.KeyPurposeId(x))
-        super(EKU, self).__init__(csp.szOID_ENHANCED_KEY_USAGE, encoder.encode(val))
-
-
-class KeyUsage(CertExtension):
-    """Расширенное использование ключа"""
-
-    def __init__(self, mask):
-        """Создание EKU
-
-        :ekus: список OID-ов расш. использования
-
-        """
-        val = rfc2459.KeyUsage(bytes(','.join(mask)))
-        super(KeyUsage, self).__init__(csp.szOID_KEY_USAGE, encoder.encode(val))
-
-
-class Attributes(object):
-    """Набор пар (тип, значение)"""
-
-    def __init__(self, attrs):
-        self.asn = rfc2459.Name()
-        vals = rfc2459.RDNSequence()
-
-        for (i, (oid, val)) in enumerate(attrs):
-            pair = rfc2459.AttributeTypeAndValue()
-            pair.setComponentByName('type', rfc2459.AttributeType(bytes(oid)))
-            pair.setComponentByName('value',
-                                    rfc2459.AttributeValue(
-                                        univ.OctetString(encoder.encode(char.UTF8String(unicode(val).encode('utf-8'))))))
-
-            pairset = rfc2459.RelativeDistinguishedName()
-            pairset.setComponentByPosition(0, pair)
-
-            vals.setComponentByPosition(i, pairset)
-
-        self.asn.setComponentByPosition(0, vals)
-
-    def encode(self):
-        return encoder.encode(self.asn)
-
-
-class SubjectAltName(CertExtension):
-    """Расширенное использование ключа"""
-
-    def __init__(self, altnames):
-        """Создание AltName
-
-        :ekus: список OID-ов расш. использования
-
-        """
-        val = rfc2459.SubjectAltName()
-        for (i, (t, v)) in enumerate(altnames):
-            gn = rfc2459.GeneralName()
-            if t == 'directoryName':
-                val = rfc2459.Name().subtype(implicitTag=tag.Tag(tag.tagClassContext, tag.tagFormatSimple, 4))
-            else:
-                assert 0, 'Unsupported SubjectAltName type: {0}'.format(t)
-            gn.setComponentByName(t, val)
-            val.setComponentByPosition(i, gn)
-
-        super(SubjectAltName, self).__init__(csp.szOID_KEY_USAGE, encoder.encode(val))
 
 
 def gen_key(cont, local=True, silent=False):
@@ -228,10 +97,10 @@ def create_request(cont, params, local=True):
                                        datetime.now() + timedelta(days=30)))
     eku = EKU(params.get('EKU', []))
     usage = KeyUsage(params.get('KeyUsage', []))
-    #altname = SubjectAltName(params.get('SubjectAltName', []))
+    # altname = SubjectAltName(params.get('SubjectAltName', []))
     ext_attr = CertExtensions([usage,
                                eku,
-                               #altname,
+                               # altname,
                                ])
     validity.add_to(req)
     ext_attr.add_to(req)
@@ -404,11 +273,6 @@ def pkcs7_info(data):
     return res
 
 
-def _filetime(ft):
-    ft_dec = struct.unpack(b'<Q', ft)[0]
-    return filetime_to_dt(ft_dec)
-
-
 def cert_info(cert):
     """Информация о сертификате
 
@@ -433,8 +297,8 @@ def cert_info(cert):
     info = csp.CertInfo(cert)
     res = dict(
         Version=info.version(),
-        ValidFrom=_filetime(info.not_before()),
-        ValidTo=_filetime(info.not_after()),
+        ValidFrom=filetime_from_dec(info.not_before()),
+        ValidTo=filetime_from_dec(info.not_after()),
         Issuer=unicode(info.issuer(), 'cp1251', 'replace'),
         Thumbprint=hexlify(cert.thumbprint()),
         UseToSign=bool(info.usage() & csp.CERT_DIGITAL_SIGNATURE_KEY_USAGE),
@@ -444,64 +308,3 @@ def cert_info(cert):
         Extensions=list(cert.eku()),
     )
     return res
-
-
-if __name__ == '__main__':
-    # Генерация ключевого контейера
-    cont = b'123456789abcdef'
-    print('key generated:', gen_key(cont))
-
-    # Запрос на серт
-    req_params = dict(Attributes=[(rfc2459.id_at_commonName, b'123456789abcdef')],
-                      KeyUsage=['dataEncipherment', 'digitalSignature'],
-                      EKU=[csp.szOID_PKIX_KP_EMAIL_PROTECTION,
-                           csp.szOID_PKIX_KP_CLIENT_AUTH],
-                      ValidFrom=datetime.utcnow(),
-                      SubjectAltName=[('directoryName',
-                                       [(rfc2459.id_at_givenName, 'Вася')])],
-                      ValidTo=datetime(2014, 1, 1))
-    req = create_request(cont, req_params)
-    print('request data:', req)
-    open('cer_test.req', 'wb').write(req)
-    open('cer_test.der', 'wb').write(b64decode(req))
-
-    # Импорт серта из файла (требуется отправить запрос в УЦ и сохранить
-    # полученный серт в файл 'cer_test.cer')
-    certdata = open('cer_test.cer', 'rb').read()
-    thumb = bind_cert_to_key(cont, b64encode(certdata))
-    print('bound cert thumb:', thumb)
-
-    # Получение данных о сертификате
-    cert = get_certificate(thumb)
-    print(cert_info(cert))
-
-    # Подписывание данных
-    data = b64encode('Ahaahahahah!!!')
-    wrong_data = b64encode('Ahaahahahah???')
-    signdata = sign(cert, data, True)
-
-    # Информация о PKSC7 - сообщении
-    print('sign info:', pkcs7_info(signdata))
-
-    # Проверка отсоединенной подписи
-    print('verify "{0}":'.format(data), check_signature(cert, signdata, data))
-    print('verify "{0}":'.format(wrong_data), check_signature(cert, signdata, wrong_data))
-
-    # Шифрование данных
-    message = 'Hello, dolly!'
-    msg = b64encode(message)
-    encmsg = encrypt([cert], msg)
-    print('encrypted len of "{0}":'.format(message), len(encmsg))
-
-    # Расшифровка данных
-    decmsg = decrypt(encmsg, thumb)
-    print('decrypted:', b64decode(decmsg))
-
-    # Комбинированное подписывание и шифрование
-    sencdata = sign_and_encrypt(cert, [cert], data)
-    print('signed and encrypted len:', len(sencdata))
-    print('info of s_a_e:', pkcs7_info(sencdata))
-    
-    # Удаление контейнера
-    # Закомментировано, чтобы каждый раз не создавать ключи снова
-    # print(remove_key(cont))
