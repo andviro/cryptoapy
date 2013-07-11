@@ -447,8 +447,11 @@ def cert_info(cert):
 
 
 if __name__ == '__main__':
+    # Генерация ключевого контейера
     cont = b'123456789abcdef'
-    print(gen_key(cont))
+    print('key generated:', gen_key(cont))
+
+    # Запрос на серт
     req_params = dict(Attributes=[(rfc2459.id_at_commonName, b'123456789abcdef')],
                       KeyUsage=['dataEncipherment', 'digitalSignature'],
                       EKU=[csp.szOID_PKIX_KP_EMAIL_PROTECTION,
@@ -461,23 +464,44 @@ if __name__ == '__main__':
     print('request data:', req)
     open('cer_test.req', 'wb').write(req)
     open('cer_test.der', 'wb').write(b64decode(req))
-    thumb = bind_cert_to_key(cont, b64encode(open('cer_test.cer').read()))
+
+    # Импорт серта из файла (требуется отправить запрос в УЦ и сохранить
+    # полученный серт в файл 'cer_test.cer')
+    certdata = open('cer_test.cer', 'rb').read()
+    thumb = bind_cert_to_key(cont, b64encode(certdata))
     print('bound cert thumb:', thumb)
+
+    # Получение данных о сертификате
     cert = get_certificate(thumb)
     print(cert_info(cert))
+
+    # Подписывание данных
     data = b64encode('Ahaahahahah!!!')
     wrong_data = b64encode('Ahaahahahah???')
     signdata = sign(cert, data, True)
+
+    # Информация о PKSC7 - сообщении
     print('sign info:', pkcs7_info(signdata))
+
+    # Проверка отсоединенной подписи
     print('verify "{0}":'.format(data), check_signature(cert, signdata, data))
     print('verify "{0}":'.format(wrong_data), check_signature(cert, signdata, wrong_data))
+
+    # Шифрование данных
     message = 'Hello, dolly!'
     msg = b64encode(message)
     encmsg = encrypt([cert], msg)
     print('encrypted len of "{0}":'.format(message), len(encmsg))
+
+    # Расшифровка данных
     decmsg = decrypt(encmsg, thumb)
     print('decrypted:', b64decode(decmsg))
+
+    # Комбинированное подписывание и шифрование
     sencdata = sign_and_encrypt(cert, [cert], data)
     print('signed and encrypted len:', len(sencdata))
     print('info of s_a_e:', pkcs7_info(sencdata))
+    
+    # Удаление контейнера
+    # Закомментировано, чтобы каждый раз не создавать ключи снова
     # print(remove_key(cont))
