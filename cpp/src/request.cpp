@@ -42,8 +42,8 @@ void CertRequest::add_attribute_value(int n, BYTE *STRING, DWORD LENGTH) throw (
     memcpy(pdata->pbData, STRING, LENGTH);
 }
 
-CertRequest::CertRequest(Crypt *ctx, BYTE *STRING, DWORD LENGTH) throw (CSPException) : ctx(ctx) {
-    LOG("CertRequest::CertRequest(%p, %s)\n", ctx, STRING);
+CertRequest::CertRequest(Crypt *ctx) throw (CSPException) : ctx(ctx) {
+    LOG("CertRequest::CertRequest(%p)\n", ctx);
     if (ctx) {
         ctx -> ref();
     } else {
@@ -71,9 +71,6 @@ CertRequest::CertRequest(Crypt *ctx, BYTE *STRING, DWORD LENGTH) throw (CSPExcep
         throw CSPException("Couldn't export public key info");
     }
     CertReqInfo.SubjectPublicKeyInfo = *pbPublicKeyInfo;
-    if (STRING && LENGTH) {
-        set_name(STRING, LENGTH);
-    }
     CertReqInfo.cAttribute = 0;
     CertReqInfo.rgAttribute = NULL;
 }
@@ -106,41 +103,17 @@ CertRequest::~CertRequest() throw (CSPException) {
     free((void*) CertReqInfo.rgAttribute);
 }
 
-void CertRequest::set_name(BYTE *STRING, DWORD LENGTH) throw (CSPException) {
-    LOG("CertRequest::set_name(%s)\n", STRING);
+void CertRequest::set_subject(BYTE *STRING, DWORD LENGTH) throw (CSPException) {
+    LOG("CertRequest::set_subject(%s)\n", STRING);
 
-    bool res = CertStrToName(
-        MY_ENC_TYPE,
-        (LPCSTR) STRING,
-        //CERT_OID_NAME_STR | CERT_NAME_STR_REVERSE_FLAG,
-        CERT_OID_NAME_STR,
-        NULL,
-        NULL,
-        &CertReqInfo.Subject.cbData,
-        NULL );
-    if(!res) {
-        throw CSPException("Couldn't determine encoded name length");
-    }
-
+    CertReqInfo.Subject.cbData = LENGTH;
     if (CertReqInfo.Subject.pbData) {
         free(CertReqInfo.Subject.pbData);
         CertReqInfo.Subject.pbData = NULL;
     }
-
     CertReqInfo.Subject.pbData = (BYTE *)malloc(CertReqInfo.Subject.cbData);
+    memcpy(CertReqInfo.Subject.pbData, STRING, LENGTH);
 
-    res = CertStrToName(
-        MY_ENC_TYPE,
-        (LPCSTR) STRING,
-        //CERT_OID_NAME_STR | CERT_NAME_STR_REVERSE_FLAG,
-        CERT_OID_NAME_STR,
-        NULL,
-        CertReqInfo.Subject.pbData,
-        &CertReqInfo.Subject.cbData,
-        NULL );
-    if(!res) {
-        throw CSPException("Couldn't encode subject name string");
-    }
 }
 
 void CertRequest::get_data(BYTE **s, DWORD *slen) throw (CSPException) {

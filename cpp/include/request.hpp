@@ -19,8 +19,8 @@ class CertRequest
     DWORD cbPublicKeyInfo;
     Crypt *ctx;
     public:
-        CertRequest(Crypt *ctx, BYTE *STRING=NULL, DWORD LENGTH=0) throw (CSPException);
-        void set_name(BYTE *STRING, DWORD LENGTH) throw (CSPException);
+        CertRequest(Crypt *ctx) throw (CSPException);
+        void set_subject(BYTE *STRING, DWORD LENGTH) throw (CSPException);
         void get_data(BYTE **s, DWORD *slen) throw (CSPException);
         ~CertRequest() throw (CSPException);
         int add_attribute(BYTE *STRING, DWORD LENGTH) throw (CSPException);

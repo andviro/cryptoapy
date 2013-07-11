@@ -8,12 +8,11 @@ import platform
 from binascii import hexlify, unhexlify
 from filetimes import filetime_to_dt
 import struct
-import sys
 
-from datetime import datetime
-from pyasn1.type import univ, useful
-from pyasn1.codec.der import encoder, decoder
-from pyasn1_modules import rfc2251, rfc2459
+from datetime import datetime, timedelta
+from pyasn1.type import univ, useful, char, tag
+from pyasn1.codec.der import encoder
+from pyasn1_modules import rfc2459
 
 
 class CertAttribute(object):
@@ -52,7 +51,6 @@ class CertExtensions(CertAttribute):
         val = univ.SequenceOf()
         for i, ext in enumerate(exts):
             val.setComponentByPosition(i, ext.asn)
-        print(val.prettyPrint())
         super(CertExtensions, self).__init__(csp.szOID_CERT_EXTENSIONS, [val])
 
 
@@ -83,6 +81,66 @@ class EKU(CertExtension):
         for i, x in enumerate(ekus):
             val.setComponentByPosition(i, rfc2459.KeyPurposeId(x))
         super(EKU, self).__init__(csp.szOID_ENHANCED_KEY_USAGE, encoder.encode(val))
+
+
+class KeyUsage(CertExtension):
+    """Расширенное использование ключа"""
+
+    def __init__(self, mask):
+        """Создание EKU
+
+        :ekus: список OID-ов расш. использования
+
+        """
+        val = rfc2459.KeyUsage(bytes(','.join(mask)))
+        super(KeyUsage, self).__init__(csp.szOID_KEY_USAGE, encoder.encode(val))
+
+
+class Attributes(object):
+    """Набор пар (тип, значение)"""
+
+    def __init__(self, attrs):
+        self.asn = rfc2459.Name()
+        vals = rfc2459.RDNSequence()
+
+        for (i, (oid, val)) in enumerate(attrs):
+            pair = rfc2459.AttributeTypeAndValue()
+            pair.setComponentByName('type', rfc2459.AttributeType(bytes(oid)))
+            pair.setComponentByName('value',
+                                    rfc2459.AttributeValue(
+                                        univ.OctetString(encoder.encode(char.UTF8String(unicode(val).encode('utf-8'))))))
+
+            pairset = rfc2459.RelativeDistinguishedName()
+            pairset.setComponentByPosition(0, pair)
+
+            vals.setComponentByPosition(i, pairset)
+
+        self.asn.setComponentByPosition(0, vals)
+
+    def encode(self):
+        return encoder.encode(self.asn)
+
+
+class SubjectAltName(CertExtension):
+    """Расширенное использование ключа"""
+
+    def __init__(self, altnames):
+        """Создание AltName
+
+        :ekus: список OID-ов расш. использования
+
+        """
+        val = rfc2459.SubjectAltName()
+        for (i, (t, v)) in enumerate(altnames):
+            gn = rfc2459.GeneralName()
+            if t == 'directoryName':
+                val = rfc2459.Name().subtype(implicitTag=tag.Tag(tag.tagClassContext, tag.tagFormatSimple, 4))
+            else:
+                assert 0, 'Unsupported SubjectAltName type: {0}'.format(t)
+            gn.setComponentByName(t, val)
+            val.setComponentByPosition(i, gn)
+
+        super(SubjectAltName, self).__init__(csp.szOID_KEY_USAGE, encoder.encode(val))
 
 
 def gen_key(cont, local=True, silent=False):
@@ -142,21 +200,39 @@ def remove_key(cont, local=True):
     return True
 
 
-def create_request(cont, Subject, Extensions, NotBefore, NotAfter, local=True):
+def create_request(cont, params, local=True):
     """Создание запроса на сертификат
 
     :cont: Имя контейнера
-    :descriptor: параметры запроса (пока просто Subject string)
+    :params: Параметры запроса в виде словаря следующего вида:
+        {
+        'Attributes' : список пар [('OID', 'значение'), ...],
+        'CertificatePolicies' : список пар [('OID', 'значение'), ...],
+        'ValidFrom' : Дата начала действия (объект `datetime`),
+        'ValidTo' : Дата окончания действия (объект `datetime`),
+        'EKU' : список OIDов,
+        'SubjectAltName' : список пар [('Тип', 'Значение'), ...],
+        'KeyUsage' : список строк ['digitalSignature', 'nonRepudiation', ...]
+        }
     :local: Если True, работа идет с локальным хранилищем
     :returns: строка base64, пустая строка в случае ошибки (???)
 
     """
+
     provider = "Crypto-Pro HSM CSP" if not local else None
     ctx = csp.Crypt(cont, csp.PROV_GOST_2001_DH, 0, provider)
-    req = csp.CertRequest(ctx, Subject)
-    validity = CertValidity(NotBefore, NotAfter)
-    eku = EKU(Extensions)
-    ext_attr = CertExtensions([eku])
+    req = csp.CertRequest(ctx, )
+    req.set_subject(Attributes(params.get('Attributes', '')).encode())
+    validity = CertValidity(params.get('ValidFrom', datetime.now()),
+                            params.get('ValidTo',
+                                       datetime.now() + timedelta(days=30)))
+    eku = EKU(params.get('EKU', []))
+    usage = KeyUsage(params.get('KeyUsage', []))
+    #altname = SubjectAltName(params.get('SubjectAltName', []))
+    ext_attr = CertExtensions([usage,
+                               eku,
+                               #altname,
+                               ])
     validity.add_to(req)
     ext_attr.add_to(req)
     return b64encode(req.get_data())
@@ -373,12 +449,15 @@ def cert_info(cert):
 if __name__ == '__main__':
     cont = b'123456789abcdef'
     print(gen_key(cont))
-    req = create_request(cont,
-                         Subject=b'CN=123456789abcdef',
-                         Extensions=[csp.szOID_PKIX_KP_EMAIL_PROTECTION, 
-                                     csp.szOID_PKIX_KP_CLIENT_AUTH],
-                         NotBefore=datetime.utcnow(),
-                         NotAfter=datetime(2014, 1, 1))
+    req_params = dict(Attributes=[(rfc2459.id_at_commonName, b'123456789abcdef')],
+                      KeyUsage=['dataEncipherment', 'digitalSignature'],
+                      EKU=[csp.szOID_PKIX_KP_EMAIL_PROTECTION,
+                           csp.szOID_PKIX_KP_CLIENT_AUTH],
+                      ValidFrom=datetime.utcnow(),
+                      SubjectAltName=[('directoryName',
+                                       [(rfc2459.id_at_givenName, 'Вася')])],
+                      ValidTo=datetime(2014, 1, 1))
+    req = create_request(cont, req_params)
     print('request data:', req)
     open('cer_test.req', 'wb').write(req)
     open('cer_test.der', 'wb').write(b64decode(req))
