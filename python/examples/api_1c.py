@@ -20,7 +20,9 @@ req_params = dict(Attributes=[(CN, b'123456789abcdef')],
                   EKU=[csp.szOID_PKIX_KP_EMAIL_PROTECTION,
                        csp.szOID_PKIX_KP_CLIENT_AUTH],
                   ValidFrom=datetime.utcnow(),
-                  SubjectAltName=[('directoryName', [(GN, 'Вася')])],
+
+                  SubjectAltName=[('directoryName',
+                                   [(b'1.2.643.3.141.1.1', '123123456')])],
                   ValidTo=datetime.now() + timedelta(days=31))
 req = cryptoapi.create_request(cont, req_params)
 print('request data:', req)

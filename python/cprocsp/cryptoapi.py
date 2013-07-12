@@ -3,7 +3,7 @@
 from __future__ import unicode_literals, print_function
 
 import csp
-from certutils import Attributes, CertValidity, KeyUsage, EKU, CertExtensions
+from certutils import Attributes, CertValidity, KeyUsage, EKU, CertExtensions, SubjectAltName
 
 import platform
 from base64 import b64encode, b64decode
@@ -97,10 +97,10 @@ def create_request(cont, params, local=True):
                                        datetime.now() + timedelta(days=30)))
     eku = EKU(params.get('EKU', []))
     usage = KeyUsage(params.get('KeyUsage', []))
-    # altname = SubjectAltName(params.get('SubjectAltName', []))
+    altname = SubjectAltName(params.get('SubjectAltName', []))
     ext_attr = CertExtensions([usage,
                                eku,
-                               # altname,
+                               altname,
                                ])
     validity.add_to(req)
     ext_attr.add_to(req)

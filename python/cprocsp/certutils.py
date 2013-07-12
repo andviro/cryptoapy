@@ -115,20 +115,73 @@ class Attributes(object):
 class SubjectAltName(CertExtension):
     """Расширенное использование ключа"""
 
+    # namedtype.NamedType('otherName', AnotherName().subtype(implicitTag=tag.Tag(tag.tagClassContext, tag.tagFormatSimple, 0))),
+    # namedtype.NamedType('x400Address', ORAddress().subtype(implicitTag=tag.Tag(tag.tagClassContext, tag.tagFormatSimple, 3))),
+    # namedtype.NamedType('ediPartyName',
+    # EDIPartyName().subtype(implicitTag=tag.Tag(tag.tagClassContext,
+    # tag.tagFormatSimple, 5))),
+
+    def rfc822Name(self, st):
+        '''
+        :st: строка с именем
+
+        '''
+        return unicode(st).encode('cp1251', 'replace')
+
+    dNSName = rfc822Name
+    uniformResourceIdentifier = rfc822Name
+    iPAddress = rfc822Name
+    registeredID = rfc822Name
+
+    def directoryName(self, rdn):
+        '''
+        :rdn: [(OID, value), (OID, value) ...]
+
+        '''
+        elt = rfc2459.Name().subtype(
+            implicitTag=tag.Tag(tag.tagClassContext, tag.tagFormatSimple, 4))
+        elt.setComponentByName('', Attributes(rdn).asn[0])
+        return elt
+
     def __init__(self, altnames):
         """Создание AltName
 
-        :ekus: список OID-ов расш. использования
+        :altnames: список вида [(тип, значение), (тип, значение), ]
+            где значение в зависимости от типа:
+                    'directoryName' : [('OID', 'строка'), ...]
+                    'dNSName' : строка
+                    'uniformResourceIdentifier' : строка
+                    'iPAddress' : строка
+                    'registeredID' : строка
 
         """
         val = rfc2459.SubjectAltName()
         for (i, (t, v)) in enumerate(altnames):
             gn = rfc2459.GeneralName()
-            if t == 'directoryName':
-                val = rfc2459.Name().subtype(implicitTag=tag.Tag(tag.tagClassContext, tag.tagFormatSimple, 4))
-            else:
-                assert 0, 'Unsupported SubjectAltName type: {0}'.format(t)
-            gn.setComponentByName(t, val)
+            elt = getattr(self, t, None)
+            if elt is None:
+                assert False, 'unsupported element type {0}'.format(t)
+            gn.setComponentByName(t, elt(v))
             val.setComponentByPosition(i, gn)
 
-        super(SubjectAltName, self).__init__(csp.szOID_KEY_USAGE, encoder.encode(val))
+        print(val.prettyPrint())
+        super(SubjectAltName, self).__init__(rfc2459.id_ce_subjectAltName, encoder.encode(val))
+
+
+class CertificatePolicies(CertExtension):
+    def __init__(self, policies):
+        '''создане CertificatePolicies
+
+        :policies: список вида [(OID, ()) )]
+
+        '''
+        pass
+
+
+if __name__ == '__main__':
+    from pyasn1_modules.rfc2459 import id_at_commonName as CN, id_at_givenName as GN
+    test = SubjectAltName([('directoryName', [(CN, 'Vasya'), (GN, 'Вася')]),
+                           ('rfc822Name', 'asldkj'),
+                           ('iPAddress', '1.1.1.1'),
+                           ('dNSName', 'www.xxx.com'),
+                           ])
