@@ -30,7 +30,7 @@ def swig(size=void_size):
         '-DSIZEOF_VOID_P={0}'.format(size),
     ]
     if platform.system() == 'Windows':
-        swig_binary = "c:\dev\swigwin-2.0.9\swig.exe"
+        swig_binary = "c:\dev\swigwin-2.0.10\swig.exe"
     else:
         swig_binary = 'swig'
         swig_opts.append('-DUNIX',)
