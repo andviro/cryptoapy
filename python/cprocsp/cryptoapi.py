@@ -3,7 +3,7 @@
 from __future__ import unicode_literals, print_function
 
 import csp
-from certutils import Attributes, CertValidity, KeyUsage, EKU, CertExtensions, SubjectAltName
+from certutils import Attributes, CertValidity, KeyUsage, EKU, CertExtensions, SubjectAltName, CertificatePolicies
 
 import platform
 from base64 import b64encode, b64decode
@@ -76,11 +76,20 @@ def create_request(cont, params, local=True):
     :params: Параметры запроса в виде словаря следующего вида:
         {
         'Attributes' : список пар [('OID', 'значение'), ...],
-        'CertificatePolicies' : список пар [('OID', 'значение'), ...],
+        'CertificatePolicies' : список вида [(OID, [(квалификатор, значение), ...]), ... ]
+            OID - идент-р политики
+            квалификатор - OID
+            значение - произвольная информация в base64
         'ValidFrom' : Дата начала действия (объект `datetime`),
         'ValidTo' : Дата окончания действия (объект `datetime`),
         'EKU' : список OIDов,
-        'SubjectAltName' : список пар [('Тип', 'Значение'), ...],
+        'SubjectAltName' : список вида [(тип, значение), (тип, значение), ]
+            где значение в зависимости от типа:
+                'directoryName' : [('OID', 'строка'), ...]
+                'dNSName' : строка
+                'uniformResourceIdentifier' : строка
+                'iPAddress' : строка
+                'registeredID' : строка
         'KeyUsage' : список строк ['digitalSignature', 'nonRepudiation', ...]
         }
     :local: Если True, работа идет с локальным хранилищем
@@ -98,9 +107,11 @@ def create_request(cont, params, local=True):
     eku = EKU(params.get('EKU', []))
     usage = KeyUsage(params.get('KeyUsage', []))
     altname = SubjectAltName(params.get('SubjectAltName', []))
+    pols = CertificatePolicies(params.get('CertificatePolicies', []))
     ext_attr = CertExtensions([usage,
                                eku,
                                altname,
+                               pols,
                                ])
     validity.add_to(req)
     ext_attr.add_to(req)

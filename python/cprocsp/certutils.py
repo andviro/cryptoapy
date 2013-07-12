@@ -1,9 +1,10 @@
 # coding: utf-8
 from __future__ import unicode_literals, print_function
 import csp
-from pyasn1.type import univ, useful, char, tag
+from pyasn1.type import univ, useful, char, tag, constraint
 from pyasn1.codec.der import encoder
 from pyasn1_modules import rfc2459
+from base64 import b64decode, b64encode
 
 
 class CertAttribute(object):
@@ -164,7 +165,6 @@ class SubjectAltName(CertExtension):
             gn.setComponentByName(t, elt(v))
             val.setComponentByPosition(i, gn)
 
-        print(val.prettyPrint())
         super(SubjectAltName, self).__init__(rfc2459.id_ce_subjectAltName, encoder.encode(val))
 
 
@@ -172,16 +172,30 @@ class CertificatePolicies(CertExtension):
     def __init__(self, policies):
         '''создане CertificatePolicies
 
-        :policies: список вида [(OID, ()) )]
+        :policies: список вида [(OID, [(квалификатор, значение), ...]), ... ]
+            OID - идент-р политики
+            квалификатор - OID
+            значение - произвольная информация в base64
 
         '''
         pass
+        val = rfc2459.CertificatePolicies()
+        for (i, (t, v)) in enumerate(policies):
+            pol = rfc2459.PolicyInformation()
+            pol.setComponentByPosition(0, rfc2459.CertPolicyId(t))
+            if len(v):
+                sq = univ.SequenceOf(componentType=rfc2459.PolicyQualifierInfo()
+                                     ).subtype(subtypeSpec=constraint.ValueSizeConstraint(1, rfc2459.MAX))
+                for n, (ident, qualif) in enumerate(v):
+                    pqi = rfc2459.PolicyQualifierInfo()
+                    pqi.setComponentByPosition(0, rfc2459.PolicyQualifierId(ident))
+                    pqi.setComponentByPosition(1, univ.OctetString(b64decode(qualif)))
+                    sq.setComponentByPosition(n, pqi)
+                pol.setComponentByPosition(1, sq)
+            val.setComponentByPosition(i, pol)
+        super(CertificatePolicies, self).__init__(rfc2459.id_ce_certificatePolicies, encoder.encode(val))
 
 
 if __name__ == '__main__':
-    from pyasn1_modules.rfc2459 import id_at_commonName as CN, id_at_givenName as GN
-    test = SubjectAltName([('directoryName', [(CN, 'Vasya'), (GN, 'Вася')]),
-                           ('rfc822Name', 'asldkj'),
-                           ('iPAddress', '1.1.1.1'),
-                           ('dNSName', 'www.xxx.com'),
-                           ])
+    from pyasn1_modules.rfc2459 import id_qt_unotice as unotice, id_qt_cps as cps
+    test = CertificatePolicies([(unotice, []), (cps, [(cps, b64encode(b"alsdk"))])])
