@@ -101,7 +101,7 @@ class Attributes(object):
             pair.setComponentByName('type', rfc2459.AttributeType(bytes(oid)))
             pair.setComponentByName('value',
                                     rfc2459.AttributeValue(
-                                        univ.OctetString(encoder.encode(char.IA5String(unicode(val).encode('cp1251'))))))
+                                        univ.OctetString(encoder.encode(char.UTF8String(unicode(val).encode('utf-8'))))))
 
             pairset = rfc2459.RelativeDistinguishedName()
             pairset.setComponentByPosition(0, pair)
