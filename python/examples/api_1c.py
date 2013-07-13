@@ -15,7 +15,7 @@ cont = b'123456789abcdef'
 print('key generated:', cryptoapi.gen_key(cont))
 
 # Запрос на серт
-req_params = dict(Attributes=[(CN, b'123456789abcdef')],
+req_params = dict(Attributes=[(CN, b'123456789abcdef'), (GN, 'Вася')],
                   KeyUsage=['dataEncipherment', 'digitalSignature'],
                   EKU=[csp.szOID_PKIX_KP_EMAIL_PROTECTION,
                        csp.szOID_PKIX_KP_CLIENT_AUTH],
@@ -40,6 +40,9 @@ print('bound cert thumb:', thumb)
 # Получение данных о сертификате
 cert = cryptoapi.get_certificate(thumb)
 print(cryptoapi.cert_info(cert))
+cert2 = b64encode(open('cer_test.cer', 'rb').read())
+print(cryptoapi.cert_info(cert2))
+
 
 # Подписывание данных
 data = b64encode('Ahaahahahah!!!')

@@ -310,12 +310,12 @@ def cert_info(cert):
         Version=info.version(),
         ValidFrom=filetime_from_dec(info.not_before()),
         ValidTo=filetime_from_dec(info.not_after()),
-        Issuer=unicode(info.issuer(), 'cp1251', 'replace'),
+        Issuer=Attributes.decode(info.issuer(False)),
         Thumbprint=hexlify(cert.thumbprint()),
         UseToSign=bool(info.usage() & csp.CERT_DIGITAL_SIGNATURE_KEY_USAGE),
         UseToEncrypt=bool(info.usage() & csp.CERT_DATA_ENCIPHERMENT_KEY_USAGE),
-        SerialNumber=hexlify(info.serial()),
-        Subject=unicode(info.name(), 'cp1251', 'replace'),
+        SerialNumber=':'.join(hex(ord(x))[2:] for x in reversed(info.serial())),
+        Subject=Attributes.decode(info.name(False)),
         Extensions=list(cert.eku()),
     )
     return res

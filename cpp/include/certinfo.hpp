@@ -16,8 +16,8 @@ public:
     virtual ~CertInfo () throw(CSPException);
 
     DWORD version();
-    void issuer(BYTE **s, DWORD *slen) throw(CSPException);
-    void name(BYTE **s, DWORD *slen) throw(CSPException);
+    void issuer(BYTE **s, DWORD *slen, bool decode=TRUE) throw(CSPException);
+    void name(BYTE **s, DWORD *slen, bool decode=TRUE) throw(CSPException);
     void not_before(BYTE **s, DWORD *slen) throw(CSPException);
     void not_after(BYTE **s, DWORD *slen) throw(CSPException);
     BYTE usage() throw(CSPException);

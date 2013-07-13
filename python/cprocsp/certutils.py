@@ -2,9 +2,10 @@
 from __future__ import unicode_literals, print_function
 import csp
 from pyasn1.type import univ, useful, char, tag, constraint
-from pyasn1.codec.der import encoder
+from pyasn1.codec.der import encoder, decoder
 from pyasn1_modules import rfc2459
-from base64 import b64decode, b64encode
+from base64 import b64decode
+from datetime import datetime
 
 
 class CertAttribute(object):
@@ -100,7 +101,7 @@ class Attributes(object):
             pair.setComponentByName('type', rfc2459.AttributeType(bytes(oid)))
             pair.setComponentByName('value',
                                     rfc2459.AttributeValue(
-                                        univ.OctetString(encoder.encode(char.UTF8String(unicode(val).encode('utf-8'))))))
+                                        univ.OctetString(encoder.encode(char.IA5String(unicode(val).encode('cp1251'))))))
 
             pairset = rfc2459.RelativeDistinguishedName()
             pairset.setComponentByPosition(0, pair)
@@ -111,6 +112,26 @@ class Attributes(object):
 
     def encode(self):
         return encoder.encode(self.asn)
+
+    @staticmethod
+    def decode(value):
+        asn = decoder.decode(value, asn1Spec=rfc2459.Name())[0]
+        res = []
+        for rdn in asn[0]:
+            item = []
+            for dn in rdn:
+                oid = unicode(dn[0])
+                value = decoder.decode(dn[1])[0]
+                if value.__class__.__name__ == 'UTF8String':
+                    value = unicode(bytes(value), 'utf-8')
+                else:
+                    value = unicode(bytes(value), 'cp1251')
+                item.append((oid, value))
+            if len(item) != 1:
+                res.append(item)
+            else:
+                res.append(item[0])
+        return res
 
 
 class SubjectAltName(CertExtension):
@@ -193,9 +214,17 @@ class CertificatePolicies(CertExtension):
                     sq.setComponentByPosition(n, pqi)
                 pol.setComponentByPosition(1, sq)
             val.setComponentByPosition(i, pol)
-        super(CertificatePolicies, self).__init__(rfc2459.id_ce_certificatePolicies, encoder.encode(val))
+        super(CertificatePolicies, self).__init__(rfc2459.id_ce_certificatePolicies,
+                                                  encoder.encode(val))
 
 
 if __name__ == '__main__':
-    from pyasn1_modules.rfc2459 import id_qt_unotice as unotice, id_qt_cps as cps
-    test = CertificatePolicies([(unotice, []), (cps, [(cps, b64encode(b"alsdk"))])])
+    # from pyasn1_modules.rfc2459 import id_qt_unotice as unotice, id_qt_cps as cps
+    # test = CertificatePolicies([(unotice, []), (cps, [(cps, b64encode(b"alsdk"))])])
+    data = open('../examples/cer_test.cer', 'rb').read()
+    #cert = decoder.decode(data, asn1Spec=rfc2459.Certificate())[0]
+    #print(cert.prettyPrint())
+    ci = csp.CertInfo(csp.Cert(data))
+    xx = Attributes.decode(ci.issuer(False))
+    print(xx)
+

@@ -73,19 +73,31 @@ char *CertInfo::sign_algorithm()
     return psi->SignatureAlgorithm.pszObjId;
 }
 
-void CertInfo::name(BYTE **s, DWORD *slen) throw(CSPException)
+void CertInfo::name(BYTE **s, DWORD *slen, bool decode) throw(CSPException)
 {
     LOG("CertInfo::name()\n");
     if (msg) {
         throw CSPException("Message signer info may not contain subject name", -1);
     }
-    decode_name_blob(&psi->Subject, s, slen);
+    if (decode) {
+        decode_name_blob(&psi->Subject, s, slen);
+    } else {
+        *slen = psi->Subject.cbData;
+        *s = (BYTE *)malloc(*slen);
+        memcpy(*s, psi->Subject.pbData, *slen);
+    }
 }
 
-void CertInfo::issuer(BYTE **s, DWORD *slen) throw(CSPException)
+void CertInfo::issuer(BYTE **s, DWORD *slen, bool decode) throw(CSPException)
 {
     LOG("CertInfo::issuer()\n");
-    decode_name_blob(&psi->Issuer, s, slen);
+    if (decode) {
+        decode_name_blob(&psi->Issuer, s, slen);
+    } else {
+        *slen = psi->Issuer.cbData;
+        *s = (BYTE *)malloc(*slen);
+        memcpy(*s, psi->Issuer.pbData, *slen);
+    }
 }
 
 void CertInfo::serial(BYTE **s, DWORD *slen) throw(CSPException)
