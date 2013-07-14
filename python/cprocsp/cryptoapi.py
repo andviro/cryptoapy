@@ -169,8 +169,9 @@ def sign(cert, data, include_data):
     assert len(store_lst), 'Unable to find signing cert in system store'
     signcert = store_lst[0]
     mess = csp.CryptMsg()
-    # mess.add_signer_cert(signcert)
-    sign_data = mess.sign_data(b64decode(data), signcert, include_data)
+    # mess.add_signer(signcert)
+    # sign_data = mess.sign_data(b64decode(data), not(include_data))
+    sign_data = mess.sign_data(b64decode(data), signcert, not(include_data))
     return b64encode(sign_data)
 
 

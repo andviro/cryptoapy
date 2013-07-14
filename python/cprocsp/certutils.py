@@ -221,10 +221,24 @@ class CertificatePolicies(CertExtension):
 if __name__ == '__main__':
     # from pyasn1_modules.rfc2459 import id_qt_unotice as unotice, id_qt_cps as cps
     # test = CertificatePolicies([(unotice, []), (cps, [(cps, b64encode(b"alsdk"))])])
-    data = open('../examples/cer_test.cer', 'rb').read()
+    #data = open('../examples/cer_test.cer', 'rb').read()
     #cert = decoder.decode(data, asn1Spec=rfc2459.Certificate())[0]
     #print(cert.prettyPrint())
-    ci = csp.CertInfo(csp.Cert(data))
-    xx = Attributes.decode(ci.issuer(False))
-    print(xx)
-
+    #ci = csp.CertInfo(csp.Cert(data))
+    #xx = Attributes.decode(ci.issuer(False))
+    #print(xx)
+    from pyasn1_modules import rfc2315
+    data = open('../examples/encrypted.p7s', 'rb').read()
+    data = decoder.decode(data, asn1Spec=rfc2315.ContentInfo())[0]
+    contentType = {
+        '1.2.840.113549.1.7.1': rfc2315.Data,
+        '1.2.840.113549.1.7.2': rfc2315.SignedData,
+        '1.2.840.113549.1.7.3': rfc2315.EnvelopedData,
+        '1.2.840.113549.1.7.4': rfc2315.SignedAndEnvelopedData,
+        '1.2.840.113549.1.7.5': rfc2315.DigestedData,
+        '1.2.840.113549.1.7.6': rfc2315.EncryptedData,
+    }.get(str(data[0]))
+    print(contentType)
+    content = decoder.decode(data[1], asn1Spec=contentType())[0]
+    print(data.prettyPrint())
+    print(content.prettyPrint())

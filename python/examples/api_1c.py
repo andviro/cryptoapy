@@ -47,7 +47,8 @@ print(cryptoapi.cert_info(cert2))
 # Подписывание данных
 data = b64encode('Ahaahahahah!!!')
 wrong_data = b64encode('Ahaahahahah???')
-signdata = cryptoapi.sign(cert, data, True)
+signdata = cryptoapi.sign(cert, data, False)
+open('detached.p7s', 'wb').write(b64decode(signdata))
 
 # Информация о PKSC7 - сообщении
 print('sign info:', cryptoapi.pkcs7_info(signdata))
@@ -60,6 +61,7 @@ print('verify "{0}":'.format(wrong_data), cryptoapi.check_signature(cert, signda
 message = 'Hello, dolly!'
 msg = b64encode(message)
 encmsg = cryptoapi.encrypt([cert], msg)
+open('encrypted.p7s', 'wb').write(b64decode(encmsg))
 print('encrypted len of "{0}":'.format(message), len(encmsg))
 
 # Расшифровка данных
