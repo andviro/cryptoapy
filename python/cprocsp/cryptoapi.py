@@ -3,7 +3,8 @@
 from __future__ import unicode_literals, print_function
 
 import csp
-from certutils import Attributes, CertValidity, KeyUsage, EKU, CertExtensions, SubjectAltName, CertificatePolicies
+from certutils import Attributes, CertValidity, KeyUsage, EKU,\
+    CertExtensions, SubjectAltName, CertificatePolicies, PKCS7Msg
 
 import platform
 from base64 import b64encode, b64decode
@@ -276,12 +277,9 @@ def pkcs7_info(data):
     """
     bin_data = b64decode(data)
     msg = csp.CryptMsg(bin_data)
-    res = dict(data=msg.get_data(), type=msg.get_type(), signers=[])
-    res['certs'] = list(b64encode(x.extract()) for x in csp.CertStore(msg))
-    for i in range(msg.num_signers()):
-        info = csp.CertInfo(msg, i)
-        res['signers'].append((unicode(info.issuer(), 'cp1251', 'replace'),
-                               hexlify(info.serial())))
+    res = PKCS7Msg(bin_data).abstract()
+    res['Content'] = msg.get_data()
+    res['Certificates'] = list(b64encode(x.extract()) for x in csp.CertStore(msg))
     return res
 
 
@@ -311,12 +309,12 @@ def cert_info(cert):
         Version=info.version(),
         ValidFrom=filetime_from_dec(info.not_before()),
         ValidTo=filetime_from_dec(info.not_after()),
-        Issuer=Attributes.decode(info.issuer(False)),
+        Issuer=Attributes.load(info.issuer(False)).decode(),
         Thumbprint=hexlify(cert.thumbprint()),
         UseToSign=bool(info.usage() & csp.CERT_DIGITAL_SIGNATURE_KEY_USAGE),
         UseToEncrypt=bool(info.usage() & csp.CERT_DATA_ENCIPHERMENT_KEY_USAGE),
         SerialNumber=':'.join(hex(ord(x))[2:] for x in reversed(info.serial())),
-        Subject=Attributes.decode(info.name(False)),
+        Subject=Attributes.load(info.name(False)).decode(),
         Extensions=list(cert.eku()),
     )
     return res

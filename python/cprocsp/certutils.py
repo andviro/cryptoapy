@@ -3,7 +3,7 @@ from __future__ import unicode_literals, print_function
 import csp
 from pyasn1.type import univ, useful, char, tag, constraint
 from pyasn1.codec.der import encoder, decoder
-from pyasn1_modules import rfc2459
+from pyasn1_modules import rfc2459, rfc2315
 from base64 import b64decode
 from datetime import datetime
 
@@ -56,7 +56,7 @@ class CertExtension(object):
 
         """
         self.asn = rfc2459.Extension()
-        self.asn.setComponentByName(b'extnID', univ.ObjectIdentifier(oid))
+        self.asn.setComponentByName(b'extnID', univ.ObjectIdentifier(bytes(oid)))
         self.asn.setComponentByName(b'critical', univ.Boolean(bool(critical)))
         self.asn.setComponentByName(b'extnValue', univ.OctetString(value))
 
@@ -72,7 +72,7 @@ class EKU(CertExtension):
         """
         val = rfc2459.ExtKeyUsageSyntax()
         for i, x in enumerate(ekus):
-            val.setComponentByPosition(i, rfc2459.KeyPurposeId(x))
+            val.setComponentByPosition(i, rfc2459.KeyPurposeId(bytes(x)))
         super(EKU, self).__init__(csp.szOID_ENHANCED_KEY_USAGE, encoder.encode(val))
 
 
@@ -93,40 +93,45 @@ class Attributes(object):
     """Набор пар (тип, значение)"""
 
     def __init__(self, attrs):
-        self.asn = rfc2459.Name()
-        vals = rfc2459.RDNSequence()
+        if isinstance(attrs, list):
+            self.asn = rfc2459.Name()
+            vals = rfc2459.RDNSequence()
 
-        for (i, (oid, val)) in enumerate(attrs):
-            pair = rfc2459.AttributeTypeAndValue()
-            pair.setComponentByName('type', rfc2459.AttributeType(bytes(oid)))
-            pair.setComponentByName('value',
-                                    rfc2459.AttributeValue(
-                                        univ.OctetString(encoder.encode(char.UTF8String(unicode(val).encode('utf-8'))))))
+            for (i, (oid, val)) in enumerate(attrs):
+                pair = rfc2459.AttributeTypeAndValue()
+                pair.setComponentByName('type', rfc2459.AttributeType(bytes(oid)))
+                pair.setComponentByName('value',
+                                        rfc2459.AttributeValue(
+                                            univ.OctetString(encoder.encode(char.UTF8String(unicode(val).encode('utf-8'))))))
 
-            pairset = rfc2459.RelativeDistinguishedName()
-            pairset.setComponentByPosition(0, pair)
+                pairset = rfc2459.RelativeDistinguishedName()
+                pairset.setComponentByPosition(0, pair)
 
-            vals.setComponentByPosition(i, pairset)
+                vals.setComponentByPosition(i, pairset)
 
-        self.asn.setComponentByPosition(0, vals)
+            self.asn.setComponentByPosition(0, vals)
+        else:
+            self.asn = attrs
 
     def encode(self):
         return encoder.encode(self.asn)
 
-    @staticmethod
-    def decode(value):
-        asn = decoder.decode(value, asn1Spec=rfc2459.Name())[0]
+    @classmethod
+    def load(cls, value):
+        return(cls(decoder.decode(value, asn1Spec=rfc2459.Name())[0]))
+
+    def decode(self):
         res = []
-        for rdn in asn[0]:
+        for rdn in self.asn[0]:
             item = []
             for dn in rdn:
                 oid = unicode(dn[0])
-                value = decoder.decode(dn[1])[0]
-                if value.__class__.__name__ == 'UTF8String':
-                    value = unicode(bytes(value), 'utf-8')
+                self.asn = decoder.decode(dn[1])[0]
+                if self.asn.__class__.__name__ == 'UTF8String':
+                    self.asn = unicode(bytes(self.asn), 'utf-8')
                 else:
-                    value = unicode(bytes(value), 'cp1251')
-                item.append((oid, value))
+                    self.asn = unicode(bytes(self.asn), 'cp1251')
+                item.append((oid, self.asn))
             if len(item) != 1:
                 res.append(item)
             else:
@@ -203,19 +208,82 @@ class CertificatePolicies(CertExtension):
         val = rfc2459.CertificatePolicies()
         for (i, (t, v)) in enumerate(policies):
             pol = rfc2459.PolicyInformation()
-            pol.setComponentByPosition(0, rfc2459.CertPolicyId(t))
+            pol.setComponentByPosition(0, rfc2459.CertPolicyId(bytes(t)))
             if len(v):
                 sq = univ.SequenceOf(componentType=rfc2459.PolicyQualifierInfo()
                                      ).subtype(subtypeSpec=constraint.ValueSizeConstraint(1, rfc2459.MAX))
                 for n, (ident, qualif) in enumerate(v):
                     pqi = rfc2459.PolicyQualifierInfo()
-                    pqi.setComponentByPosition(0, rfc2459.PolicyQualifierId(ident))
+                    pqi.setComponentByPosition(0, rfc2459.PolicyQualifierId(bytes(ident)))
                     pqi.setComponentByPosition(1, univ.OctetString(b64decode(qualif)))
                     sq.setComponentByPosition(n, pqi)
                 pol.setComponentByPosition(1, sq)
             val.setComponentByPosition(i, pol)
         super(CertificatePolicies, self).__init__(rfc2459.id_ce_certificatePolicies,
                                                   encoder.encode(val))
+
+
+class PKCS7Msg(object):
+    """Парсинг свойств pkcs7 сообщения"""
+
+    def __init__(self, data):
+        """@todo: to be defined
+
+        :data: @todo
+
+        """
+        self.asn = decoder.decode(data, asn1Spec=rfc2315.ContentInfo())[0]
+        self.contentType = {
+            '1.2.840.113549.1.7.1': rfc2315.Data,
+            '1.2.840.113549.1.7.2': rfc2315.SignedData,
+            '1.2.840.113549.1.7.3': rfc2315.EnvelopedData,
+            '1.2.840.113549.1.7.4': rfc2315.SignedAndEnvelopedData,
+            '1.2.840.113549.1.7.5': rfc2315.DigestedData,
+            '1.2.840.113549.1.7.6': rfc2315.EncryptedData,
+        }.get(str(self.asn[0]), None)
+
+        assert self.contentType, 'Unsupported message content type'
+        self.content = decoder.decode(self.asn[1], asn1Spec=self.contentType())[0]
+
+    def data(self):
+        return {}
+
+    digestedData = data
+
+    encryptedData = data
+
+    def envelopedData(self):
+        res = []
+        for si in self.content.getComponentByName('recipientInfos'):
+            info = si.getComponentByName('issuerAndSerialNumber')
+            attrs = Attributes(info[0]).decode()
+            sn = '{0:x}'.format(long(info[1]))
+            res.append(dict(Issuer=attrs, SerialNumber=sn))
+        return dict(RecipientInfos=res)
+
+    def signedData(self):
+        res = []
+        for si in self.content.getComponentByName('signerInfos'):
+            info = si.getComponentByName('issuerAndSerialNumber')
+            attrs = Attributes(info[0]).decode()
+            sn = '{0:x}'.format(long(info[1]))
+            res.append(dict(Issuer=attrs, SerialNumber=sn))
+        return dict(SignerInfos=res)
+
+    def signedAndEnvelopedData(self):
+        res = {}
+        res.update(self.signedData())
+        res.update(self.envelopedData())
+        return res
+
+    def abstract(self):
+        ct = self.contentType.__name__
+        ct = ct[0].lower() + ct[1:]
+        res = dict(ContentType=ct)
+        fun = getattr(self, ct, None)
+        if fun is not None:
+            res.update(fun())
+        return res
 
 
 if __name__ == '__main__':
@@ -227,18 +295,5 @@ if __name__ == '__main__':
     #ci = csp.CertInfo(csp.Cert(data))
     #xx = Attributes.decode(ci.issuer(False))
     #print(xx)
-    from pyasn1_modules import rfc2315
-    data = open('../examples/encrypted.p7s', 'rb').read()
-    data = decoder.decode(data, asn1Spec=rfc2315.ContentInfo())[0]
-    contentType = {
-        '1.2.840.113549.1.7.1': rfc2315.Data,
-        '1.2.840.113549.1.7.2': rfc2315.SignedData,
-        '1.2.840.113549.1.7.3': rfc2315.EnvelopedData,
-        '1.2.840.113549.1.7.4': rfc2315.SignedAndEnvelopedData,
-        '1.2.840.113549.1.7.5': rfc2315.DigestedData,
-        '1.2.840.113549.1.7.6': rfc2315.EncryptedData,
-    }.get(str(data[0]))
-    print(contentType)
-    content = decoder.decode(data[1], asn1Spec=contentType())[0]
-    print(data.prettyPrint())
-    print(content.prettyPrint())
+    msg = PKCS7Msg(open('../examples/encrypted.p7s', 'rb').read())
+    print(msg.abstract())

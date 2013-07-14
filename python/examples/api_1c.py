@@ -15,16 +15,16 @@ cont = b'123456789abcdef'
 print('key generated:', cryptoapi.gen_key(cont))
 
 # Запрос на серт
-req_params = dict(Attributes=[(CN, b'123456789abcdef'), (GN, 'Вася')],
+req_params = dict(Attributes=[(CN, '123456789abcdef'), (GN, 'Вася')],
                   KeyUsage=['dataEncipherment', 'digitalSignature'],
                   EKU=[csp.szOID_PKIX_KP_EMAIL_PROTECTION,
                        csp.szOID_PKIX_KP_CLIENT_AUTH],
-                  CertificatePolicies=[(unotice, []),
-                                       (cps, [(cps, b64encode(b"alsdk"))])],
+                  CertificatePolicies=[('1.2.643.100.113.1', []),
+                                       ('1.2.643.100.113.2', [])],
                   ValidFrom=datetime.utcnow(),
 
                   SubjectAltName=[('directoryName',
-                                   [(b'1.2.643.3.141.1.1', '123123456')])],
+                                   [('1.2.643.3.141.1.1', '123123456')])],
                   ValidTo=datetime.now() + timedelta(days=31))
 req = cryptoapi.create_request(cont, req_params)
 print('request data:', req)
@@ -49,6 +49,8 @@ data = b64encode('Ahaahahahah!!!')
 wrong_data = b64encode('Ahaahahahah???')
 signdata = cryptoapi.sign(cert, data, False)
 open('detached.p7s', 'wb').write(b64decode(signdata))
+signmsg = cryptoapi.sign(cert, data, True)
+open('signedmsg.p7s', 'wb').write(b64decode(signmsg))
 
 # Информация о PKSC7 - сообщении
 print('sign info:', cryptoapi.pkcs7_info(signdata))
