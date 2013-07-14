@@ -155,20 +155,17 @@ def get_certificate(thumb):
     return b64encode(cert.extract())
 
 
-def sign(cert, data, include_data):
+def sign(thumb, data, include_data):
     """Подписывание данных сертификатом
 
-    :cert: сертификат, закодированный в base64
+    :thumb: отпечаток сертификата, которым будем подписывать
     :data: бинарные данные, закодированные в base64
     :include_data: булев флаг, если True -- данные прицепляются вместе с подписью
     :returns: данные и/или подпись, закодированные в base64
 
     """
-    cert = ''.join(x for x in cert.splitlines() if not x.startswith('---'))
-    cdata = b64decode(cert)
-    signcert_thumb = csp.Cert(cdata).thumbprint()
     cs = csp.CertStore(None, b"MY")
-    store_lst = list(cs.find_by_thumb(signcert_thumb))
+    store_lst = list(cs.find_by_thumb(unhexlify(thumb)))
     assert len(store_lst), 'Unable to find signing cert in system store'
     signcert = store_lst[0]
     mess = csp.CryptMsg()
@@ -178,20 +175,19 @@ def sign(cert, data, include_data):
     return b64encode(sign_data)
 
 
-def sign_and_encrypt(signcert, certs, data):
+def sign_and_encrypt(thumb, certs, data):
     """Подписывание данных сертификатом
 
-    :cert: сертификат подписывания, закодированный в base64
+    :thumb: отпечаток сертификата, которым будем подписывать
     :certs: список сертификатов получателей
     :data: бинарные данные, закодированные в base64
     :returns: данные и подпись, зашифрованные и закодированные в base64
 
     """
-    cert = ''.join(x for x in signcert.splitlines() if not x.startswith('---'))
-    cdata = b64decode(cert)
-    signcert_thumb = csp.Cert(cdata).thumbprint()
     cs = csp.CertStore(None, b"MY")
-    signcert = list(cs.find_by_thumb(signcert_thumb))[0]
+    store_lst = list(cs.find_by_thumb(unhexlify(thumb)))
+    assert len(store_lst), 'Unable to find signing cert in system store'
+    signcert = store_lst[0]
     mess = csp.CryptMsg()
     for c in certs:
         certdata = ''.join(x for x in c.splitlines() if not x.startswith('---'))

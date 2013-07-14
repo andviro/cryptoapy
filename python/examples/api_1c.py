@@ -48,9 +48,9 @@ print(cryptoapi.cert_info(cert2))
 # Подписывание данных
 data = b64encode('Ahaahahahah!!!')
 wrong_data = b64encode('Ahaahahahah???')
-signdata = cryptoapi.sign(cert, data, False)
+signdata = cryptoapi.sign(thumb, data, False)
 open('detached.p7s', 'wb').write(b64decode(signdata))
-signmsg = cryptoapi.sign(cert, data, True)
+signmsg = cryptoapi.sign(thumb, data, True)
 open('signedmsg.p7s', 'wb').write(b64decode(signmsg))
 
 # Информация о PKSC7 - сообщении
@@ -72,7 +72,7 @@ decmsg = cryptoapi.decrypt(encmsg, thumb)
 print('decrypted:', b64decode(decmsg))
 
 # Комбинированное подписывание и шифрование
-sencdata = cryptoapi.sign_and_encrypt(cert, [cert], data)
+sencdata = cryptoapi.sign_and_encrypt(thumb, [cert], data)
 print('signed and encrypted len:', len(sencdata))
 print('info of s_a_e:', cryptoapi.pkcs7_info(sencdata))
 
