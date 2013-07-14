@@ -5,7 +5,7 @@ import sys
 sys.path.insert(0, '..')
 from cprocsp import cryptoapi, csp
 
-from pyasn1_modules.rfc2459 import id_at_commonName as CN, id_at_givenName as GN, id_qt_unotice as unotice, id_qt_cps as cps
+from pyasn1_modules.rfc2459 import id_at_commonName as CN, id_at_givenName as GN
 from datetime import datetime, timedelta
 from base64 import b64decode, b64encode
 
@@ -21,6 +21,7 @@ req_params = dict(Attributes=[(CN, '123456789abcdef'), (GN, 'Вася')],
                        csp.szOID_PKIX_KP_CLIENT_AUTH],
                   CertificatePolicies=[('1.2.643.100.113.1', []),
                                        ('1.2.643.100.113.2', [])],
+                  RawExtensions=[],
                   ValidFrom=datetime.utcnow(),
 
                   SubjectAltName=[('directoryName',

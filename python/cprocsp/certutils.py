@@ -58,7 +58,7 @@ class CertExtension(object):
         self.asn = rfc2459.Extension()
         self.asn.setComponentByName(b'extnID', univ.ObjectIdentifier(bytes(oid)))
         self.asn.setComponentByName(b'critical', univ.Boolean(bool(critical)))
-        self.asn.setComponentByName(b'extnValue', univ.OctetString(value))
+        self.asn.setComponentByName(b'extnValue', univ.OctetString(bytes(value)))
 
 
 class EKU(CertExtension):

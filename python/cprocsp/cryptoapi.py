@@ -4,7 +4,7 @@ from __future__ import unicode_literals, print_function
 
 import csp
 from certutils import Attributes, CertValidity, KeyUsage, EKU,\
-    CertExtensions, SubjectAltName, CertificatePolicies, PKCS7Msg
+    CertExtensions, SubjectAltName, CertificatePolicies, PKCS7Msg, CertExtension
 
 import platform
 from base64 import b64encode, b64decode
@@ -92,6 +92,9 @@ def create_request(cont, params, local=True):
                 'iPAddress' : строка
                 'registeredID' : строка
         'KeyUsage' : список строк ['digitalSignature', 'nonRepudiation', ...]
+        'RawExtensions' : список троек [('OID', 'b64string', bool(CriticalFlag)), ...]
+            предназначен для добавления в запрос произвольных расширений,
+            закодированных в DER-кодировку внешними средставми
         }
     :local: Если True, работа идет с локальным хранилищем
     :returns: строка base64, пустая строка в случае ошибки (???)
@@ -109,11 +112,10 @@ def create_request(cont, params, local=True):
     usage = KeyUsage(params.get('KeyUsage', []))
     altname = SubjectAltName(params.get('SubjectAltName', []))
     pols = CertificatePolicies(params.get('CertificatePolicies', []))
-    ext_attr = CertExtensions([usage,
-                               eku,
-                               altname,
-                               pols,
-                               ])
+    all_exts = [usage, eku, altname, pols, ]
+    for (oid, data, crit) in params.get('RawExtensions', []):
+        all_exts.append(CertExtension(oid, b64decode(data), bool(crit)))
+    ext_attr = CertExtensions(all_exts)
     validity.add_to(req)
     ext_attr.add_to(req)
     return b64encode(req.get_data())
