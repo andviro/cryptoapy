@@ -25,8 +25,9 @@ def gen_key(cont, local=True, silent=False):
 
     '''
     silent_flag = csp.CRYPT_SILENT if silent else 0
-    provider = "Crypto-Pro HSM CSP" if not local else None
+    provider = b"Crypto-Pro HSM CSP" if not local else None
 
+    cont = bytes(cont)
     try:
         ctx = csp.Crypt(cont, csp.PROV_GOST_2001_DH, silent_flag, provider)
     except (ValueError, SystemError):
@@ -64,8 +65,8 @@ def remove_key(cont, local=True):
     :returns: True, если операция успешна
 
     '''
-    provider = "Crypto-Pro HSM CSP" if not local else None
-    csp.Crypt.remove(cont, csp.PROV_GOST_2001_DH, provider)
+    provider = b"Crypto-Pro HSM CSP" if not local else None
+    csp.Crypt.remove(bytes(cont), csp.PROV_GOST_2001_DH, provider)
     return True
 
 
@@ -79,7 +80,7 @@ def create_request(cont, params, local=True):
         'CertificatePolicies' : список вида [(OID, [(квалификатор, значение), ...]), ... ]
             OID - идент-р политики
             квалификатор - OID
-            значение - произвольная информация в base64
+            значение - произвольная байтовая строка
         'ValidFrom' : Дата начала действия (объект `datetime`),
         'ValidTo' : Дата окончания действия (объект `datetime`),
         'EKU' : список OIDов,
@@ -96,12 +97,12 @@ def create_request(cont, params, local=True):
             закодированных в DER-кодировку внешними средставми
         }
     :local: Если True, работа идет с локальным хранилищем
-    :returns: строка base64, пустая строка в случае ошибки (???)
+    :returns: байтовая строка с запросом в DER-кодировке
 
     """
 
-    provider = "Crypto-Pro HSM CSP" if not local else None
-    ctx = csp.Crypt(cont, csp.PROV_GOST_2001_DH, 0, provider)
+    provider = b"Crypto-Pro HSM CSP" if not local else None
+    ctx = csp.Crypt(bytes(cont), csp.PROV_GOST_2001_DH, 0, provider)
     req = csp.CertRequest(ctx, )
     req.set_subject(Attributes(params.get('Attributes', '')).encode())
     validity = CertValidity(params.get('ValidFrom', datetime.now()),
@@ -113,7 +114,7 @@ def create_request(cont, params, local=True):
     pols = CertificatePolicies(params.get('CertificatePolicies', []))
     all_exts = [usage, eku, altname, pols, ]
     for (oid, data, crit) in params.get('RawExtensions', []):
-        all_exts.append(CertExtension(oid, data, bool(crit)))
+        all_exts.append(CertExtension(bytes(oid), data, bool(crit)))
     ext_attr = CertExtensions(all_exts)
     validity.add_to(req)
     ext_attr.add_to(req)
@@ -124,16 +125,14 @@ def bind_cert_to_key(cont, cert, local=True):
     """Привязка сертификата к закрытому ключу в контейнере
 
     :cont: Имя контейнера
-    :cert: Сертификат, закодированный в строку base64
+    :cert: Сертификат в байтовой строке
     :local: Если True, работа идет с локальным хранилищем
     :returns: отпечаток сертификата в виде строки
 
     """
-    provider = "Crypto-Pro HSM CSP" if not local else None
-    ctx = csp.Crypt(cont, csp.PROV_GOST_2001_DH, 0, provider)
-    #cert = ''.join(x for x in cert.splitlines() if not x.startswith('---'))
-    cdata = cert
-    newc = csp.Cert(cdata)
+    provider = b"Crypto-Pro HSM CSP" if not local else None
+    ctx = csp.Crypt(bytes(cont), csp.PROV_GOST_2001_DH, 0, provider)
+    newc = csp.Cert(cert)
     newc.bind(ctx)
     cs = csp.CertStore(ctx, b"MY")
     cs.add_cert(newc)
@@ -144,7 +143,7 @@ def get_certificate(thumb):
     """Поиск сертификатов по отпечатку
 
     :thumb: отпечаток, возвращенный функцией `bind_cert_to_key`
-    :returns: сертификат, закодированный в base64
+    :returns: сертификат в байтовой строке
 
     """
     cs = csp.CertStore(None, b"MY")
@@ -158,9 +157,9 @@ def sign(thumb, data, include_data):
     """Подписывание данных сертификатом
 
     :thumb: отпечаток сертификата, которым будем подписывать
-    :data: бинарные данные, закодированные в base64
+    :data: бинарные данные, байтовая строка
     :include_data: булев флаг, если True -- данные прицепляются вместе с подписью
-    :returns: данные и/или подпись, закодированные в base64
+    :returns: данные и/или подпись в виде байтовой строки
 
     """
     cs = csp.CertStore(None, b"MY")
@@ -168,8 +167,6 @@ def sign(thumb, data, include_data):
     assert len(store_lst), 'Unable to find signing cert in system store'
     signcert = store_lst[0]
     mess = csp.CryptMsg()
-    # mess.add_signer(signcert)
-    # sign_data = mess.sign_data(b64decode(data), not(include_data))
     sign_data = mess.sign_data(data, signcert, not(include_data))
     return sign_data
 
@@ -179,8 +176,8 @@ def sign_and_encrypt(thumb, certs, data):
 
     :thumb: отпечаток сертификата, которым будем подписывать
     :certs: список сертификатов получателей
-    :data: бинарные данные, закодированные в base64
-    :returns: данные и подпись, зашифрованные и закодированные в base64
+    :data: байтовая строка с данными
+    :returns: данные и подпись, зашифрованные и закодированные в байтовую строку
 
     """
     cs = csp.CertStore(None, b"MY")
@@ -189,7 +186,6 @@ def sign_and_encrypt(thumb, certs, data):
     signcert = store_lst[0]
     mess = csp.CryptMsg()
     for c in certs:
-        #certdata = ''.join(x for x in c.splitlines() if not x.startswith('---'))
         cert = csp.Cert(c)
         mess.add_recipient(cert)
     sign_data = mess.sign_data(data, signcert)
@@ -200,16 +196,14 @@ def sign_and_encrypt(thumb, certs, data):
 def check_signature(cert, sig, data):
     """Проверка подписи под данными
 
-    :cert: сертификат, закодированный в base64
-    :data: бинарные данные, закодированные в base64
-    :sig: данные подписи в base64
+    :cert: сертификат в байтовой строке
+    :data: бинарные данные в байтовой строке
+    :sig: данные подписи в байтовой строке
     :local: Если True, работа идет с локальным хранилищем
     :returns: True или False
 
     """
     sign = csp.Signature(sig)
-    #cert = ''.join(x for x in cert.splitlines() if not x.startswith('---'))
-    #data = b64decode(data)
     cert = csp.Cert(cert)
     icert = csp.CertInfo(cert)
     cissuer = icert.issuer()
@@ -225,16 +219,14 @@ def check_signature(cert, sig, data):
 def encrypt(certs, data):
     """Шифрование данных на сертификатах получателей
 
-    :certs: список сертификатов в base64
-    :data: данные в base64
-    :returns: шифрованные данные в base64
+    :certs: список сертификатов в байтовых строках
+    :data: данные в байтовой строке
+    :returns: шифрованные данные в байтовой строке
 
     """
-    #bin_data = b64decode(data)
     bin_data = data
     msg = csp.CryptMsg()
     for c in certs:
-        #certdata = ''.join(x for x in c.splitlines() if not x.startswith('---'))
         cert = csp.Cert(c)
         msg.add_recipient(cert)
     encrypted = msg.encrypt_data(bin_data)
@@ -245,8 +237,8 @@ def decrypt(data, thumb):
     """Дешифрование данных из сообщения
 
     :thumb: отпечаток сертификата для расшифровки
-    :data: данные в base64
-    :returns: шифрованные данные в base64
+    :data: данные в байтовой строке
+    :returns: шифрованные данные в байтовой строке
 
     """
     cs = csp.CertStore(None, b"MY")
@@ -263,19 +255,22 @@ def decrypt(data, thumb):
 def pkcs7_info(data):
     """Информация о сообщении в формате PKCS7
 
-    :data: данные в base64
+    :data: данные в байтовой строке
     :returns: словарь с информацией следующего вида:
     {
-        'type' : 'тип сообщения',
-        'data' : 'содержимое сообщения' # (если оно не зашифровано)
-        'signers' : [(issuer1, serial1), (issuer2, serial2) ...]
-        'certs' : [cert1, cert2, ...] # сертификаты в base64
+        'Content': '....', # байтовая строка
+        'Certificates': [сертификат, сертификат, ...], # байтовые строки
+        'SignerInfos': [ { 'SerialNumber': 'строка', 'Issuer': [(OID, 'строка'), ... ] }, ... ],
+        'ContentType': 'signedData' # один из ('data', 'signedData',
+                                    #   'envelopedData', 'signedAndEnvelopedData', 'digestedData',
+                                    #   'encryptedData')
+        'RecipientInfos': [ { 'SerialNumber': 'строка', 'Issuer': [(OID, строка), ...] }, ... ],
     }
 
+
     """
-    bin_data = data
-    msg = csp.CryptMsg(bin_data)
-    res = PKCS7Msg(bin_data).abstract()
+    msg = csp.CryptMsg(data)
+    res = PKCS7Msg(data).abstract()
     res['Content'] = msg.get_data()
     res['Certificates'] = list(x.extract() for x in csp.CertStore(msg))
     return res
@@ -287,20 +282,19 @@ def cert_info(cert):
     :cert: сертификат в base64
     :returns: словарь с информацией следующего вида:
     {
-        'Version' : версия сертификата,
+        'Version' : целое число,
         'ValidFrom' : ДатаНачала (тип datetime),
         'ValidTo' : ДатаОкончания (тип datetime),
-        'Issuer': Издатель,
-        'UseToSign':ИспользоватьДляПодписи,
-        'UseToEncrypt' :ИспользоватьДляШифрования,
-        'Thumbprint': Отпечаток,
+        'Issuer': [(OID, строка), ...],
+        'UseToSign': булев флаг,
+        'UseToEncrypt' : булев флаг,
+        'Thumbprint': строка,
         'SerialNumber': СерийныйНомер,
-        'Subject': Субъект,
-        'Extensions': [Item, Item, ...]
+        'Subject': [(OID, строка), ...],
+        'Extensions': [OID, OID, ...]
     }
 
     """
-    #cert = ''.join(x for x in cert.splitlines() if not x.startswith('---'))
     cert = csp.Cert(cert)
     info = csp.CertInfo(cert)
     res = dict(
