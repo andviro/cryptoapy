@@ -6,6 +6,14 @@ import sys
 import os
 import platform
 
+try:
+    import bdist_nsi
+    have_nsis = True
+except ImportError:
+    have_nsis = False
+    pass
+
+
 major, minor = sys.version_info[:2]
 
 if architecture()[0] == '32bit':
@@ -80,6 +88,15 @@ csp = Extension('cprocsp._csp',
                 library_dirs=library_dirs,
                 libraries=libraries,
                 extra_compile_args=extra_compile_args,)
+
+
+options = {}
+if have_nsis:
+    nsis_options = {}  # your nsis options
+    options.update({
+        'bdist_nsi': nsis_options,
+    })
+
 setup(name='python{major}.{minor}-cprocsp'.format(major=major, minor=minor),
       version='0.2',
       requires=['pyasn1', 'pyasn1_modules'],
@@ -88,4 +105,5 @@ setup(name='python{major}.{minor}-cprocsp'.format(major=major, minor=minor),
       py_modules=['cprocsp.csp', 'cprocsp.rdn', 'cprocsp.cryptoapi',
                   'cprocsp.filetimes'],
       cmdclass=cmdclass,
+      options=options,
       )

@@ -7,6 +7,7 @@ dist
 *.req
 wiki
 *.exe
+*.msi
 *.egg
 *.orig
 *.egg-info
