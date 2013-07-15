@@ -429,16 +429,16 @@ EKUIter::EKUIter (Cert *c)
     cbsize = 0;
 }
 
-char *EKUIter::next () throw (CSPException, Stop_Iteration)
+void *EKUIter::next (BYTE **s, DWORD *slen) throw (CSPException, Stop_Iteration)
 {
     LOG("EKUIter::next()\n");
     if (!pekus || i >= pekus->cUsageIdentifier) {
         LOG("    Stop iter\n");
         throw Stop_Iteration();
     }
-    char *res = strdup((char *)pekus->rgpszUsageIdentifier[i]);
+    *s = (BYTE *)strdup((char *)pekus->rgpszUsageIdentifier[i]);
+    *slen = strlen((char *)*s);
     i ++;
-    return res;
 }
 
 
