@@ -200,7 +200,6 @@ class SubjectAltName(CertExtension):
             assert elt is not None, 'unsupported element type {0}'.format(t)
             gn.setComponentByName(t, elt(v))
             val.setComponentByPosition(i, gn)
-        print(val)
 
         super(SubjectAltName, self).__init__(rfc2459.id_ce_subjectAltName, encoder.encode(val))
 
