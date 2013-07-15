@@ -110,7 +110,7 @@ def create_request(cont, params, local=True):
     req.set_subject(Attributes(params.get('Attributes', '')).encode())
     validity = CertValidity(params.get('ValidFrom', datetime.now()),
                             params.get('ValidTo',
-                                       datetime.now() + timedelta(days=30)))
+                                       datetime.now() + timedelta(days=365)))
     eku = EKU(params.get('EKU', []))
     usage = KeyUsage(params.get('KeyUsage', []))
     altname = SubjectAltName(params.get('SubjectAltName', []))
