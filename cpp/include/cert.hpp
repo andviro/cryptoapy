@@ -77,7 +77,15 @@ public:
 
     CertFind(CertStore *p, DWORD et, BYTE *name);
 
-    virtual Cert *next() throw (Stop_Iteration, CSPException);
+    Cert *next() throw (Stop_Iteration, CSPException);
+
+    CertFind *__iter__() {
+        if (findtype == CERT_FIND_SUBJECT_STR) {
+            return new CertFind(parent, enctype, (BYTE *)param);
+        } else {
+            return new CertFind(parent, enctype, findtype, param->pbData, param->cbData);
+        }
+    }
 };
 
 

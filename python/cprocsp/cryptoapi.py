@@ -149,7 +149,9 @@ def get_certificate(thumb):
 
     """
     cs = csp.CertStore(None, b"MY")
+    print(len(unhexlify(thumb)))
     res = list(cs.find_by_thumb(unhexlify(thumb)))
+    print([hexlify(x.thumbprint()) for x in res])
     assert len(res)
     cert = res[0]
     return b64encode(cert.extract())
@@ -255,6 +257,7 @@ def decrypt(data, thumb):
     decrcs = csp.CertStore()
     decrcs.add_cert(certs[0])
     bin_data = b64decode(data)
+    print(len(bin_data), hexlify(certs[0].thumbprint()))
     msg = csp.CryptMsg(bin_data)
     decrypted = msg.decrypt(decrcs)
     return b64encode(decrypted)

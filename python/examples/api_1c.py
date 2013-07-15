@@ -35,6 +35,7 @@ open('cer_test.der', 'wb').write(b64decode(req))
 # Импорт серта из файла (требуется отправить запрос в УЦ и сохранить
 # полученный серт в файл 'cer_test.cer')
 certdata = open('cer_test.cer', 'rb').read()
+print(cryptoapi.cert_info(b64encode(certdata)))
 thumb = cryptoapi.bind_cert_to_key(cont, b64encode(certdata))
 print('bound cert thumb:', thumb)
 
@@ -78,4 +79,4 @@ print('info of s_a_e:', cryptoapi.pkcs7_info(sencdata))
 
 # Удаление контейнера
 # Закомментировано, чтобы каждый раз не создавать ключи снова
-# print(cryptoapi.remove_key(cont))
+print(cryptoapi.remove_key(cont))

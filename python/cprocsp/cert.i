@@ -12,6 +12,7 @@
 %newobject CertStore::get_cert_by_info;
 %newobject CertIter::next;
 %newobject CertIter::__iter__;
+%newobject CertFind::__iter__;
 %newobject CertFind::next;
 %newobject EKUIter::__iter__;
 %newobject EKUIter::next;
@@ -22,7 +23,9 @@
 %feature("unref") CertStore "$this->unref();"
 %feature("python:slot", "tp_iter", functype="getiterfunc") CertStore::__iter__;
 %feature("python:slot", "tp_iter", functype="getiterfunc") CertIter::__iter__;
+%feature("python:slot", "tp_iter", functype="getiterfunc") CertFind::__iter__;
 %feature("python:slot", "tp_iternext", functype="iternextfunc") CertIter::next;
+%feature("python:slot", "tp_iternext", functype="iternextfunc") CertFind::next;
 %feature("python:slot", "tp_iter", functype="getiterfunc") EKUIter::__iter__;
 %feature("python:slot", "tp_iternext", functype="iternextfunc") EKUIter::next;
 

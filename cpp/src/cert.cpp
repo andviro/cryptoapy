@@ -276,7 +276,7 @@ Cert *CertIter::next() throw (Stop_Iteration, CSPException)
 
 Cert *CertFind::next() throw (Stop_Iteration, CSPException)
 {
-    LOG("CertFind::next()\n");
+    LOG("CertFind::next(%x, %p)\n", findtype, param);
     if (!iter) {
         LOG("    Stopped find\n");
         throw Stop_Iteration();
