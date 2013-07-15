@@ -56,6 +56,7 @@ open('signedmsg.p7s', 'wb').write(b64decode(signmsg))
 
 # Информация о PKSC7 - сообщении
 print('sign info:', cryptoapi.pkcs7_info(signdata))
+print('msg info:', cryptoapi.pkcs7_info(signmsg))
 
 # Проверка отсоединенной подписи
 print('verify "{0}":'.format(data), cryptoapi.check_signature(cert, signdata, data))
@@ -79,4 +80,4 @@ print('info of s_a_e:', cryptoapi.pkcs7_info(sencdata))
 
 # Удаление контейнера
 # Закомментировано, чтобы каждый раз не создавать ключи снова
-print(cryptoapi.remove_key(cont))
+#print(cryptoapi.remove_key(cont))
