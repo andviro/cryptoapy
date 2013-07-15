@@ -15,7 +15,6 @@
 %newobject CertFind::__iter__;
 %newobject CertFind::next;
 %newobject EKUIter::__iter__;
-%newobject EKUIter::next;
 
 %feature("ref") Cert "$this->ref();"
 %feature("unref") Cert "$this->unref();"
