@@ -7,7 +7,6 @@ from certutils import Attributes, CertValidity, KeyUsage, EKU,\
     CertExtensions, SubjectAltName, CertificatePolicies, PKCS7Msg, CertExtension
 
 import platform
-from base64 import b64encode, b64decode
 from binascii import hexlify, unhexlify
 from filetimes import filetime_from_dec
 from datetime import datetime, timedelta
@@ -114,11 +113,11 @@ def create_request(cont, params, local=True):
     pols = CertificatePolicies(params.get('CertificatePolicies', []))
     all_exts = [usage, eku, altname, pols, ]
     for (oid, data, crit) in params.get('RawExtensions', []):
-        all_exts.append(CertExtension(oid, b64decode(data), bool(crit)))
+        all_exts.append(CertExtension(oid, data, bool(crit)))
     ext_attr = CertExtensions(all_exts)
     validity.add_to(req)
     ext_attr.add_to(req)
-    return b64encode(req.get_data())
+    return req.get_data()
 
 
 def bind_cert_to_key(cont, cert, local=True):
@@ -132,8 +131,8 @@ def bind_cert_to_key(cont, cert, local=True):
     """
     provider = "Crypto-Pro HSM CSP" if not local else None
     ctx = csp.Crypt(cont, csp.PROV_GOST_2001_DH, 0, provider)
-    cert = ''.join(x for x in cert.splitlines() if not x.startswith('---'))
-    cdata = b64decode(cert)
+    #cert = ''.join(x for x in cert.splitlines() if not x.startswith('---'))
+    cdata = cert
     newc = csp.Cert(cdata)
     newc.bind(ctx)
     cs = csp.CertStore(ctx, b"MY")
@@ -152,7 +151,7 @@ def get_certificate(thumb):
     res = list(cs.find_by_thumb(unhexlify(thumb)))
     assert len(res), 'Cert not found'
     cert = res[0]
-    return b64encode(cert.extract())
+    return cert.extract()
 
 
 def sign(thumb, data, include_data):
@@ -171,8 +170,8 @@ def sign(thumb, data, include_data):
     mess = csp.CryptMsg()
     # mess.add_signer(signcert)
     # sign_data = mess.sign_data(b64decode(data), not(include_data))
-    sign_data = mess.sign_data(b64decode(data), signcert, not(include_data))
-    return b64encode(sign_data)
+    sign_data = mess.sign_data(data, signcert, not(include_data))
+    return sign_data
 
 
 def sign_and_encrypt(thumb, certs, data):
@@ -190,12 +189,12 @@ def sign_and_encrypt(thumb, certs, data):
     signcert = store_lst[0]
     mess = csp.CryptMsg()
     for c in certs:
-        certdata = ''.join(x for x in c.splitlines() if not x.startswith('---'))
-        cert = csp.Cert(b64decode(certdata))
+        #certdata = ''.join(x for x in c.splitlines() if not x.startswith('---'))
+        cert = csp.Cert(c)
         mess.add_recipient(cert)
-    sign_data = mess.sign_data(b64decode(data), signcert)
+    sign_data = mess.sign_data(data, signcert)
     encrypted = mess.encrypt_data(sign_data)
-    return b64encode(encrypted)
+    return encrypted
 
 
 def check_signature(cert, sig, data):
@@ -208,10 +207,10 @@ def check_signature(cert, sig, data):
     :returns: True или False
 
     """
-    sign = csp.Signature(b64decode(sig))
-    cert = ''.join(x for x in cert.splitlines() if not x.startswith('---'))
-    data = b64decode(data)
-    cert = csp.Cert(b64decode(cert))
+    sign = csp.Signature(sig)
+    #cert = ''.join(x for x in cert.splitlines() if not x.startswith('---'))
+    #data = b64decode(data)
+    cert = csp.Cert(cert)
     icert = csp.CertInfo(cert)
     cissuer = icert.issuer()
     cserial = icert.serial()
@@ -231,14 +230,15 @@ def encrypt(certs, data):
     :returns: шифрованные данные в base64
 
     """
-    bin_data = b64decode(data)
+    #bin_data = b64decode(data)
+    bin_data = data
     msg = csp.CryptMsg()
     for c in certs:
-        certdata = ''.join(x for x in c.splitlines() if not x.startswith('---'))
-        cert = csp.Cert(b64decode(certdata))
+        #certdata = ''.join(x for x in c.splitlines() if not x.startswith('---'))
+        cert = csp.Cert(c)
         msg.add_recipient(cert)
     encrypted = msg.encrypt_data(bin_data)
-    return b64encode(encrypted)
+    return encrypted
 
 
 def decrypt(data, thumb):
@@ -254,10 +254,10 @@ def decrypt(data, thumb):
     assert len(certs), 'Certificate for thumbprint not found'
     decrcs = csp.CertStore()
     decrcs.add_cert(certs[0])
-    bin_data = b64decode(data)
+    bin_data = data
     msg = csp.CryptMsg(bin_data)
     decrypted = msg.decrypt(decrcs)
-    return b64encode(decrypted)
+    return decrypted
 
 
 def pkcs7_info(data):
@@ -273,11 +273,11 @@ def pkcs7_info(data):
     }
 
     """
-    bin_data = b64decode(data)
+    bin_data = data
     msg = csp.CryptMsg(bin_data)
     res = PKCS7Msg(bin_data).abstract()
     res['Content'] = msg.get_data()
-    res['Certificates'] = list(b64encode(x.extract()) for x in csp.CertStore(msg))
+    res['Certificates'] = list(x.extract() for x in csp.CertStore(msg))
     return res
 
 
@@ -300,8 +300,8 @@ def cert_info(cert):
     }
 
     """
-    cert = ''.join(x for x in cert.splitlines() if not x.startswith('---'))
-    cert = csp.Cert(b64decode(cert))
+    #cert = ''.join(x for x in cert.splitlines() if not x.startswith('---'))
+    cert = csp.Cert(cert)
     info = csp.CertInfo(cert)
     res = dict(
         Version=info.version(),

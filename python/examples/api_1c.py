@@ -7,7 +7,7 @@ from cprocsp import cryptoapi, csp
 
 from pyasn1_modules.rfc2459 import id_at_commonName as CN, id_at_givenName as GN
 from datetime import datetime, timedelta
-from base64 import b64decode, b64encode
+from base64 import b64encode
 
 
 # Генерация ключевого контейера
@@ -28,31 +28,31 @@ req_params = dict(Attributes=[(CN, '123456789abcdef'), (GN, 'Вася')],
                                    [('1.2.643.3.141.1.1', '123123456')])],
                   ValidTo=datetime.now() + timedelta(days=31))
 req = cryptoapi.create_request(cont, req_params)
-print('request data:', req)
-open('cer_test.req', 'wb').write(req)
-open('cer_test.der', 'wb').write(b64decode(req))
+print('request data:', b64encode(req))
+open('cer_test.req', 'wb').write(b64encode(req))
+open('cer_test.der', 'wb').write(req)
 
 # Импорт серта из файла (требуется отправить запрос в УЦ и сохранить
 # полученный серт в файл 'cer_test.cer')
 certdata = open('cer_test.cer', 'rb').read()
-print(cryptoapi.cert_info(b64encode(certdata)))
-thumb = cryptoapi.bind_cert_to_key(cont, b64encode(certdata))
+print(cryptoapi.cert_info(certdata))
+thumb = cryptoapi.bind_cert_to_key(cont, certdata)
 print('bound cert thumb:', thumb)
 
 # Получение данных о сертификате
 cert = cryptoapi.get_certificate(thumb)
 print(cryptoapi.cert_info(cert))
-cert2 = b64encode(open('cer_test.cer', 'rb').read())
+cert2 = open('cer_test.cer', 'rb').read()
 print(cryptoapi.cert_info(cert2))
 
 
 # Подписывание данных
-data = b64encode('Ahaahahahah!!!')
-wrong_data = b64encode('Ahaahahahah???')
+data = b'Ahaahahahah!!!'
+wrong_data = b'Ahaahahahah???'
 signdata = cryptoapi.sign(thumb, data, False)
-open('detached.p7s', 'wb').write(b64decode(signdata))
+open('detached.p7s', 'wb').write(signdata)
 signmsg = cryptoapi.sign(thumb, data, True)
-open('signedmsg.p7s', 'wb').write(b64decode(signmsg))
+open('signedmsg.p7s', 'wb').write(signmsg)
 
 # Информация о PKSC7 - сообщении
 print('sign info:', cryptoapi.pkcs7_info(signdata))
@@ -63,15 +63,15 @@ print('verify "{0}":'.format(data), cryptoapi.check_signature(cert, signdata, da
 print('verify "{0}":'.format(wrong_data), cryptoapi.check_signature(cert, signdata, wrong_data))
 
 # Шифрование данных
-message = 'Hello, dolly!'
-msg = b64encode(message)
+message = b'Hello, dolly!'
+msg = message
 encmsg = cryptoapi.encrypt([cert], msg)
-open('encrypted.p7s', 'wb').write(b64decode(encmsg))
+open('encrypted.p7s', 'wb').write(encmsg)
 print('encrypted len of "{0}":'.format(message), len(encmsg))
 
 # Расшифровка данных
 decmsg = cryptoapi.decrypt(encmsg, thumb)
-print('decrypted:', b64decode(decmsg))
+print('decrypted:', decmsg)
 
 # Комбинированное подписывание и шифрование
 sencdata = cryptoapi.sign_and_encrypt(thumb, [cert], data)
