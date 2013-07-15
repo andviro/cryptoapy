@@ -142,11 +142,19 @@ class Attributes(object):
 class SubjectAltName(CertExtension):
     """Расширенное использование ключа"""
 
-    # namedtype.NamedType('otherName', AnotherName().subtype(implicitTag=tag.Tag(tag.tagClassContext, tag.tagFormatSimple, 0))),
-    # namedtype.NamedType('x400Address', ORAddress().subtype(implicitTag=tag.Tag(tag.tagClassContext, tag.tagFormatSimple, 3))),
-    # namedtype.NamedType('ediPartyName',
-    # EDIPartyName().subtype(implicitTag=tag.Tag(tag.tagClassContext,
-    # tag.tagFormatSimple, 5))),
+    def x400Address(self, val):
+        return decoder.decode(val,
+                              asn1Spec=rfc2459.ORAddress().subtype(implicitTag=tag.Tag(tag.tagClassContext, tag.tagFormatSimple, 3)))
+
+    def ediPartyName(self, val):
+        return decoder.decode(val,
+                              asn1Spec=rfc2459.EDIPartyName().subtype(implicitTag=tag.Tag(tag.tagClassContext, tag.tagFormatSimple, 5)))
+
+    def otherName(self, val):
+        res = rfc2459.AnotherName().subtype(implicitTag=tag.Tag(tag.tagClassContext, tag.tagFormatSimple, 0))
+        res.setComponentByName('type-id', bytes(val[0]))
+        res.setComponentByName('value', bytes(val[1]))
+        return res
 
     def rfc822Name(self, st):
         '''
@@ -175,6 +183,9 @@ class SubjectAltName(CertExtension):
 
         :altnames: список вида [(тип, значение), (тип, значение), ]
             где значение в зависимости от типа:
+                    'otherName' : ('OID', 'байтовая строка')
+                    'ediPartyName' : 'байтовая строка'
+                    'x400Address' : 'байтовая строка'
                     'directoryName' : [('OID', 'строка'), ...]
                     'dNSName' : строка
                     'uniformResourceIdentifier' : строка
@@ -186,10 +197,10 @@ class SubjectAltName(CertExtension):
         for (i, (t, v)) in enumerate(altnames):
             gn = rfc2459.GeneralName()
             elt = getattr(self, t, None)
-            if elt is None:
-                assert False, 'unsupported element type {0}'.format(t)
+            assert elt is not None, 'unsupported element type {0}'.format(t)
             gn.setComponentByName(t, elt(v))
             val.setComponentByPosition(i, gn)
+        print(val)
 
         super(SubjectAltName, self).__init__(rfc2459.id_ce_subjectAltName, encoder.encode(val))
 
@@ -287,13 +298,15 @@ class PKCS7Msg(object):
 
 
 if __name__ == '__main__':
+    altnn = SubjectAltName([('otherName', ('1.2.3', 'aslkdj'))])
+    print(altnn.asn)
     # from pyasn1_modules.rfc2459 import id_qt_unotice as unotice, id_qt_cps as cps
     # test = CertificatePolicies([(unotice, []), (cps, [(cps, b64encode(b"alsdk"))])])
-    #data = open('../examples/cer_test.cer', 'rb').read()
-    #cert = decoder.decode(data, asn1Spec=rfc2459.Certificate())[0]
-    #print(cert.prettyPrint())
-    #ci = csp.CertInfo(csp.Cert(data))
-    #xx = Attributes.decode(ci.issuer(False))
-    #print(xx)
-    msg = PKCS7Msg(open('../examples/encrypted.p7s', 'rb').read())
-    print(msg.abstract())
+    # data = open('../examples/cer_test.cer', 'rb').read()
+    # cert = decoder.decode(data, asn1Spec=rfc2459.Certificate())[0]
+    # print(cert.prettyPrint())
+    # ci = csp.CertInfo(csp.Cert(data))
+    # xx = Attributes.decode(ci.issuer(False))
+    # print(xx)
+    # msg = PKCS7Msg(open('../examples/encrypted.p7s', 'rb').read())
+    # print(msg.abstract())
