@@ -11,11 +11,11 @@ from base64 import b64encode
 
 
 # Генерация ключевого контейера
-cont = b'123456789abcdef'
+cont = b'123456789abcdefj'
 print('key generated:', cryptoapi.gen_key(cont))
 
 # Запрос на серт
-req_params = dict(Attributes=[(CN, '123456789abcdef'), (GN, 'Вася')],
+req_params = dict(Attributes=[(CN, cont), (GN, 'Вася')],
                   KeyUsage=['dataEncipherment', 'digitalSignature'],
                   EKU=[csp.szOID_PKIX_KP_EMAIL_PROTECTION,
                        csp.szOID_PKIX_KP_CLIENT_AUTH],

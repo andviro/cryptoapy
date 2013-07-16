@@ -97,15 +97,18 @@ class Attributes(object):
             self.asn = rfc2459.Name()
             vals = rfc2459.RDNSequence()
 
-            for (i, (oid, val)) in enumerate(attrs):
-                pair = rfc2459.AttributeTypeAndValue()
-                pair.setComponentByName('type', rfc2459.AttributeType(bytes(oid)))
-                pair.setComponentByName('value',
-                                        rfc2459.AttributeValue(
-                                            univ.OctetString(encoder.encode(char.UTF8String(unicode(val).encode('utf-8'))))))
-
+            for (i, attr) in enumerate(attrs):
+                if not isinstance(attr, list):
+                    attr = [attr]
                 pairset = rfc2459.RelativeDistinguishedName()
-                pairset.setComponentByPosition(0, pair)
+                for (j, (oid, val)) in enumerate(attr):
+                    pair = rfc2459.AttributeTypeAndValue()
+                    pair.setComponentByName('type', rfc2459.AttributeType(bytes(oid)))
+                    pair.setComponentByName('value',
+                                            rfc2459.AttributeValue(
+                                                univ.OctetString(encoder.encode(char.UTF8String(unicode(val).encode('utf-8'))))))
+
+                    pairset.setComponentByPosition(j, pair)
 
                 vals.setComponentByPosition(i, pairset)
 
