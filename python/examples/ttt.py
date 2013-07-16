@@ -11,13 +11,13 @@ from cprocsp import csp
 
 
 def tease(s):
-    for n in range(100):
+    for n in range(10):
         cc = csp.Cert(s)
         print(list(cc.eku()))
         del cc
 
 substrate = open('cer_test.cer', 'rb').read()
-for i in range(100):
+for i in range(10):
     tease(substrate)
 # cert = decoder.decode(substrate, asn1Spec=rfc2459.Certificate())[0]
 # print(cert.prettyPrint())
