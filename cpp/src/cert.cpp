@@ -442,9 +442,23 @@ void EKUIter::next (BYTE **s, DWORD *slen) throw (CSPException, Stop_Iteration)
         throw Stop_Iteration();
     }
     LOG("    next EKU: %s\n", pekus->rgpszUsageIdentifier[i]);
-    *s = (BYTE *)strdup((char *)pekus->rgpszUsageIdentifier[i]);
-    *slen = strlen((char *)*s);
+    *slen = strlen((char *)pekus->rgpszUsageIdentifier[i]);
+
+    *s = (BYTE *)malloc(*slen);
+    memcpy(*s, pekus->rgpszUsageIdentifier[i], *slen);
+
+    //puts("1");
+    //char *t = strdup((char *)pekus->rgpszUsageIdentifier[i]);
+    //puts("2");
+    //*s = (BYTE *)t;
+    //puts("3");
+    //*slen = strlen(t);
+    //puts("4");
+    //LOG("   copy: %s\n", t);
+    //free(t);
+
     i ++;
+    LOG("   returned: %s, %i\n", *s, *slen);
 }
 
 
