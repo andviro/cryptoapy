@@ -137,7 +137,7 @@ public:
         }
         return res;
     }
-    void *next (BYTE **s, DWORD *slen) throw (CSPException, Stop_Iteration);
+    void next (BYTE **s, DWORD *slen) throw (CSPException, Stop_Iteration);
 
 private:
     Cert *parent;

@@ -429,7 +429,7 @@ EKUIter::EKUIter (Cert *c)
     cbsize = 0;
 }
 
-void *EKUIter::next (BYTE **s, DWORD *slen) throw (CSPException, Stop_Iteration)
+void EKUIter::next (BYTE **s, DWORD *slen) throw (CSPException, Stop_Iteration)
 {
     LOG("EKUIter::next()\n");
     if (!pekus || i >= pekus->cUsageIdentifier) {
