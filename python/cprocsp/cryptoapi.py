@@ -4,7 +4,8 @@ from __future__ import unicode_literals, print_function
 
 import csp
 from certutils import Attributes, CertValidity, KeyUsage, EKU,\
-    CertExtensions, SubjectAltName, CertificatePolicies, PKCS7Msg, CertExtension
+    CertExtensions, SubjectAltName, CertificatePolicies, PKCS7Msg, \
+    CertExtension, CertificateInfo
 
 import platform
 from binascii import hexlify, unhexlify
@@ -298,11 +299,9 @@ def cert_info(cert):
     }
 
     """
-    print(1)
+    infoasn = CertificateInfo(cert)
     cert = csp.Cert(cert)
-    print(2)
     info = csp.CertInfo(cert)
-    print(3)
     res = dict(
         Version=info.version(),
         ValidFrom=filetime_from_dec(info.not_before()),
@@ -313,6 +312,6 @@ def cert_info(cert):
         UseToEncrypt=bool(info.usage() & csp.CERT_DATA_ENCIPHERMENT_KEY_USAGE),
         SerialNumber=':'.join(hex(ord(x))[2:] for x in reversed(info.serial())),
         Subject=Attributes.load(info.name(False)).decode(),
-        Extensions=list(cert.eku()),
+        Extensions=infoasn.EKU(),
     )
     return res

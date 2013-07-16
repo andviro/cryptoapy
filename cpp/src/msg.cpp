@@ -256,6 +256,7 @@ void CryptMsg::get_data(BYTE **s, DWORD *slen) throw(CSPException)
 
 void CryptMsg::sign_data(BYTE *STRING, DWORD LENGTH, BYTE **s, DWORD *slen, Cert *signer, bool detach) throw(CSPException)
 {
+    LOG("CryptMsg::sign_data(%p, %u, %p, %i)\n", STRING, LENGTH, signer, detach);
     CRYPT_SIGN_MESSAGE_PARA  SigParams;
     ZeroMemory(&SigParams, sizeof(SigParams));
     PCCERT_CONTEXT pCert = signer->pcert;
@@ -273,6 +274,7 @@ void CryptMsg::sign_data(BYTE *STRING, DWORD LENGTH, BYTE **s, DWORD *slen, Cert
 
     SigParams.cMsgCert = 1;
     SigParams.rgpMsgCert = &pCert;
+    LOG("1\n");
 
     // First, get the size of the signed BLOB.
     if(!CryptSignMessage(
@@ -286,13 +288,18 @@ void CryptMsg::sign_data(BYTE *STRING, DWORD LENGTH, BYTE **s, DWORD *slen, Cert
         DWORD err = GetLastError();
         throw CSPException("Getting signed BLOB size failed", err);
     }
+    LOG("2 %u\n", *slen);
 
     // Allocate memory for the signed BLOB.
     *s = (BYTE *)malloc(*slen);
+    LOG("2a\n");
     if(!*s) {
+        LOG("2b\n");
         DWORD err = GetLastError();
+        LOG("2c\n");
         throw CSPException("Memory allocation error while signing", err);
     }
+    LOG("3\n");
 
     // Get the signed message BLOB.
     if(!CryptSignMessage(
@@ -307,6 +314,7 @@ void CryptMsg::sign_data(BYTE *STRING, DWORD LENGTH, BYTE **s, DWORD *slen, Cert
         free((void *)*s);
         throw CSPException("Error getting signed BLOB", err);
     }
+    LOG("4\n");
 }
 
 CryptMsg::~CryptMsg() throw(CSPException)

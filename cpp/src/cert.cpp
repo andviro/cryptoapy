@@ -306,7 +306,7 @@ Cert::Cert(PCCERT_CONTEXT pc, CertStore *parent) throw(CSPException) : parent(pa
 
 Cert::~Cert() throw(CSPException)
 {
-    LOG("Cert::~Cert(%p)\n", pcert);
+    LOG("Cert::~Cert(%p, %p)\n", pcert, this);
     if (pcert && !CertFreeCertificateContext(pcert)) {
         throw CSPException("Couldn't free certificate context");
     }
@@ -410,6 +410,7 @@ EKUIter::EKUIter (Cert *c)
     LOG("EKUIter::EKUIter()\n");
     pekus = NULL;
     cbsize = 0;
+    i = 0;
     if (parent)
         parent -> ref();
     else
@@ -422,6 +423,7 @@ EKUIter::EKUIter (Cert *c)
        return;
    }
 
+    LOG("   allocated %i bytes (%i needed)\n", cbsize, sizeof(CERT_ENHKEY_USAGE));
    pekus = (CERT_ENHKEY_USAGE *)malloc(cbsize);
 
    if (!CertGetEnhancedKeyUsage(parent->pcert, 0, pekus, &cbsize)) {
@@ -434,12 +436,12 @@ EKUIter::EKUIter (Cert *c)
 
 void EKUIter::next (BYTE **s, DWORD *slen) throw (CSPException, Stop_Iteration)
 {
-    LOG("EKUIter::next()\n");
+    LOG("EKUIter::next(%i)\n", i);
     if (!pekus || i >= pekus->cUsageIdentifier) {
-        LOG("    Stop iter\n");
+        LOG("    Stop iter %p, %i\n", pekus, i);
         throw Stop_Iteration();
     }
-    LOG("    next EKU: %p\n", pekus->rgpszUsageIdentifier[i]);
+    LOG("    next EKU: %s\n", pekus->rgpszUsageIdentifier[i]);
     *s = (BYTE *)strdup((char *)pekus->rgpszUsageIdentifier[i]);
     *slen = strlen((char *)*s);
     i ++;

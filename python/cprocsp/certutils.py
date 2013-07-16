@@ -142,6 +142,26 @@ class Attributes(object):
         return res
 
 
+class CertificateInfo(object):
+    def __init__(self, certdata):
+        """@todo: Docstring for __init__
+
+        :certdata: @todo
+        :returns: @todo
+
+        """
+
+        self.asn = decoder.decode(certdata, asn1Spec=rfc2459.Certificate())[0]
+
+    def EKU(self):
+        for ext in self.asn[0].getComponentByName('extensions') or []:
+            if ext[0] == rfc2459.id_ce_extKeyUsage:
+                res = decoder.decode(ext.getComponentByName('extnValue'))[0]
+                res = decoder.decode(res, asn1Spec=rfc2459.ExtKeyUsageSyntax())[0]
+                return list(str(x) for x in res)
+        return []
+
+
 class SubjectAltName(CertExtension):
     """Расширенное использование ключа"""
 
@@ -300,8 +320,11 @@ class PKCS7Msg(object):
 
 
 if __name__ == '__main__':
-    altnn = SubjectAltName([('otherName', ('1.2.3', 'aslkdj'))])
-    print(altnn.asn)
+    info = CertificateInfo(open('../examples/cer_test.cer', 'rb').read())
+    print(info.EKU())
+    print(info.asn.prettyPrint())
+    #altnn = SubjectAltName([('otherName', ('1.2.3', 'aslkdj'))])
+    #print(altnn.asn)
     # from pyasn1_modules.rfc2459 import id_qt_unotice as unotice, id_qt_cps as cps
     # test = CertificatePolicies([(unotice, []), (cps, [(cps, b64encode(b"alsdk"))])])
     # data = open('../examples/cer_test.cer', 'rb').read()

@@ -25,6 +25,7 @@
 %feature("python:slot", "tp_iter", functype="getiterfunc") CertFind::__iter__;
 %feature("python:slot", "tp_iternext", functype="iternextfunc") CertIter::next;
 %feature("python:slot", "tp_iternext", functype="iternextfunc") CertFind::next;
+%feature("python:slot", "tp_iter", functype="getiterfunc") Cert::eku;
 %feature("python:slot", "tp_iter", functype="getiterfunc") EKUIter::__iter__;
 %feature("python:slot", "tp_iternext", functype="iternextfunc") EKUIter::next;
 

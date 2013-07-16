@@ -32,7 +32,7 @@ void CertRequest::add_attribute_value(int n, BYTE *STRING, DWORD LENGTH) throw (
         throw CSPException("Attribute index out of range", -1);
     }
     pa = &CertReqInfo.rgAttribute[n];
-    pa -> rgValue = (PCRYPT_ATTR_BLOB) malloc(sizeof(CRYPT_ATTR_BLOB) * (pa -> cValue + 1) );
+    pa -> rgValue = (PCRYPT_ATTR_BLOB) realloc(pa -> rgValue, sizeof(CRYPT_ATTR_BLOB) * (pa -> cValue + 1) );
     pdata = &(pa -> rgValue[pa -> cValue]);
     ZeroMemory(pdata, sizeof(CRYPT_ATTR_BLOB));
     (pa -> cValue) ++;
