@@ -4,8 +4,6 @@ import csp
 from pyasn1.type import univ, useful, char, tag, constraint
 from pyasn1.codec.der import encoder, decoder
 from pyasn1_modules import rfc2459, rfc2315
-from base64 import b64decode
-from datetime import datetime
 
 
 class CertAttribute(object):
@@ -239,16 +237,17 @@ class CertificatePolicies(CertExtension):
         '''
         pass
         val = rfc2459.CertificatePolicies()
-        for (i, (t, v)) in enumerate(policies):
+        for (i, (t, v)) in enumerate(policies or []):
             pol = rfc2459.PolicyInformation()
             pol.setComponentByPosition(0, rfc2459.CertPolicyId(bytes(t)))
+            v = v or []
             if len(v):
                 sq = univ.SequenceOf(componentType=rfc2459.PolicyQualifierInfo()
                                      ).subtype(subtypeSpec=constraint.ValueSizeConstraint(1, rfc2459.MAX))
                 for n, (ident, qualif) in enumerate(v):
                     pqi = rfc2459.PolicyQualifierInfo()
                     pqi.setComponentByPosition(0, rfc2459.PolicyQualifierId(bytes(ident)))
-                    pqi.setComponentByPosition(1, univ.OctetString(b64decode(qualif)))
+                    pqi.setComponentByPosition(1, univ.OctetString(qualif))
                     sq.setComponentByPosition(n, pqi)
                 pol.setComponentByPosition(1, sq)
             val.setComponentByPosition(i, pol)
