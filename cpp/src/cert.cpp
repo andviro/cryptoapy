@@ -400,33 +400,36 @@ void Cert::bind(Crypt *ctx, DWORD keyspec) {
 }
 
 EKUIter *Cert::eku() throw(CSPException) {
-   EKUIter *res = new EKUIter(this);
-   if (!CertGetEnhancedKeyUsage(pcert, 0, NULL, &res->cbsize)) {
-       res->pekus = NULL;
-       res->cbsize = 0;
-       return res;
-   }
-
-   res->pekus = (CERT_ENHKEY_USAGE *)malloc(res->cbsize);
-
-   if (!CertGetEnhancedKeyUsage(pcert, 0, res->pekus, &res->cbsize)) {
-       free(res->pekus);
-       res->pekus= NULL;
-       res->cbsize = 0;
-   }
-   return res;
+   return new EKUIter(this);
 }
 
 
 EKUIter::EKUIter (Cert *c)
     :parent(c)
 {
+    LOG("EKUIter::EKUIter()\n");
+    pekus = NULL;
+    cbsize = 0;
     if (parent)
         parent -> ref();
+    else
+        return;
 
-    pekus = NULL;
-    i = 0;
-    cbsize = 0;
+   if (!CertGetEnhancedKeyUsage(parent->pcert, 0, NULL, &cbsize)) {
+       LOG("   failed 1\n");
+       pekus = NULL;
+       cbsize = 0;
+       return;
+   }
+
+   pekus = (CERT_ENHKEY_USAGE *)malloc(cbsize);
+
+   if (!CertGetEnhancedKeyUsage(parent->pcert, 0, pekus, &cbsize)) {
+       LOG("   failed 2\n");
+       free(pekus);
+       pekus= NULL;
+       cbsize = 0;
+   }
 }
 
 void EKUIter::next (BYTE **s, DWORD *slen) throw (CSPException, Stop_Iteration)
@@ -436,6 +439,7 @@ void EKUIter::next (BYTE **s, DWORD *slen) throw (CSPException, Stop_Iteration)
         LOG("    Stop iter\n");
         throw Stop_Iteration();
     }
+    LOG("    next EKU: %p\n", pekus->rgpszUsageIdentifier[i]);
     *s = (BYTE *)strdup((char *)pekus->rgpszUsageIdentifier[i]);
     *slen = strlen((char *)*s);
     i ++;
@@ -444,9 +448,12 @@ void EKUIter::next (BYTE **s, DWORD *slen) throw (CSPException, Stop_Iteration)
 
 EKUIter::~EKUIter ()
 {
+    LOG("EKUIter::~EKUIter(%p)\n", this);
     if (pekus) {
         free(pekus);
     }
+    LOG("    free 1\n", this);
     if (parent)
         parent -> unref();
+    LOG("    free parent\n", this);
 }

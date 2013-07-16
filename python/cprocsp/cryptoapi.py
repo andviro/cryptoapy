@@ -298,8 +298,11 @@ def cert_info(cert):
     }
 
     """
+    print(1)
     cert = csp.Cert(cert)
+    print(2)
     info = csp.CertInfo(cert)
+    print(3)
     res = dict(
         Version=info.version(),
         ValidFrom=filetime_from_dec(info.not_before()),

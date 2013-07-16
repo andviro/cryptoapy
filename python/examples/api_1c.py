@@ -41,6 +41,7 @@ print('bound cert thumb:', thumb)
 
 # Получение данных о сертификате
 cert = cryptoapi.get_certificate(thumb)
+print(len(cert))
 print(cryptoapi.cert_info(cert))
 cert = b64decode('''
 MIIFgzCCA2ugAwIBAgIJANaJNbHYaE1HMA0GCSqGSIb3DQEBBQUAMFgxCzAJBgNV

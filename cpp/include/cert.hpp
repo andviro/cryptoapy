@@ -44,6 +44,7 @@ public:
     friend class CryptMsg;
     friend class CertStore;
     friend class CertInfo;
+    friend class EKUIter;
 };
 
 class CertIter
@@ -129,13 +130,7 @@ public:
     EKUIter (Cert *c);
     virtual ~EKUIter ();
     EKUIter *__iter__() {
-        EKUIter *res = new EKUIter(parent);
-        if (pekus) {
-            res -> cbsize = cbsize;
-            res -> pekus = (CERT_ENHKEY_USAGE *)malloc(cbsize);
-            memcpy(res->pekus, pekus, cbsize);
-        }
-        return res;
+        return new EKUIter(parent);
     }
     void next (BYTE **s, DWORD *slen) throw (CSPException, Stop_Iteration);
 

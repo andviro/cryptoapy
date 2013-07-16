@@ -1,10 +1,10 @@
 /* vim: ft=swig
 */
-%newobject CertInfo::name;
-%newobject CertInfo::issuer;
-%newobject CertInfo::serial;
-%newobject CertInfo::not_before;
-%newobject CertInfo::not_after;
+/*%newobject CertInfo::name;*/
+/*%newobject CertInfo::issuer;*/
+/*%newobject CertInfo::serial;*/
+/*%newobject CertInfo::not_before;*/
+/*%newobject CertInfo::not_after;*/
 %newobject CertInfo::extensions;
 %newobject ExtIter::next;
 %newobject ExtIter::__iter__;
