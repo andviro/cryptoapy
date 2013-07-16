@@ -1,5 +1,5 @@
 !define PRODUCT_NAME "Python crypto suite"
-!define PRODUCT_VERSION "0.1"
+!define PRODUCT_VERSION "1.0"
 !define PRODUCT_PUBLISHER "Andrew Rodionoff <rodionov_a@astralnalog.ru>"
 !define PRODUCT_WEB_SITE "http://www.astralnalog.ru"
 
@@ -62,27 +62,37 @@ Section "SQLAlchemy" SEC07
   ExecWait "$INSTDIR\pkgs\SQLAlchemy-0.8.2.win32-py2.7.exe"
 SectionEnd
 
-Section "Cprocsp" SEC08
+Section "Pyasn1" SEC08
+  ; this is not a "quiet" install
+  ExecWait '$INSTDIR\pkgs\pyasn1-0.1.7.win32.exe'
+SectionEnd
+
+Section "Pyasn1_modules" SEC09
+  ; this is not a "quiet" install
+  ExecWait '$INSTDIR\pkgs\pyasn1-modules-0.0.5.win32.exe'
+SectionEnd
+
+Section "Cprocsp" SEC10
   ; this is not a "quiet" install
   ExecWait '$INSTDIR\pkgs\python2.7-cprocsp-0.2.win32-py2.7.exe'
 SectionEnd
 
-Section "Mock" SEC09
+Section "Mock" SEC11
   ; this is not a "quiet" install
   ExecWait '$INSTDIR\pkgs\mock-1.0.1.win32.exe'
 SectionEnd
 
-Section "Spyne" SEC10
+Section "Spyne" SEC12
   ; this is not a "quiet" install
   ExecWait '$INSTDIR\pkgs\spyne-2.10.8.win32.exe'
 SectionEnd
 
-Section "Tornado" SEC11
+Section "Tornado" SEC13
   ; this is not a "quiet" install
   ExecWait '$INSTDIR\pkgs\tornado-3.1.win32-py2.7.exe'
 SectionEnd
 
-Section "Nose" SEC12
+Section "Nose" SEC14
   ; this is not a "quiet" install
   ExecWait '$INSTDIR\ pkgs\nose-1.3.0.win32-py2.7.exe'
 SectionEnd
