@@ -28,7 +28,7 @@ public:
 
     Key *import_key(BYTE *STRING, DWORD LENGTH, Key *decrypt=NULL) throw(CSPException);
 
-    void set_password(BYTE *STRING, DWORD LENGTH, DWORD keyspec=AT_SIGNATURE) throw(CSPException);
+    void set_password(char *pin, DWORD keyspec=AT_SIGNATURE) throw(CSPException);
 
     static void remove(char *container, DWORD type, char *name) throw(CSPException, CSPNotFound);
 

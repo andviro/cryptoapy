@@ -11,6 +11,12 @@ from cprocsp import csp
 
 
 def tease(s):
+    for f in range(10):
+        cs = csp.CertStore(None, "MY")
+        lst = list(cs)
+        print(len(lst))
+        del lst
+        del cs
     for n in range(10):
         cc = csp.Cert(s)
         print(list(cc.eku()))

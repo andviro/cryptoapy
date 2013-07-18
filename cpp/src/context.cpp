@@ -45,7 +45,7 @@ char *Crypt::prov_name() {
         throw CSPException("Couldn't determine provider name length");
     }
 
-    s=new char[slen + 1];
+    s=new char[slen];
 
     if(!CryptGetProvParam( hprov, PP_NAME, (BYTE *)s, &slen, 0)) {
         delete[] s;
@@ -61,7 +61,7 @@ char *Crypt::name() {
         throw CSPException("Couldn't determine container name length");
     }
 
-    s=new char[slen + 1];
+    s=new char[slen];
 
     if(!CryptGetProvParam( hprov, PP_CONTAINER, (BYTE *)s, &slen, 0)) {
         delete[] s;
@@ -77,7 +77,7 @@ char *Crypt::uniq_name() {
         throw CSPException("Couldn't determine container unique name length");
     }
 
-    s=new char[slen + 1];
+    s=new char[slen];
 
     if(!CryptGetProvParam( hprov, PP_UNIQUE_CONTAINER, (BYTE *)s, &slen, 0)) {
         delete[] s;
@@ -86,7 +86,7 @@ char *Crypt::uniq_name() {
     return s;
 }
 
-void Crypt::set_password(BYTE *STRING, DWORD LENGTH, DWORD keyspec) throw (CSPException) {
+void Crypt::set_password(char *pin, DWORD keyspec) throw (CSPException) {
     DWORD param;
 
     if (keyspec == AT_SIGNATURE) {
@@ -95,7 +95,7 @@ void Crypt::set_password(BYTE *STRING, DWORD LENGTH, DWORD keyspec) throw (CSPEx
         param = PP_KEYEXCHANGE_PIN;
     }
 
-    if(!CryptSetProvParam( hprov, param, STRING, 0)) {
+    if(!CryptSetProvParam( hprov, param, (const BYTE *)pin, 0)) {
         throw CSPException("Couldn't set password");
     }
 }

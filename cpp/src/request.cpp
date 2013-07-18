@@ -16,7 +16,9 @@ int CertRequest::add_attribute(BYTE *STRING, DWORD LENGTH) throw (CSPException)
     pa = &CertReqInfo.rgAttribute[n];
     ZeroMemory(pa, sizeof(CRYPT_ATTRIBUTE));
     CertReqInfo.cAttribute ++;
-    pa -> pszObjId = (LPSTR) STRING;
+    pa -> pszObjId = new char[LENGTH + 1];
+    strncpy(pa -> pszObjId, (char *)STRING, LENGTH + 1);
+    pa -> pszObjId[LENGTH] = 0;
     pa -> cValue = 0;
     pa -> rgValue = NULL;
     LOG("    added attribute %i\n", n);
@@ -34,9 +36,9 @@ void CertRequest::add_attribute_value(int n, BYTE *STRING, DWORD LENGTH) throw (
     pa = &CertReqInfo.rgAttribute[n];
     pa -> rgValue = (PCRYPT_ATTR_BLOB) realloc(pa -> rgValue, sizeof(CRYPT_ATTR_BLOB) * (pa -> cValue + 1) );
     pdata = &(pa -> rgValue[pa -> cValue]);
-    ZeroMemory(pdata, sizeof(CRYPT_ATTR_BLOB));
     (pa -> cValue) ++;
 
+    ZeroMemory(pdata, sizeof(CRYPT_ATTR_BLOB));
     pdata -> cbData = LENGTH;
     pdata -> pbData = (BYTE *)malloc(LENGTH);
     memcpy(pdata->pbData, STRING, LENGTH);
@@ -99,6 +101,7 @@ CertRequest::~CertRequest() throw (CSPException) {
                 free((void *)pdata -> pbData);
         }
         free((void*) pa->rgValue);
+        delete[] pa->pszObjId;
     }
     free((void*) CertReqInfo.rgAttribute);
 }

@@ -9,6 +9,7 @@ void CertStore::init()
     ctx = NULL;
     msg = NULL;
     hstore = 0;
+    proto = NULL;
     LOG("CertStore::init %p\n", this);
 }
 
@@ -39,10 +40,13 @@ Cert *Cert::self_sign(Crypt *ctx, BYTE *STRING, DWORD LENGTH)  throw(CSPExceptio
 #else
     CERT_NAME_BLOB issuer;
     bool res;
+    char *subj = new char[LENGTH + 1];
+    strncpy(subj, STRING, LENGTH);
+    subj[LENGTH] = 0;
 
     res = CertStrToName(
               MY_ENC_TYPE,
-              (LPSTR)STRING,
+              (LPSTR)subj,
               CERT_OID_NAME_STR | CERT_NAME_STR_REVERSE_FLAG,
               NULL,
               NULL,
@@ -50,6 +54,7 @@ Cert *Cert::self_sign(Crypt *ctx, BYTE *STRING, DWORD LENGTH)  throw(CSPExceptio
               NULL );
 
     if (!res) {
+        delete[] subj;
         throw CSPException("Couldn't determine encoded info size");
     }
 
@@ -57,7 +62,7 @@ Cert *Cert::self_sign(Crypt *ctx, BYTE *STRING, DWORD LENGTH)  throw(CSPExceptio
 
     res = CertStrToName(
               MY_ENC_TYPE,
-              (LPSTR)STRING,
+              (LPSTR)subj,
               CERT_OID_NAME_STR | CERT_NAME_STR_REVERSE_FLAG,
               NULL,
               issuer.pbData,
@@ -65,9 +70,12 @@ Cert *Cert::self_sign(Crypt *ctx, BYTE *STRING, DWORD LENGTH)  throw(CSPExceptio
               NULL );
 
     if (!res) {
+        delete[] subj;
         free(issuer.pbData);
         throw CSPException("Couldn't encode cert info");
     }
+
+    delete[] subj
 
     CRYPT_ALGORITHM_IDENTIFIER algid;
     DWORD hasi = sizeof(algid);
@@ -126,12 +134,14 @@ CertFind::CertFind(CertStore *p, DWORD et, DWORD ft, BYTE *STRING, DWORD LENGTH)
 }
 
 
-CertFind::CertFind(CertStore *p, DWORD et, BYTE *name) : CertIter(p)
+CertFind::CertFind(CertStore *p, DWORD et, BYTE *STRING, DWORD LENGTH) : CertIter(p)
 {
     LOG("CertFind::CertFind(%p, %u, %s)\n", p, et, name);
     enctype = et;
     findtype = CERT_FIND_SUBJECT_STR;
-    param = (CRYPT_HASH_BLOB *)strdup((const char *)name);
+    param = (CRYPT_HASH_BLOB *)malloc(LENGTH + 1);
+    strncpy((char *)param, (const char*)STRING, LENGTH + 1);
+    ((char *)param)[LENGTH] = 0;
 }
 
 CertStore::CertStore() throw(CSPException)
@@ -154,6 +164,7 @@ CertStore::CertStore(Crypt *parent, LPCTSTR protocol) throw(CSPException)
         ctx->ref();
         hprov = ctx->hprov;
     }
+    proto = strdup(protocol);
     hstore = CertOpenStore(
                  CERT_STORE_PROV_SYSTEM_A,          // The store provider type
                  0,                               // The encoding type is
@@ -217,7 +228,7 @@ CertFind *CertStore::find_by_thumb(BYTE *STRING, DWORD LENGTH) throw(CSPExceptio
 
 CertFind *CertStore::find_by_name(BYTE *STRING, DWORD LENGTH) throw(CSPException)
 {
-    return new CertFind(this, X509_ASN_ENCODING | PKCS_7_ASN_ENCODING, STRING);
+    return new CertFind(this, X509_ASN_ENCODING | PKCS_7_ASN_ENCODING, STRING, LENGTH);
 }
 
 CertIter::CertIter(CertStore *p) throw (CSPException) : parent(p)
@@ -359,6 +370,9 @@ CertStore::~CertStore() throw(CSPException)
             throw CSPException("Couldn't properly close certificate store", err);
         }
     }
+    if (proto) {
+        free(proto);
+    }
     if (msg) {
         msg->unref();
     }
@@ -446,17 +460,6 @@ void EKUIter::next (BYTE **s, DWORD *slen) throw (CSPException, Stop_Iteration)
 
     *s = (BYTE *)malloc(*slen);
     memcpy(*s, pekus->rgpszUsageIdentifier[i], *slen);
-
-    //puts("1");
-    //char *t = strdup((char *)pekus->rgpszUsageIdentifier[i]);
-    //puts("2");
-    //*s = (BYTE *)t;
-    //puts("3");
-    //*slen = strlen(t);
-    //puts("4");
-    //LOG("   copy: %s\n", t);
-    //free(t);
-
     i ++;
     LOG("   returned: %s, %i\n", *s, *slen);
 }

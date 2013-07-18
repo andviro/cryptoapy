@@ -76,13 +76,13 @@ public:
 
     virtual ~CertFind() throw (CSPException);
 
-    CertFind(CertStore *p, DWORD et, BYTE *name);
+    CertFind(CertStore *p, DWORD et, BYTE *STRING, DWORD LENGTH);
 
     Cert *next() throw (Stop_Iteration, CSPException);
 
     CertFind *__iter__() {
         if (findtype == CERT_FIND_SUBJECT_STR) {
-            return new CertFind(parent, enctype, (BYTE *)param);
+            return new CertFind(parent, enctype, (BYTE *)param, strlen((char *)param));
         } else {
             return new CertFind(parent, enctype, findtype, param->pbData, param->cbData);
         }
@@ -96,6 +96,7 @@ private:
     Crypt *ctx;
     CryptMsg *msg;
     HCERTSTORE hstore;
+    char *proto;
 
     void init();
 public:
