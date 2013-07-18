@@ -20,6 +20,8 @@ CertExtension::~CertExtension()
 
 void CertExtension::oid(BYTE **s, DWORD *slen) {
     LOG("CertExtension::oid() = %p\n", data.pszObjId);
-    *slen = strlen(data.pszObjId);
-    *s = (BYTE *)strdup(data.pszObjId);
+    *slen = strlen(data.pszObjId) + 1;
+    *s = (BYTE *)malloc(*slen);
+    strncpy((char *)*s, data.pszObjId, *slen);
+    (*s)[*slen - 1] = 0;
 }

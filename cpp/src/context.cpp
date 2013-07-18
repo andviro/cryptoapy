@@ -14,10 +14,10 @@ Crypt::~Crypt() throw(CSPException) {
         }
     }
     if (cont_name) {
-        free(cont_name);
+        delete[] cont_name;
     }
     if (pr_name) {
-        free(pr_name);
+        delete[] cont_name;
     }
     LOG("    Freed ctx %p (%x)\n", this, hprov);
 }
@@ -103,8 +103,17 @@ void Crypt::set_password(char *pin, DWORD keyspec) throw (CSPException) {
 Crypt::Crypt(char *container, DWORD type, DWORD flags, char *name) throw(CSPException, CSPNotFound)
 {
     LOG("Crypt::Crypt(%s, %u, %x, %s)\n", container, type, flags, name);
-    cont_name = container? strdup(container) : NULL;
-    pr_name = name? strdup(name) : NULL;
+    cont_name = NULL;
+    if (container) {
+        cont_name = new char[strlen(container) + 1];
+        strcpy(cont_name, container);
+    }
+ 
+    pr_name = NULL;
+    if (name) {
+        pr_name = new char[strlen(name) + 1];
+        strcpy(pr_name, name);
+    }
 
     if (flags & CRYPT_DELETEKEYSET) {
         throw CSPException("Delete flag not allowed in Crypt::Crypt()", -1);

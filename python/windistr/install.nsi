@@ -35,7 +35,9 @@ Section "MainSection" SEC01
   File /r "service"
   File /r "mingw"
 
-  createShortCut "$SMPROGRAMS\Run CryptoService.lnk" "python $INSTDIR\service\server.py"
+  SetOutPath "$INSTDIR\service"
+  createShortCut "$SMPROGRAMS\Run CryptoService.lnk" "$INSTDIR\service\server.py"
+  SetOutPath "$INSTDIR"
 
   writeUninstaller $INSTDIR\uninstall.exe
 
@@ -135,4 +137,14 @@ SectionEnd
 Section "Lxml" SEC18
   ; this is not a "quiet" install
   ExecWait '$INSTDIR\pkgs\lxml-3.2.1.win32-py2.7.exe'
+SectionEnd
+
+Section "Lxml" SEC19
+  ; this is not a "quiet" install
+  ExecWait '$INSTDIR\pkgs\pytz-2013b.win32-py2.7.exe'
+SectionEnd
+
+Section "VCredist" SEC20
+  ; this is not a "quiet" install
+  ExecWait '$INSTDIR\pkgs\vcredist_x86.exe'
 SectionEnd

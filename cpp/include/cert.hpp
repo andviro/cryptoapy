@@ -105,7 +105,7 @@ public:
 
     CertStore() throw(CSPException);
 
-    CertStore(Crypt *parent, LPCTSTR protocol) throw(CSPException);
+    CertStore(Crypt *parent, BYTE *STRING, DWORD LENGTH) throw(CSPException);
 
     ~CertStore() throw(CSPException);
 

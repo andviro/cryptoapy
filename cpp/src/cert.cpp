@@ -41,7 +41,7 @@ Cert *Cert::self_sign(Crypt *ctx, BYTE *STRING, DWORD LENGTH)  throw(CSPExceptio
     CERT_NAME_BLOB issuer;
     bool res;
     char *subj = new char[LENGTH + 1];
-    strncpy(subj, STRING, LENGTH);
+    strncpy(subj, (char *)STRING, LENGTH);
     subj[LENGTH] = 0;
 
     res = CertStrToName(
@@ -75,7 +75,7 @@ Cert *Cert::self_sign(Crypt *ctx, BYTE *STRING, DWORD LENGTH)  throw(CSPExceptio
         throw CSPException("Couldn't encode cert info");
     }
 
-    delete[] subj
+    delete[] subj;
 
     CRYPT_ALGORITHM_IDENTIFIER algid;
     DWORD hasi = sizeof(algid);
@@ -154,7 +154,7 @@ CertStore::CertStore() throw(CSPException)
     }
 }
 
-CertStore::CertStore(Crypt *parent, LPCTSTR protocol) throw(CSPException)
+CertStore::CertStore(Crypt *parent, BYTE *STRING, DWORD LENGTH) throw(CSPException)
 {
     LOG("CertStore::CertStore(%p, %s)\n", parent, protocol);
     HCRYPTPROV hprov = 0;
@@ -164,7 +164,9 @@ CertStore::CertStore(Crypt *parent, LPCTSTR protocol) throw(CSPException)
         ctx->ref();
         hprov = ctx->hprov;
     }
-    proto = strdup(protocol);
+    proto = new char[LENGTH + 1];
+    strncpy(proto, (char *)STRING, LENGTH);
+    proto[LENGTH] = 0;
     hstore = CertOpenStore(
                  CERT_STORE_PROV_SYSTEM_A,          // The store provider type
                  0,                               // The encoding type is
@@ -173,7 +175,7 @@ CertStore::CertStore(Crypt *parent, LPCTSTR protocol) throw(CSPException)
                                                     // Set the store location in a
                                                     // registry location
                  CERT_STORE_NO_CRYPT_RELEASE_FLAG | CERT_SYSTEM_STORE_CURRENT_USER,
-                 protocol                            // The store name as a Unicode
+                 proto                            // The store name as a Unicode
                                                     // string
              );
     if (!hstore) {
@@ -371,7 +373,7 @@ CertStore::~CertStore() throw(CSPException)
         }
     }
     if (proto) {
-        free(proto);
+        delete[] proto;
     }
     if (msg) {
         msg->unref();
