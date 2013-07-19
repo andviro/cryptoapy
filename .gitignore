@@ -1,8 +1,11 @@
 doc/_*
 build
 dist
+log
+MANIFEST
 *.log
 *.cer
+*.rpm
 *.der
 *.req
 wiki

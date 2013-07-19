@@ -5,13 +5,7 @@ from platform import architecture
 import sys
 import os
 import platform
-
-try:
-    import bdist_nsi
-    have_nsis = True
-except ImportError:
-    have_nsis = False
-    pass
+import glob
 
 
 major, minor = sys.version_info[:2]
@@ -49,8 +43,8 @@ class TestCommand(Command):
 
 cmdclass = {'test': TestCommand}
 
-include_dirs = ['../cpp/include']
-library_dirs = ['../cpp']
+include_dirs = ['cpp/include']
+library_dirs = ['cpp']
 libraries = []
 extra_compile_args = ['-DSIZEOF_VOID_P={0}'.format(size)]
 
@@ -79,31 +73,23 @@ else:
     ]
 
 
+sources = ['cprocsp/csp_wrap.cxx']
+sources.extend(glob.glob('cpp/src/*.cpp'))
 csp = Extension('cprocsp._csp',
-                sources=[
-                    'cprocsp/csp_wrap.cxx',
-                ],
-                extra_objects=['../cpp/libcsp.a'],
+                sources=sources,
                 include_dirs=include_dirs,
                 library_dirs=library_dirs,
                 libraries=libraries,
                 extra_compile_args=extra_compile_args,)
 
 
-options = {}
-if have_nsis:
-    nsis_options = {}  # your nsis options
-    options.update({
-        'bdist_nsi': nsis_options,
-    })
-
 setup(name='python{major}.{minor}-cprocsp'.format(major=major, minor=minor),
       version='0.2',
       requires=['pyasn1', 'pyasn1_modules'],
       ext_modules=[csp],
       packages=['cprocsp'],
+      headers=glob.glob('cpp/include/*.hpp'),
       py_modules=['cprocsp.csp', 'cprocsp.rdn', 'cprocsp.cryptoapi',
                   'cprocsp.filetimes'],
       cmdclass=cmdclass,
-      options=options,
       )

@@ -1,5 +1,3 @@
 #!/bin/sh
-cd cpp
-make clean all
-cd ../python
+cd python
 fab rebuild
