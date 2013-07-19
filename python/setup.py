@@ -73,22 +73,32 @@ else:
     ]
 
 
-sources = ['cprocsp/csp_wrap.cxx']
+sources = ['cprocsp/csp.i']
 sources.extend(glob.glob('cpp/src/*.cpp'))
+swig_opts = [
+    '-py3',
+    '-builtin',
+    '-c++',
+    '-I./cpp/include',
+    '-I./cprocsp',
+    '-I./',
+    '-DSIZEOF_VOID_P={0}'.format(size),
+]
 csp = Extension('cprocsp._csp',
                 sources=sources,
+                swig_opts=swig_opts,
                 include_dirs=include_dirs,
                 library_dirs=library_dirs,
                 libraries=libraries,
                 extra_compile_args=extra_compile_args,)
 
 
-setup(name='python{major}.{minor}-cprocsp'.format(major=major, minor=minor),
-      version='0.2',
+setup(name='cryptoapy',
+      version='0.3',
       requires=['pyasn1', 'pyasn1_modules'],
       ext_modules=[csp],
+      description='Python/C++ wrapper for Microsoft cryptoapi services (currently, Russian GOST algorithms only)',
       packages=['cprocsp'],
-      headers=glob.glob('cpp/include/*.hpp'),
       py_modules=['cprocsp.csp', 'cprocsp.rdn', 'cprocsp.cryptoapi',
                   'cprocsp.filetimes'],
       cmdclass=cmdclass,
