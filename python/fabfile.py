@@ -26,7 +26,7 @@ def swig(size=void_size):
         '-py3',
         '-builtin',
         '-c++',
-        '-I../cpp/include',
+        '-Icpp/include',
         '-DSIZEOF_VOID_P={0}'.format(size),
     ]
     if platform.system() == 'Windows':
@@ -55,6 +55,8 @@ def build(pyversion=''):
 def build_rpm(pyversion=''):
     local("python{0} setup.py bdist --format=rpm".format(pyversion))
 
+def build_wininst(pyversion=''):
+    local("python{0} setup.py bdist --format=wininst".format(pyversion))
 
 def prepare(pyversion=''):
     test(pyversion)
