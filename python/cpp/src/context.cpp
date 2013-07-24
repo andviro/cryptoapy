@@ -17,7 +17,7 @@ Crypt::~Crypt() throw(CSPException) {
         delete[] cont_name;
     }
     if (pr_name) {
-        delete[] cont_name;
+        delete[] pr_name;
     }
     LOG("    Freed ctx %p (%x)\n", this, hprov);
 }
