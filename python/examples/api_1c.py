@@ -95,6 +95,7 @@ D+GMk60nncLKIOlzaNWzX3lHzOod8dYmXmDHN4BaBf8ZN7H0UyHJzCidJhgG57Q0
 ''')
 print('RSA серт:', cryptoapi.cert_info(cert))
 
+cert = cryptoapi.get_certificate(thumb)
 
 # Подписывание данных
 data = b'Ahaahahahah!!!'
