@@ -1,2 +1,2 @@
 recursive-include cpp *.cpp *.hpp
-recursive-include cprocsp *.i
+recursive-include cprocsp *.i *.h

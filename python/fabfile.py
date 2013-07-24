@@ -65,7 +65,7 @@ def prepare(pyversion=''):
 
 
 def cleanup():
-    local("rm -rf dist build *.egg-info")
+    local("rm -rf dist build *.egg-info cprocsp/*_wrap.cxx")
 
 
 def deploy(pyversion=''):
@@ -81,6 +81,6 @@ def deploy(pyversion=''):
 
 def rebuild(pyversion=''):
     cleanup()
-    swig()
+    #swig()
     local("python{0} setup.py build_ext --inplace".format(pyversion))
     #test(pyversion)

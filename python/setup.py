@@ -94,7 +94,11 @@ csp = Extension('cprocsp._csp',
 
 
 setup(name='cryptoapy',
-      version='0.4',
+      version='0.4.3',
+      author='Andrew Rodionoff',
+      author_email='andviro@gmail.com',
+      license='LGPL',
+      platforms=['Linux', 'Windows'],
       install_requires=['pyasn1', 'pyasn1_modules'],
       ext_modules=[csp],
       description='Python/C++ wrapper for Microsoft cryptoapi services (currently, Russian GOST algorithms only)',
