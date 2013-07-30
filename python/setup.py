@@ -73,7 +73,7 @@ else:
     ]
 
 
-sources = ['cprocsp/csp.i']
+sources = ['cprocsp/csp_wrap_{0}.cxx'.format(arch)]
 sources.extend(glob.glob('cpp/src/*.cpp'))
 swig_opts = [
     '-py3',
@@ -94,7 +94,7 @@ csp = Extension('cprocsp._csp',
 
 
 setup(name='cryptoapy',
-      version='0.4.3',
+      version='0.4.4',
       author='Andrew Rodionoff',
       author_email='andviro@gmail.com',
       license='LGPL',
