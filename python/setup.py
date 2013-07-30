@@ -6,7 +6,7 @@ import sys
 import os
 import platform
 import glob
-
+import subprocess as sub
 
 major, minor = sys.version_info[:2]
 
@@ -41,7 +41,39 @@ class TestCommand(Command):
             return True
         return nose.core.run(argv=["", '-v', os.path.join(self._dir, 'tests')])
 
-cmdclass = {'test': TestCommand}
+
+class SWIGCommand(Command):
+    """Custom distutils command to generate wrappers"""
+
+    user_options = []
+
+    def initialize_options(self):
+        self._dir = os.getcwd()
+
+    def finalize_options(self):
+        pass
+
+    def run(self):
+        """Generate wrappers"""
+        for arch, size in [('ia32', 4), ('amd64', 8)]:
+            swig_cmd = [
+                'swig',
+                '-python',
+                '-py3',
+                '-builtin',
+                '-c++',
+                '-o',
+                'cprocsp/csp_wrap_{0}.cxx'.format(arch),
+                '-I./cpp/include',
+                '-I./cprocsp',
+                '-I./',
+                '-DSIZEOF_VOID_P={0}'.format(size),
+                'cprocsp/csp.i',
+            ]
+            sub.call(swig_cmd)
+
+cmdclass = {'test': TestCommand,
+            'swig': SWIGCommand}
 
 include_dirs = ['cpp/include']
 library_dirs = ['cpp']
@@ -75,18 +107,9 @@ else:
 
 sources = ['cprocsp/csp_wrap_{0}.cxx'.format(arch)]
 sources.extend(glob.glob('cpp/src/*.cpp'))
-swig_opts = [
-    '-py3',
-    '-builtin',
-    '-c++',
-    '-I./cpp/include',
-    '-I./cprocsp',
-    '-I./',
-    '-DSIZEOF_VOID_P={0}'.format(size),
-]
+
 csp = Extension('cprocsp._csp',
                 sources=sources,
-                swig_opts=swig_opts,
                 include_dirs=include_dirs,
                 library_dirs=library_dirs,
                 libraries=libraries,
