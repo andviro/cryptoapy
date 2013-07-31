@@ -168,8 +168,19 @@ class SubjectAltName(CertExtension):
                               asn1Spec=rfc2459.ORAddress().subtype(implicitTag=tag.Tag(tag.tagClassContext, tag.tagFormatSimple, 3)))
 
     def ediPartyName(self, val):
-        return decoder.decode(val,
-                              asn1Spec=rfc2459.EDIPartyName().subtype(implicitTag=tag.Tag(tag.tagClassContext, tag.tagFormatSimple, 5)))
+        res = rfc2459.EDIPartyName().subtype(implicitTag=tag.Tag(tag.tagClassContext, tag.tagFormatSimple, 5))
+        if isinstance(val, tuple):
+            val0 = rfc2459.DirectoryString().subtype(implicitTag=tag.Tag(tag.tagClassContext, tag.tagFormatSimple, 0))
+            val0.setComponentByName('utf8String', unicode(val[0]).encode('utf-8'))
+            res.setComponentByName('nameAssigner', val0)
+            val1 = rfc2459.DirectoryString().subtype(implicitTag=tag.Tag(tag.tagClassContext, tag.tagFormatSimple, 1))
+            val1.setComponentByName('utf8String', unicode(val[1]).encode('utf-8'))
+            res.setComponentByName('partyName', val1)
+        else:
+            val1 = rfc2459.DirectoryString().subtype(implicitTag=tag.Tag(tag.tagClassContext, tag.tagFormatSimple, 1))
+            val1.setComponentByName('utf8String', unicode(val).encode('utf-8'))
+            res.setComponentByName('partyName', val1)
+        return res
 
     def otherName(self, val):
         res = rfc2459.AnotherName().subtype(implicitTag=tag.Tag(tag.tagClassContext, tag.tagFormatSimple, 0))
