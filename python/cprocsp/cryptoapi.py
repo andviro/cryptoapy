@@ -88,7 +88,7 @@ def create_request(cont, params, local=True):
         'SubjectAltName' : список вида [(тип, значение), (тип, значение), ]
             где значение в зависимости от типа:
                 'otherName' : ('OID', 'байтовая строка')
-                'ediPartyName' : 'байтовая строка'
+                'ediPartyName' : ('строка', 'строка') или 'строка'
                 'x400Address' : 'байтовая строка'
                 'directoryName' : [('OID', 'строка'), ...]
                 'dNSName' : строка
