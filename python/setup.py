@@ -7,6 +7,7 @@ import os
 import platform
 import glob
 import subprocess as sub
+import multiprocessing
 
 major, minor = sys.version_info[:2]
 
@@ -117,7 +118,7 @@ csp = Extension('cprocsp._csp',
 
 
 setup(name='cryptoapy',
-      version='0.4.5',
+      version='0.4.11',
       author='Andrew Rodionoff',
       author_email='andviro@gmail.com',
       license='LGPL',
