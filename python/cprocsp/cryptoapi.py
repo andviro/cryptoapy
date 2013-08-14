@@ -5,7 +5,7 @@ from __future__ import unicode_literals, print_function
 import csp
 from certutils import Attributes, CertValidity, KeyUsage, EKU,\
     CertExtensions, SubjectAltName, CertificatePolicies, PKCS7Msg, \
-    CertExtension, CertificateInfo
+    CertExtension, CertificateInfo, autopem, set_q_defaults
 
 import platform
 from binascii import hexlify, unhexlify
@@ -96,7 +96,7 @@ def create_request(cont, params, local=True):
                 'iPAddress' : строка
                 'registeredID' : строка
         'KeyUsage' : список строк ['digitalSignature', 'nonRepudiation', ...]
-        'RawExtensions' : список троек [('OID', 'b64string', bool(CriticalFlag)), ...]
+        'RawExtensions' : список троек [('OID', 'байтовая строка', bool(CriticalFlag)), ...]
             предназначен для добавления в запрос произвольных расширений,
             закодированных в DER-кодировку внешними средставми
         }
@@ -108,7 +108,8 @@ def create_request(cont, params, local=True):
     provider = b"Crypto-Pro HSM CSP" if not local else None
     ctx = csp.Crypt(bytes(cont), csp.PROV_GOST_2001_DH, 0, provider)
     req = csp.CertRequest(ctx, )
-    req.set_subject(Attributes(params.get('Attributes', '')).encode())
+    set_q_defaults(params)
+    req.set_subject(Attributes(params.get('Attributes', [])).encode())
     validity = CertValidity(params.get('ValidFrom', datetime.now()),
                             params.get('ValidTo',
                                        datetime.now() + timedelta(days=365)))
@@ -135,6 +136,7 @@ def bind_cert_to_key(cont, cert, local=True):
 
     """
     provider = b"Crypto-Pro HSM CSP" if not local else None
+    cert = autopem(cert)
     ctx = csp.Crypt(bytes(cont), csp.PROV_GOST_2001_DH, 0, provider)
     newc = csp.Cert(cert)
     newc.bind(ctx)
@@ -184,6 +186,7 @@ def sign_and_encrypt(thumb, certs, data):
     :returns: данные и подпись, зашифрованные и закодированные в байтовую строку
 
     """
+    certs = [autopem(c) for c in certs]
     cs = csp.CertStore(None, b"MY")
     store_lst = list(cs.find_by_thumb(unhexlify(thumb)))
     assert len(store_lst), 'Unable to find signing cert in system store'
@@ -208,6 +211,7 @@ def check_signature(cert, sig, data):
 
     """
     sign = csp.Signature(sig)
+    cert = autopem(cert)
     cert = csp.Cert(cert)
     icert = csp.CertInfo(cert)
     cissuer = icert.issuer()
@@ -229,6 +233,7 @@ def encrypt(certs, data):
 
     """
     bin_data = data
+    certs = [autopem(c) for c in certs]
     msg = csp.CryptMsg()
     for c in certs:
         cert = csp.Cert(c)
@@ -299,6 +304,7 @@ def cert_info(cert):
     }
 
     """
+    cert = autopem(cert)
     infoasn = CertificateInfo(cert)
     cert = csp.Cert(cert)
     info = csp.CertInfo(cert)
