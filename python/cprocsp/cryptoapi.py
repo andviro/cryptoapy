@@ -114,9 +114,13 @@ def create_request(cont, params, local=True):
                                        datetime.now() + timedelta(days=365)))
     eku = EKU(params.get('EKU', []))
     usage = KeyUsage(params.get('KeyUsage', []))
-    altname = SubjectAltName(params.get('SubjectAltName', []))
-    pols = CertificatePolicies(params.get('CertificatePolicies', []))
-    all_exts = [usage, eku, altname, pols, ]
+    all_exts = [usage, eku]
+    altname = params.get('SubjectAltName', [])
+    if len(altname):
+        all_exts.append(SubjectAltName(altname))
+    pols = params.get('CertificatePolicies', [])
+    if len(pols):
+        all_exts.append(CertificatePolicies(pols))
     for (oid, data, crit) in params.get('RawExtensions', []):
         all_exts.append(CertExtension(bytes(oid), data, bool(crit)))
     ext_attr = CertExtensions(all_exts)
