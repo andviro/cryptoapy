@@ -123,6 +123,8 @@ Crypt::Crypt(char *container, DWORD type, DWORD flags, char *name) throw(CSPExce
         switch (err) {
         case NTE_KEYSET_NOT_DEF:
             throw CSPNotFound("Keyset not defined", err);
+        case NTE_BAD_KEYSET:
+            throw CSPNotFound("Keyset does not exist", err);
         case NTE_BAD_KEYSET_PARAM:
             throw CSPNotFound("Bad keyset parameters or container not found", err);
         default:
