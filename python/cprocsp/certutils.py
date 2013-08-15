@@ -8,7 +8,7 @@ from base64 import b64decode
 
 
 def autopem(cert):
-    if '----BEGIN' in cert:
+    if cert[:3] == '---':
         s = ''.join(l for l in cert.splitlines() if not l.startswith('----'))
         return b64decode(s)
     else:
