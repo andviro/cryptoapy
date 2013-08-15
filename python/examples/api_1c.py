@@ -34,7 +34,7 @@ open('cer_test.der', 'wb').write(req)
 
 # Импорт серта из файла (требуется отправить запрос в УЦ и сохранить
 # полученный серт в файл 'cer_test.cer')
-certdata = open('cer_test.cer', 'rb').read()
+certdata = open('тестАндромеда.cer', 'rb').read()
 print(cryptoapi.cert_info(certdata))
 thumb = cryptoapi.bind_cert_to_key(cont, certdata)
 print('bound cert thumb:', thumb)

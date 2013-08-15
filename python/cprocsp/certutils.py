@@ -4,6 +4,43 @@ import csp
 from pyasn1.type import univ, useful, char, tag, constraint
 from pyasn1.codec.der import encoder, decoder
 from pyasn1_modules import rfc2459, rfc2315
+from base64 import b64decode
+
+
+def autopem(cert):
+    if cert[:3] == b'---':
+        s = ''.join(l for l in cert.splitlines() if not l.startswith('----'))
+        return b64decode(s)
+    else:
+        return cert
+
+
+def _deep_find(lst, oid):
+    for attr in lst:
+        if isinstance(attr, list) and _deep_find(attr, oid):
+            return True
+        elif attr[0] == oid:
+            return True
+    return False
+
+
+def set_q_defaults(params):
+    attrs = params.get('Attributes', [])[:]
+    defaults = {
+        '1.2.643.100.1': '0' * 13,
+        '1.2.643.100.3': '0' * 11,
+        '1.2.643.3.131.1.1': '0' * 12,
+    }
+    for oid in defaults:
+        if not _deep_find(attrs, oid):
+            attrs.append((oid, defaults[oid]))
+    params['Attributes'] = attrs
+
+    raw = params.get('RawExtensions', [])[:]
+    if not any(oid == '1.2.643.100.111' for (oid, _, _) in raw):
+        extstr = encoder.encode(char.UTF8String('"КриптоПро CSP" (версия 3.6)'.encode('utf-8')))
+        raw.append(('1.2.643.100.111', extstr, False))
+    params['RawExtensions'] = raw
 
 
 class CertAttribute(object):
@@ -89,6 +126,13 @@ class KeyUsage(CertExtension):
 
 class Attributes(object):
     """Набор пар (тип, значение)"""
+    special_encs = {
+        '1.2.643.100.1': (char.NumericString, 'ascii'),
+        '1.2.643.100.3': (char.NumericString, 'ascii'),
+        '1.2.643.3.131.1.1': (char.NumericString, 'ascii'),
+        '2.5.4.6': (char.PrintableString, 'ascii'),
+        '1.2.840.113549.1.9.1': (char.IA5String, 'ascii'),
+    }
 
     def __init__(self, attrs):
         if isinstance(attrs, list):
@@ -102,9 +146,10 @@ class Attributes(object):
                 for (j, (oid, val)) in enumerate(attr):
                     pair = rfc2459.AttributeTypeAndValue()
                     pair.setComponentByName('type', rfc2459.AttributeType(bytes(oid)))
+                    code, enc = self.special_encs.get(oid, (char.UTF8String, 'utf-8'))
                     pair.setComponentByName('value',
                                             rfc2459.AttributeValue(
-                                                univ.OctetString(encoder.encode(char.UTF8String(unicode(val).encode('utf-8'))))))
+                                                univ.OctetString(encoder.encode(code(unicode(val).encode(enc, 'replace'))))))
 
                     pairset.setComponentByPosition(j, pair)
 
@@ -127,12 +172,9 @@ class Attributes(object):
             item = []
             for dn in rdn:
                 oid = unicode(dn[0])
-                self.asn = decoder.decode(dn[1])[0]
-                if self.asn.__class__.__name__ == 'UTF8String':
-                    self.asn = unicode(bytes(self.asn), 'utf-8')
-                else:
-                    self.asn = unicode(bytes(self.asn), 'cp1251')
-                item.append((oid, self.asn))
+                a = decoder.decode(dn[1])[0]
+                s = unicode(a)
+                item.append((oid, s))
             if len(item) != 1:
                 res.append(item)
             else:
@@ -168,22 +210,27 @@ class SubjectAltName(CertExtension):
                               asn1Spec=rfc2459.ORAddress().subtype(implicitTag=tag.Tag(tag.tagClassContext, tag.tagFormatSimple, 3)))
 
     def ediPartyName(self, val):
-        res = rfc2459.EDIPartyName().subtype(implicitTag=tag.Tag(tag.tagClassContext, tag.tagFormatSimple, 5))
+        res = rfc2459.EDIPartyName(
+        ).subtype(implicitTag=tag.Tag(tag.tagClassContext, tag.tagFormatSimple, 5))
         if isinstance(val, tuple):
-            val0 = rfc2459.DirectoryString().subtype(implicitTag=tag.Tag(tag.tagClassContext, tag.tagFormatSimple, 0))
+            val0 = rfc2459.DirectoryString(
+            ).subtype(implicitTag=tag.Tag(tag.tagClassContext, tag.tagFormatSimple, 0))
             val0.setComponentByName('utf8String', unicode(val[0]).encode('utf-8'))
             res.setComponentByName('nameAssigner', val0)
-            val1 = rfc2459.DirectoryString().subtype(implicitTag=tag.Tag(tag.tagClassContext, tag.tagFormatSimple, 1))
+            val1 = rfc2459.DirectoryString(
+            ).subtype(implicitTag=tag.Tag(tag.tagClassContext, tag.tagFormatSimple, 1))
             val1.setComponentByName('utf8String', unicode(val[1]).encode('utf-8'))
             res.setComponentByName('partyName', val1)
         else:
-            val1 = rfc2459.DirectoryString().subtype(implicitTag=tag.Tag(tag.tagClassContext, tag.tagFormatSimple, 1))
+            val1 = rfc2459.DirectoryString(
+            ).subtype(implicitTag=tag.Tag(tag.tagClassContext, tag.tagFormatSimple, 1))
             val1.setComponentByName('utf8String', unicode(val).encode('utf-8'))
             res.setComponentByName('partyName', val1)
         return res
 
     def otherName(self, val):
-        res = rfc2459.AnotherName().subtype(implicitTag=tag.Tag(tag.tagClassContext, tag.tagFormatSimple, 0))
+        res = rfc2459.AnotherName(
+        ).subtype(implicitTag=tag.Tag(tag.tagClassContext, tag.tagFormatSimple, 0))
         res.setComponentByName('type-id', bytes(val[0]))
         res.setComponentByName('value', bytes(val[1]))
         return res
@@ -333,8 +380,8 @@ if __name__ == '__main__':
     info = CertificateInfo(open('../examples/cer_test.cer', 'rb').read())
     print(info.EKU())
     print(info.asn.prettyPrint())
-    #altnn = SubjectAltName([('otherName', ('1.2.3', 'aslkdj'))])
-    #print(altnn.asn)
+    # altnn = SubjectAltName([('otherName', ('1.2.3', 'aslkdj'))])
+    # print(altnn.asn)
     # from pyasn1_modules.rfc2459 import id_qt_unotice as unotice, id_qt_cps as cps
     # test = CertificatePolicies([(unotice, []), (cps, [(cps, b64encode(b"alsdk"))])])
     # data = open('../examples/cer_test.cer', 'rb').read()
