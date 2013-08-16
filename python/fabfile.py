@@ -55,8 +55,10 @@ def build(pyversion=''):
 def build_rpm(pyversion=''):
     local("python{0} setup.py bdist --format=rpm".format(pyversion))
 
+
 def build_wininst(pyversion=''):
     local("python{0} setup.py bdist --format=wininst".format(pyversion))
+
 
 def prepare(pyversion=''):
     test(pyversion)
@@ -81,6 +83,7 @@ def deploy(pyversion=''):
 
 def rebuild(pyversion=''):
     cleanup()
-    #swig()
+    # swig()
+    local("python{0} setup.py swig".format(pyversion))
     local("python{0} setup.py build_ext --inplace".format(pyversion))
-    #test(pyversion)
+    # test(pyversion)

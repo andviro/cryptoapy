@@ -136,7 +136,7 @@ CertFind::CertFind(CertStore *p, DWORD et, DWORD ft, BYTE *STRING, DWORD LENGTH)
 
 CertFind::CertFind(CertStore *p, DWORD et, BYTE *STRING, DWORD LENGTH) : CertIter(p)
 {
-    LOG("CertFind::CertFind(%p, %u, %s)\n", p, et, name);
+    LOG("CertFind::CertFind(%p, %u, %s)\n", p, et);
     enctype = et;
     findtype = CERT_FIND_SUBJECT_STR;
     param = (CRYPT_HASH_BLOB *)malloc(LENGTH + 1);
@@ -156,7 +156,7 @@ CertStore::CertStore() throw(CSPException)
 
 CertStore::CertStore(Crypt *parent, BYTE *STRING, DWORD LENGTH) throw(CSPException)
 {
-    LOG("CertStore::CertStore(%p, %s)\n", parent, protocol);
+    LOG("CertStore::CertStore(%p, %s)\n", parent);
     HCRYPTPROV hprov = 0;
     init();
     if (parent) {
@@ -297,7 +297,10 @@ Cert *CertFind::next() throw (Stop_Iteration, CSPException)
     pcert = CertFindCertificateInStore(parent->hstore, enctype, 0, findtype, param, pcert);
     LOG("    Found next cert %p\n", pcert);
     if (pcert) {
-        return new Cert(CertDuplicateCertificateContext(pcert), parent);
+        PCCERT_CONTEXT pc = CertDuplicateCertificateContext(pcert);
+        LOG("    Duplicated cert into %p\n", pc);
+        LOG("    parent: %p\n", parent);
+        return new Cert(pc, parent);
     } else {
         iter = false;
         LOG("    Stopped find\n");
