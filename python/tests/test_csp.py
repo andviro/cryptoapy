@@ -1,11 +1,13 @@
 # coding: utf-8
 from __future__ import unicode_literals, print_function
 
-from cprocsp import csp, cryptoapi
+from cprocsp import csp
 from nose.tools import raises
-import os
 import sys
 from platform import architecture
+from base64 import b64encode
+
+from . import test_container, test_cn, case_path
 
 if sys.version_info >= (3,):
         unicode = str
@@ -17,6 +19,7 @@ if architecture()[0] == '32bit':
     arch = 'ia32'
 else:
     arch = 'amd64'
+
 
 def test_context_simple():
     '''
@@ -255,7 +258,7 @@ def test_cert_find_by_name():
     Метод `CertStore.find_by_name(s)` перечисляет все сертификаты, в RDN которых
     так или иначе встречается байтовая строка `s`.
     '''
-    name = b'test'
+    name = test_cn
     cs = csp.CertStore(None, b"MY")
     res = list(cs.find_by_name(name))
     assert len(res)
@@ -311,7 +314,7 @@ def test_msg_decode():
     декодируется. Второй, необязательный, параметр `c` задает контекст
     криптопровайдера. По умолчанию, неявно создается контекст для проверки ЭЦП.
     '''
-    with open('logical.cms', 'rb') as f:
+    with open(case_path('logical.cms'), 'rb') as f:
         testdata = f.read()
     msg = csp.CryptMsg(testdata)
     return msg
@@ -401,7 +404,6 @@ def test_msg_signatures():
     print(len(msg.get_data()))
     # TODO переделать тесты ниже
     return
-
 
     # Идентификационная информация для 1-го подписанта.
     psi = msg.get_nth_signer_info(0)
@@ -498,9 +500,9 @@ def test_verify_file():
     '''
     names = ('data1', 'data2')
     for name in names:
-        with open('{0}.bin'.format(name), 'rb') as f:
+        with open(case_path('{0}.bin'.format(name)), 'rb') as f:
             data = f.read()
-        with open('{0}.p7s'.format(name), 'rb') as f:
+        with open(case_path('{0}.p7s'.format(name)), 'rb') as f:
             sigdata = f.read()
         sign = csp.Signature(sigdata)
         print(sign.num_signers)
@@ -561,7 +563,7 @@ def test_add_remove_cert():
     '''
     my = csp.CertStore(None, b"MY")
     n1 = len(list(my))
-    with open('logical.cms', 'rb') as f:
+    with open(case_path('logical.cms'), 'rb') as f:
         testdata = f.read()
     msg = csp.CryptMsg(testdata)
     ids = []
