@@ -156,7 +156,7 @@ CertStore::CertStore() throw(CSPException)
 
 CertStore::CertStore(Crypt *parent, BYTE *STRING, DWORD LENGTH) throw(CSPException)
 {
-    LOG("CertStore::CertStore(%p, %s)\n", parent);
+    LOG("CertStore::CertStore(%p)\n", parent);
     HCRYPTPROV hprov = 0;
     init();
     if (parent) {
