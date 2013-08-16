@@ -14,9 +14,11 @@ Crypt::~Crypt() throw(CSPException) {
         }
     }
     if (cont_name) {
+        LOG("freeing cont_name(%p)\n", cont_name);
         delete[] cont_name;
     }
     if (pr_name) {
+        LOG("freeing pr_name(%p)\n", pr_name);
         delete[] pr_name;
     }
     LOG("    Freed ctx %p (%x)\n", this, hprov);
