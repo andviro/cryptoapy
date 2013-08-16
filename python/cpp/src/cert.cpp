@@ -246,6 +246,10 @@ CertIter::CertIter(CertStore *p) throw (CSPException) : parent(p)
 CertIter::~CertIter() throw (CSPException)
 {
     LOG("CertIter::~CertIter()\n");
+    if (pcert) {
+        CertFreeCertificateContext(pcert);
+        pcert = NULL;
+    }
     if (parent) {
         parent->unref();
     }
