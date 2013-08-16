@@ -14,6 +14,11 @@ test_req_fn = 'test_req.req'
 test_thumb = None
 
 
+def case_path(pth):
+    basepath = os.path.abspath(os.path.dirname(__file__))
+    return os.path.join(basepath, pth)
+
+
 def setup_package():
     '''
     Создание тестового ключевого контейнера и сертификата.
