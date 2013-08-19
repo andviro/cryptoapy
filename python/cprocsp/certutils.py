@@ -124,6 +124,12 @@ class KeyUsage(CertExtension):
         super(KeyUsage, self).__init__(csp.szOID_KEY_USAGE, encoder.encode(val))
 
 
+def _stupidAddress(s):
+    res = univ.Sequence()
+    res.setComponentByPosition(0, char.UTF8String(s))
+    return res
+
+
 class Attributes(object):
     """Набор пар (тип, значение)"""
     special_encs = {
@@ -132,6 +138,7 @@ class Attributes(object):
         '1.2.643.3.131.1.1': (char.NumericString, 'ascii'),
         '2.5.4.6': (char.PrintableString, 'ascii'),
         '1.2.840.113549.1.9.1': (char.IA5String, 'ascii'),
+        '2.5.4.16': (_stupidAddress, 'utf-8'),
     }
 
     def __init__(self, attrs):
@@ -173,7 +180,10 @@ class Attributes(object):
             for dn in rdn:
                 oid = unicode(dn[0])
                 a = decoder.decode(dn[1])[0]
-                s = unicode(a)
+                if oid == '2.5.4.16':
+                    s = ' '.join(unicode(x) for x in a)
+                else:
+                    s = unicode(a)
                 item.append((oid, s))
             if len(item) != 1:
                 res.append(item)
