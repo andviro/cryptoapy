@@ -1,4 +1,2 @@
-cd cpp
-mingw32-make clean all
-cd ..\python
+cd python
 fab rebuild
