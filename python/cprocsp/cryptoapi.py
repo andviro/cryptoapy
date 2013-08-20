@@ -39,8 +39,8 @@ def gen_key(cont, local=True, silent=False):
         ctx = csp.Crypt(cont, csp.PROV_GOST_2001_DH, csp.CRYPT_NEWKEYSET |
                         silent_flag, provider)
 
-    ctx.set_password(b'')
     ctx.set_password(b'', csp.AT_KEYEXCHANGE)
+    ctx.set_password(b'', csp.AT_SIGNATURE)
     try:
         key = ctx.get_key()
     except ValueError:

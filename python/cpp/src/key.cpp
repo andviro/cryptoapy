@@ -13,7 +13,7 @@ Key::~Key() throw(CSPException) {
     if (hkey) {
         bool res = CryptDestroyKey(hkey);
         if (!res) {
-            throw CSPException("Couldn't destroy key");
+            throw CSPException("~Key:Couldn't destroy key");
         }
     }
     parent->unref();
@@ -31,14 +31,22 @@ void Key::encode(BYTE **s, DWORD *slen, Key *cryptkey) throw(CSPException) {
     }
 
     if(!CryptExportKey( hkey, expkey, blobtype, 0, NULL, slen)) {
-        throw CSPException("Error computing key blob length");
+        throw CSPException("Key.encode: Error computing key blob length");
     }
 
     *s = (BYTE *)malloc(*slen);
 
     if(!CryptExportKey( hkey, expkey, blobtype, 0, (BYTE *)*s, slen)) {
         free((void *)*s);
-        throw CSPException("Error exporting key blob");
+        throw CSPException("Key.encode: Error exporting key blob");
     }
 };
 
+void Key::store_cert(Cert *c) throw (CSPException) {
+    if (!c || !c->pcert) {
+        throw CSPException("Key.store_cert: invalid certificate");
+    }
+    if (!CryptSetKeyParam(hkey, KP_CERTIFICATE, (const BYTE*) c->pcert->pbCertEncoded, 0)) {
+        throw CSPException("Key.store_cert: couldn't set key parameter");
+    }
+}

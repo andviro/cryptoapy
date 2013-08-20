@@ -3,6 +3,7 @@
 
 #include "context.hpp"
 #include "except.hpp"
+#include "cert.hpp"
 
 class Key
 {
@@ -14,6 +15,8 @@ public:
     ~Key() throw(CSPException);
 
     void encode(BYTE **s, DWORD *slen, Key *cryptkey=NULL) throw(CSPException);
+
+    void store_cert(Cert *c) throw (CSPException);
 
     friend class Crypt;
 };

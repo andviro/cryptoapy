@@ -22,13 +22,13 @@ public:
     char *prov_name();
     DWORD prov_type();
 
-    Key *create_key(DWORD flags, DWORD keyspec=AT_SIGNATURE) throw(CSPException);
+    Key *create_key(DWORD flags, DWORD keyspec=AT_KEYEXCHANGE) throw(CSPException);
 
-    Key *get_key(DWORD keyspec=AT_SIGNATURE) throw(CSPException, CSPNotFound);
+    Key *get_key(DWORD keyspec=AT_KEYEXCHANGE) throw(CSPException, CSPNotFound);
 
     Key *import_key(BYTE *STRING, DWORD LENGTH, Key *decrypt=NULL) throw(CSPException);
 
-    void set_password(char *pin, DWORD keyspec=AT_SIGNATURE) throw(CSPException);
+    void set_password(char *pin, DWORD keyspec=AT_KEYEXCHANGE) throw(CSPException);
 
     static void remove(char *container, DWORD type, char *name) throw(CSPException, CSPNotFound);
 

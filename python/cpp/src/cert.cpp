@@ -28,7 +28,7 @@ Cert::Cert(BYTE* STRING, DWORD LENGTH) throw(CSPException) : parent(NULL)
     pcert = CertCreateCertificateContext(MY_ENC_TYPE, STRING, LENGTH);
     LOG("    created cert: %p\n", pcert);
     if (!pcert) {
-        throw CSPException("Couldn't decode certificate blob");
+        throw CSPException("Cert: Couldn't decode certificate blob");
     }
 }
 
@@ -36,7 +36,7 @@ Cert *Cert::self_sign(Crypt *ctx, BYTE *STRING, DWORD LENGTH)  throw(CSPExceptio
 {
     LOG("Cert::self_sign\n");
 #ifdef UNIX
-    throw CSPException("Self-signed certificates are not implemented on Unix", 1);
+    throw CSPException("Cert.self_sign: Self-signed certificates are not implemented on Unix", 1);
 #else
     CERT_NAME_BLOB issuer;
     bool res;
@@ -55,7 +55,7 @@ Cert *Cert::self_sign(Crypt *ctx, BYTE *STRING, DWORD LENGTH)  throw(CSPExceptio
 
     if (!res) {
         delete[] subj;
-        throw CSPException("Couldn't determine encoded info size");
+        throw CSPException("Cert.self_sign: Couldn't determine encoded info size");
     }
 
     issuer.pbData = (BYTE*) malloc(issuer.cbData);
@@ -72,7 +72,7 @@ Cert *Cert::self_sign(Crypt *ctx, BYTE *STRING, DWORD LENGTH)  throw(CSPExceptio
     if (!res) {
         delete[] subj;
         free(issuer.pbData);
-        throw CSPException("Couldn't encode cert info");
+        throw CSPException("Cert.self_sign: Couldn't encode cert info");
     }
 
     delete[] subj;
@@ -93,7 +93,7 @@ Cert *Cert::self_sign(Crypt *ctx, BYTE *STRING, DWORD LENGTH)  throw(CSPExceptio
 
     if (!pc) {
         free(issuer.pbData);
-        throw CSPException("Couldn't acquire self-signed certificate");
+        throw CSPException("Cert.self_sign: Couldn't acquire self-signed certificate");
     }
 
     free(issuer.pbData);
@@ -114,12 +114,12 @@ void Cert::thumbprint(BYTE **s, DWORD *slen) throw(CSPException)
     LOG("Cert::thumbprint\n");
     if(!CertGetCertificateContextProperty(pcert, CERT_HASH_PROP_ID, NULL, slen)) {
         LOG("    Error: %p\n", pcert);
-        throw CSPException("Couldn't get certificate hash size");
+        throw CSPException("Cert.thumbprint: Couldn't get certificate hash size");
     }
     *s = (BYTE *)malloc(*slen);
     if(!CertGetCertificateContextProperty(pcert, CERT_HASH_PROP_ID, (void *)*s, slen)) {
         free((void *)*s);
-        throw CSPException("Couldn't get certificate thumbprint");
+        throw CSPException("Cert.thumbprint: Couldn't get certificate thumbprint");
     }
 }
 CertFind::CertFind(CertStore *p, DWORD et, DWORD ft, BYTE *STRING, DWORD LENGTH) : CertIter(p)
@@ -150,7 +150,7 @@ CertStore::CertStore() throw(CSPException)
     init();
     hstore = CertOpenStore(CERT_STORE_PROV_MEMORY, MY_ENC_TYPE, 0, CERT_STORE_CREATE_NEW_FLAG,NULL);
     if (!hstore) {
-        throw CSPException("Couldn't create memory store");
+        throw CSPException("CertStore: Couldn't create memory store");
     }
 }
 
@@ -179,7 +179,7 @@ CertStore::CertStore(Crypt *parent, BYTE *STRING, DWORD LENGTH) throw(CSPExcepti
                                                     // string
              );
     if (!hstore) {
-        throw CSPException("Couldn't open certificate store");
+        throw CSPException("CertStore: Couldn't open certificate store");
     }
 }
 
@@ -196,7 +196,7 @@ Cert *CertStore::get_cert_by_info(CertInfo *ci) throw(CSPException, CSPNotFound)
         if (err == (DWORD)CRYPT_E_NOT_FOUND) {
             throw CSPNotFound("Subject cert not found", err);
         }
-        throw CSPException("Error getting subject certificate from store", err);
+        throw CSPException("CertStore.get_cert_by_info: Error getting subject certificate from store", err);
     }
     return new Cert(res, this);
 }
@@ -210,9 +210,9 @@ Cert *CertStore::add_cert(Cert *c) throw(CSPException)
         DWORD err = GetLastError();
         switch (err) {
             case CRYPT_E_EXISTS:
-                throw CSPException("Matching or newer cerificate already exist in store", err);
+                throw CSPException("CertStore.add_cert: Matching or newer cerificate already exist in store", err);
             default:
-                throw CSPException("Couldn't add cert to store");
+                throw CSPException("CertStore.add_cert: Couldn't add cert to store");
         }
     }
     return new Cert(copy, this);
@@ -328,7 +328,7 @@ Cert::~Cert() throw(CSPException)
 {
     LOG("Cert::~Cert(%p, %p)\n", pcert, this);
     if (pcert && !CertFreeCertificateContext(pcert)) {
-        throw CSPException("Couldn't free certificate context");
+        throw CSPException("~Cert: Couldn't free certificate context");
     }
     if (parent) {
         parent->unref();
@@ -341,10 +341,10 @@ void Cert::remove_from_store() throw(CSPException)
     LOG("Cert::remove_from_store(): cert=%p parent=%p\n", pcert, parent);
     PCCERT_CONTEXT pc = CertDuplicateCertificateContext(pcert);
     if (!pc) {
-        throw CSPException("Couldn't duplicate cert context");
+        throw CSPException("Cert.remove_from_store: Couldn't duplicate cert context");
     }
     if(!CertDeleteCertificateFromStore(pc)) {
-        throw CSPException("Couldn't remove certificate");
+        throw CSPException("Cert.remove_from_store: Couldn't remove certificate");
     }
     //if (parent) {
     //parent->unref();
@@ -360,12 +360,12 @@ CertStore::CertStore(CryptMsg *parent) throw(CSPException)
     if (!msg) {
         DWORD err = GetLastError();
         LOG("Error init message store, %x\n",err);
-        throw CSPException("Invalid message for cert store", err);
+        throw CSPException("CertStore: Invalid message for cert store", err);
     }
     msg->ref();
     hstore = CertOpenStore(CERT_STORE_PROV_MSG, MY_ENC_TYPE, 0, 0, msg->get_handle());
     if (!hstore) {
-        throw CSPException("Couldn't open message certificate store");
+        throw CSPException("CertStore: Couldn't open message certificate store");
     }
 }
 
@@ -376,7 +376,7 @@ CertStore::~CertStore() throw(CSPException)
         if (!CertCloseStore(hstore, CERT_CLOSE_STORE_CHECK_FLAG)) {
             DWORD err = GetLastError();
             LOG("Error freeing store: %x\n", err);
-            throw CSPException("Couldn't properly close certificate store", err);
+            throw CSPException("~CertStore: Couldn't properly close certificate store", err);
         }
     }
     if (proto) {
@@ -406,7 +406,7 @@ void Cert::bind(Crypt *ctx, DWORD keyspec) {
     try {
         prov_name = ctx->prov_name();
     } catch (...) {
-        free(ctx_name);
+        delete[] ctx_name;
         throw;
     }
     mbstowcs(ckpi.pwszProvName, prov_name, 1000);
@@ -416,7 +416,9 @@ void Cert::bind(Crypt *ctx, DWORD keyspec) {
 
     if (!CertSetCertificateContextProperty(pcert, CERT_KEY_PROV_INFO_PROP_ID, 0, &ckpi)) {
         DWORD err = GetLastError();
-        throw CSPException("Couldn't set certificate context property", err);
+        delete[] prov_name;
+        delete[] ctx_name;
+        throw CSPException("Cert.bind: Couldn't set certificate context property", err);
     }
     delete[] prov_name;
     delete[] ctx_name;
