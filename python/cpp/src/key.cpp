@@ -5,7 +5,7 @@ Key::Key(Crypt *pctx, HCRYPTKEY hk) throw(CSPException) {
     parent = pctx;
     parent->ref();
     hkey = hk;
-    LOG("new key\n");
+    LOG("Key()\n");
 }
 
 Key::~Key() throw(CSPException) {
@@ -20,6 +20,7 @@ Key::~Key() throw(CSPException) {
 }
 
 void Key::encode(BYTE **s, DWORD *slen, Key *cryptkey) throw(CSPException) {
+    LOG("Key.encode(%p)\n", cryptkey);
     HCRYPTKEY expkey;
     DWORD blobtype;
     if (cryptkey) {
@@ -59,7 +60,8 @@ void Key::extract_cert(BYTE **s, DWORD *slen) throw (CSPException) {
         slen, 
         0))
     {
-        throw CSPException("Key.extract_cert: couldn't get certificate blob length");
+        DWORD err = GetLastError();
+        throw CSPException("Key.extract_cert: couldn't get certificate blob length", err);
     }
 
     *s = (BYTE*)malloc(*slen);
@@ -78,6 +80,7 @@ void Key::extract_cert(BYTE **s, DWORD *slen) throw (CSPException) {
         slen, 
         0))
     {
-        throw CSPException("Key.extract_cert: couldn't copy certificate blob");
+        DWORD err = GetLastError();
+        throw CSPException("Key.extract_cert: couldn't copy certificate blob", err);
     }
 }
