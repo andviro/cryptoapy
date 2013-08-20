@@ -81,7 +81,7 @@ library_dirs = ['cpp']
 libraries = []
 extra_compile_args = ['-DSIZEOF_VOID_P={0}'.format(size)]
 
-extra_compile_args.append('-DDEBUG_LOG')
+#extra_compile_args.append('-DDEBUG_LOG')
 
 if platform.system() == 'Windows':
     include_dirs += [
