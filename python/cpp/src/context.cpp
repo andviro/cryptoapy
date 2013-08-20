@@ -138,6 +138,8 @@ Crypt::Crypt(char *container, DWORD type, DWORD flags, char *name) throw(CSPExce
 Key *Crypt::get_key(DWORD keyspec) throw(CSPException, CSPNotFound)
 {
     HCRYPTKEY hkey = 0;
+
+    LOG("Crypt::get_key(%u)\n", keyspec);
     if(!CryptGetUserKey(hprov, keyspec, &hkey)) {
         DWORD err = GetLastError();
         if (err == (DWORD)NTE_NO_KEY) {
@@ -146,6 +148,7 @@ Key *Crypt::get_key(DWORD keyspec) throw(CSPException, CSPNotFound)
             throw CSPException("Crypt.get_key: Couldn't acquire user public key", err);
         }
     }
+    LOG("Crypt::get_key: acquired key %u\n", hkey);
     return new Key(this, hkey);
 }
 
