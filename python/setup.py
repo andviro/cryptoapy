@@ -120,7 +120,7 @@ csp = Extension('cprocsp._csp',
 
 
 setup(name='cryptoapy',
-      version='0.4.18',
+      version='0.4.19',
       author='Andrew Rodionoff',
       author_email='andviro@gmail.com',
       license='LGPL',

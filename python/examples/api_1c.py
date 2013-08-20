@@ -119,7 +119,6 @@ msg = message
 encmsg = cryptoapi.encrypt([cert], msg)
 open('encrypted.p7s', 'wb').write(encmsg)
 print('encrypted len of "{0}":'.format(message), len(encmsg))
-encmsg = encmsg[:52] + b'a' + encmsg[53:]
 
 # Расшифровка данных
 decmsg = cryptoapi.decrypt(encmsg, thumb)

@@ -5,6 +5,7 @@ from pyasn1.type import univ, useful, char, tag, constraint
 from pyasn1.codec.der import encoder, decoder
 from pyasn1_modules import rfc2459, rfc2315
 from base64 import b64decode
+from datetime import timedelta
 
 
 def autopem(cert):

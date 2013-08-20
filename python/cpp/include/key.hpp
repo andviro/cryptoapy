@@ -18,6 +18,8 @@ public:
 
     void store_cert(Cert *c) throw (CSPException);
 
+    void extract_cert(BYTE **s, DWORD *slen) throw (CSPException);
+
     friend class Crypt;
 };
 

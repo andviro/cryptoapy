@@ -210,6 +210,7 @@ def test_store_key():
     certdata = test_extract_cert()
     newc = csp.Cert(certdata)
     key.store_cert(newc)
+    assert key.extract_cert() == certdata
 
 
 def _cert_thumb():
