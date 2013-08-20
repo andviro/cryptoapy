@@ -31,7 +31,7 @@ void CertRequest::add_attribute_value(int n, BYTE *STRING, DWORD LENGTH) throw (
     LOG("CertRequest::add_attribute_value(%i, %p, %u)\n", n, STRING, LENGTH);
 
     if (n >= CertReqInfo.cAttribute) {
-        throw CSPException("Attribute index out of range", -1);
+        throw CSPException("CertRequest.add_attribute_value: Attribute index out of range", -1);
     }
     pa = &CertReqInfo.rgAttribute[n];
     pa -> rgValue = (PCRYPT_ATTR_BLOB) realloc(pa -> rgValue, sizeof(CRYPT_ATTR_BLOB) * (pa -> cValue + 1) );
@@ -49,7 +49,7 @@ CertRequest::CertRequest(Crypt *ctx) throw (CSPException) : ctx(ctx) {
     if (ctx) {
         ctx -> ref();
     } else {
-        throw CSPException("Null key container can not generate requests", -1);
+        throw CSPException("CertRequest: Null key container can not generate requests", -1);
     }
     cbNameEncoded = 0;
     pbNameEncoded = NULL;
@@ -64,13 +64,13 @@ CertRequest::CertRequest(Crypt *ctx) throw (CSPException) : ctx(ctx) {
     bool res = CryptExportPublicKeyInfo( ctx->hprov, AT_KEYEXCHANGE, MY_ENC_TYPE,
             NULL, &cbPublicKeyInfo );
     if (!res) {
-        throw CSPException("Couldn't determine exported key info length");
+        throw CSPException("CertRequest: Couldn't determine exported key info length");
     }
     pbPublicKeyInfo = (CERT_PUBLIC_KEY_INFO*) malloc( cbPublicKeyInfo );
     res = CryptExportPublicKeyInfo( ctx->hprov, AT_KEYEXCHANGE,
                               MY_ENC_TYPE, pbPublicKeyInfo, &cbPublicKeyInfo );
     if (!res) {
-        throw CSPException("Couldn't export public key info");
+        throw CSPException("CertRequest: Couldn't export public key info");
     }
     CertReqInfo.SubjectPublicKeyInfo = *pbPublicKeyInfo;
     CertReqInfo.cAttribute = 0;
@@ -130,7 +130,7 @@ void CertRequest::get_data(BYTE **s, DWORD *slen) throw (CSPException) {
         X509_CERT_REQUEST_TO_BE_SIGNED, &CertReqInfo,
         &SigAlg, NULL, NULL, slen );
     if(!res) {
-        throw CSPException("Couldn't determine encoded request size");
+        throw CSPException("CertRequest.get_data: Couldn't determine encoded request size");
     }
 
     *s = (BYTE *)malloc(*slen);
@@ -141,6 +141,6 @@ void CertRequest::get_data(BYTE **s, DWORD *slen) throw (CSPException) {
         &SigAlg, NULL, *s, slen );
 
     if(!res) {
-        throw CSPException("Couldn't encode certificate request");
+        throw CSPException("CertRequest.get_data: Couldn't encode certificate request");
     }
 }

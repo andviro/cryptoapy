@@ -10,7 +10,7 @@ Crypt::~Crypt() throw(CSPException) {
         if (!res) {
             DWORD err = GetLastError();
             LOG("     error closing context %x\n", err);
-            throw CSPException("Couldn't release context", err);
+            throw CSPException("~Crypt: Couldn't release context", err);
         }
     }
     if (cont_name) {
@@ -27,15 +27,15 @@ Crypt::~Crypt() throw(CSPException) {
 DWORD Crypt::prov_type() {
     DWORD slen, type;
     if(!CryptGetProvParam( hprov, PP_PROVTYPE, NULL, &slen, 0)) {
-        throw CSPException("Couldn't determine provider type data length");
+        throw CSPException("Crypt.prov_type: Couldn't determine provider type data length");
     }
 
     if(slen != sizeof(DWORD)) {
-        throw CSPException("Wrong size for binary data", -1);
+        throw CSPException("Crypt.prov_type: Wrong size for binary data", -1);
     }
 
     if(!CryptGetProvParam( hprov, PP_PROVTYPE, (BYTE *)&type, &slen, 0)) {
-        throw CSPException("Couldn't get provider type");
+        throw CSPException("Crypt.prov_type: Couldn't get provider type");
     }
     return type;
 }
@@ -44,14 +44,14 @@ char *Crypt::prov_name() {
     char *s;
     DWORD slen;
     if(!CryptGetProvParam( hprov, PP_NAME, NULL, &slen, 0)) {
-        throw CSPException("Couldn't determine provider name length");
+        throw CSPException("Crypt.prov_name: Couldn't determine provider name length");
     }
 
     s=new char[slen];
 
     if(!CryptGetProvParam( hprov, PP_NAME, (BYTE *)s, &slen, 0)) {
         delete[] s;
-        throw CSPException("Couldn't get provider name");
+        throw CSPException("Crypt.prov_name: Couldn't get provider name");
     }
     return s;
 }
@@ -60,14 +60,14 @@ char *Crypt::name() {
     char *s;
     DWORD slen;
     if(!CryptGetProvParam( hprov, PP_CONTAINER, NULL, &slen, 0)) {
-        throw CSPException("Couldn't determine container name length");
+        throw CSPException("Crypt.name: Couldn't determine container name length");
     }
 
     s=new char[slen];
 
     if(!CryptGetProvParam( hprov, PP_CONTAINER, (BYTE *)s, &slen, 0)) {
         delete[] s;
-        throw CSPException("Couldn't get container name");
+        throw CSPException("Crypt.name: Couldn't get container name");
     }
     return s;
 }
@@ -76,14 +76,14 @@ char *Crypt::uniq_name() {
     char *s;
     DWORD slen;
     if(!CryptGetProvParam( hprov, PP_UNIQUE_CONTAINER, NULL, &slen, 0)) {
-        throw CSPException("Couldn't determine container unique name length");
+        throw CSPException("Crypt.uniq_name: Couldn't determine container unique name length");
     }
 
     s=new char[slen];
 
     if(!CryptGetProvParam( hprov, PP_UNIQUE_CONTAINER, (BYTE *)s, &slen, 0)) {
         delete[] s;
-        throw CSPException("Couldn't get container unique name");
+        throw CSPException("Crypt.uniq_name: Couldn't get container unique name");
     }
     return s;
 }
@@ -98,7 +98,7 @@ void Crypt::set_password(char *pin, DWORD keyspec) throw (CSPException) {
     }
 
     if(!CryptSetProvParam( hprov, param, (const BYTE *)pin, 0)) {
-        throw CSPException("Couldn't set password");
+        throw CSPException("Crypt.set_password: Couldn't set password");
     }
 }
 
@@ -118,7 +118,7 @@ Crypt::Crypt(char *container, DWORD type, DWORD flags, char *name) throw(CSPExce
     }
 
     if (flags & CRYPT_DELETEKEYSET) {
-        throw CSPException("Delete flag not allowed in Crypt::Crypt()", -1);
+        throw CSPException("Crypt: Delete flag not allowed in Crypt::Crypt()", -1);
     }
     if (!CryptAcquireContext(&hprov, cont_name, pr_name, type, flags)) {
         DWORD err = GetLastError();
@@ -130,7 +130,7 @@ Crypt::Crypt(char *container, DWORD type, DWORD flags, char *name) throw(CSPExce
         case NTE_BAD_KEYSET_PARAM:
             throw CSPNotFound("Bad keyset parameters or container not found", err);
         default:
-            throw CSPException("Couldn't acquire context", err);
+            throw CSPException("Crypt: Couldn't acquire context", err);
         }
     }
 }
@@ -141,9 +141,9 @@ Key *Crypt::get_key(DWORD keyspec) throw(CSPException, CSPNotFound)
     if(!CryptGetUserKey(hprov, keyspec, &hkey)) {
         DWORD err = GetLastError();
         if (err == (DWORD)NTE_NO_KEY) {
-            throw CSPNotFound("Key not found", err);
+            throw CSPNotFound("Key not found for container", err);
         } else {
-            throw CSPException("Couldn't acquire user pub key", err);
+            throw CSPException("Crypt.get_key: Couldn't acquire user public key", err);
         }
     }
     return new Key(this, hkey);
@@ -153,7 +153,7 @@ Key *Crypt::create_key(DWORD flags, DWORD keyspec) throw(CSPException)
 {
     HCRYPTKEY hkey = 0;
     if(!CryptGenKey(hprov, keyspec, flags, &hkey)) {
-        throw CSPException("Couldn't create key pair");
+        throw CSPException("Crypt.create_key: Couldn't create key pair");
     }
     return new Key(this, hkey);
 }
@@ -164,7 +164,7 @@ Key *Crypt::import_key(BYTE *STRING, DWORD LENGTH, Key *decrypt) throw(CSPExcept
     HCRYPTKEY decrkey = decrypt? decrypt->hkey : 0;
 
     if(!CryptImportKey(hprov, STRING, LENGTH, decrkey, 0, &hkey)) {
-        throw CSPException("Couldn't import public key blob");
+        throw CSPException("Crypt.import_key: Couldn't import public key blob");
     }
     return new Key(this, hkey);
 }
@@ -179,7 +179,7 @@ void Crypt::remove(char *container, DWORD type, char *name) throw(CSPException, 
         case NTE_BAD_KEYSET_PARAM:
             throw CSPNotFound("Bad keyset parameters or container not found", err);
         default:
-            throw CSPException("Couldn't delete container", err);
+            throw CSPException("Crypt.remove: Couldn't delete container", err);
         }
     }
 }

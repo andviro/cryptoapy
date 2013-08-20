@@ -13,7 +13,7 @@ CertInfo::CertInfo(Cert *c) throw (CSPException)
     init();
     cert = c;
     if(!cert) {
-        throw CSPException("NULL certificate has no info");
+        throw CSPException("CertInfo: NULL certificate has no info");
     }
     cert->ref();
     psi = cert->pcert->pCertInfo;
@@ -25,18 +25,18 @@ CertInfo::CertInfo(CryptMsg *m, DWORD idx) throw (CSPException)
     init();
     msg = m;
     if(!msg) {
-        throw CSPException("NULL message has no info");
+        throw CSPException("CertInfo: NULL message has no info");
     }
     msg->ref();
     DWORD spsi;
     HCRYPTMSG hmsg = msg->get_handle();
 
     if (!CryptMsgGetParam(hmsg, CMSG_SIGNER_CERT_INFO_PARAM, idx, NULL, &spsi)) {
-        throw CSPException("Couldn't get signer info size");
+        throw CSPException("CertInfo: Couldn't get signer info size");
     }
     psi = (CERT_INFO *) malloc(spsi);
     if (!CryptMsgGetParam(hmsg, CMSG_SIGNER_CERT_INFO_PARAM, idx, psi, &spsi)) {
-        throw CSPException("Couldn't get signer info data");
+        throw CSPException("CertInfo: Couldn't get signer info data");
     }
 }
 
@@ -77,7 +77,7 @@ void CertInfo::name(BYTE **s, DWORD *slen, bool decode) throw(CSPException)
 {
     LOG("CertInfo::name()\n");
     if (msg) {
-        throw CSPException("Message signer info may not contain subject name", -1);
+        throw CSPException("CertInfo.name: Message signer info may not contain subject name", -1);
     }
     if (decode) {
         decode_name_blob(&psi->Subject, s, slen);
@@ -128,7 +128,7 @@ void CertInfo::decode_name_blob(PCERT_NAME_BLOB pNameBlob, BYTE **s, DWORD *slen
 
     *slen = CertNameToStr( X509_ASN_ENCODING, pNameBlob, flags, NULL, 0);
     if (*slen <= 1) {
-        throw CSPException("Wrong size for blob decoded data");
+        throw CSPException("CertInfo.decode_name_blob: Wrong size for blob decoded data");
     }
 
     *s = (BYTE *)malloc(*slen);
@@ -137,7 +137,7 @@ void CertInfo::decode_name_blob(PCERT_NAME_BLOB pNameBlob, BYTE **s, DWORD *slen
 
     if (*slen <= 1) {
         free(*s);
-        throw CSPException("Couldn't decode cert blob");
+        throw CSPException("CertInfo.decode_name_blob: Couldn't decode cert blob");
     }
     (*slen)--;
 }
@@ -151,7 +151,7 @@ ExtIter::ExtIter(CertInfo *p) throw (CSPException)
 {
     LOG("ExtIter::ExtIter(%p)\n", parent);
     if(!parent) {
-        throw CSPException("NULL reference to CertInfo", -1);
+        throw CSPException("CertInfo.extensions: NULL reference to CertInfo", -1);
     }
     parent->ref();
     n = parent->psi->cExtension;

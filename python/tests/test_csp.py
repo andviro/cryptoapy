@@ -204,6 +204,14 @@ def test_cert_from_data():
     assert len(list(memstore)) == 1
 
 
+def test_store_key():
+    context = csp.Crypt(test_container, csp.PROV_GOST_2001_DH, 0)
+    key = context.get_key()
+    certdata = test_extract_cert()
+    newc = csp.Cert(certdata)
+    key.store_cert(newc)
+
+
 def _cert_thumb():
     '''
     Метод `Cert.thumb()` возвращает отпечаток сертификата в виде бинарной
