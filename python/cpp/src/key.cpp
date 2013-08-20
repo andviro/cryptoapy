@@ -50,3 +50,34 @@ void Key::store_cert(Cert *c) throw (CSPException) {
         throw CSPException("Key.store_cert: couldn't set key parameter");
     }
 }
+
+void Key::extract_cert(BYTE **s, DWORD *slen) throw (CSPException) {
+    if(!CryptGetKeyParam( 
+        hkey, 
+        KP_CERTIFICATE, 
+        NULL, 
+        slen, 
+        0))
+    {
+        throw CSPException("Key.extract_cert: couldn't get certificate blob length");
+    }
+
+    *s = (BYTE*)malloc(*slen);
+
+    if(!*s) {
+        throw CSPException("Key.extract_cert: memory allocation error");
+    }
+
+    //--------------------------------------------------------------------
+    // Копирование параметров ключа в BLOB.
+
+    if(!CryptGetKeyParam( 
+        hkey, 
+        KP_CERTIFICATE, 
+        *s, 
+        slen, 
+        0))
+    {
+        throw CSPException("Key.extract_cert: couldn't copy certificate blob");
+    }
+}
