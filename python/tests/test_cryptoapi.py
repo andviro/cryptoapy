@@ -27,8 +27,8 @@ def test_encode_address():
     assert att2.decode() == testaddr
 
 
-#def test_encrypt_for_certs():
-    #certs = [open(case_path(x, 'rb')).read() for x in ('res1.cer', 'res2.cer', 'res3.cer')]
-    #data = open(case_path('res.bin', 'rb')).read()
-    #res = cryptoapi.encrypt(certs, data)
-    #assert res
+def test_encrypt_for_certs():
+    certs = [open(case_path(x), 'rb').read() for x in ('res1.cer', 'res2.cer', 'res3.cer')]
+    data = open(case_path('res.bin'), 'rb').read()
+    res = cryptoapi.encrypt(certs, data)
+    assert res
