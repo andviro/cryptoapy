@@ -81,7 +81,7 @@ library_dirs = ['cpp']
 libraries = []
 extra_compile_args = ['-DSIZEOF_VOID_P={0}'.format(size)]
 
-extra_compile_args.append('-DDEBUG_LOG')
+#extra_compile_args.append('-DDEBUG_LOG')
 
 if platform.system() == 'Windows':
     include_dirs += [
@@ -120,7 +120,7 @@ csp = Extension('cprocsp._csp',
 
 
 setup(name='cryptoapy',
-      version='0.4.20',
+      version='0.4.21',
       author='Andrew Rodionoff',
       author_email='andviro@gmail.com',
       license='LGPL',

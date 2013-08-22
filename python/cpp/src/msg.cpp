@@ -103,8 +103,10 @@ void CryptMsg::encrypt_data(BYTE *STRING, DWORD LENGTH, BYTE **s, DWORD *slen) t
     vector<Cert *>::const_iterator cii;
     int i = 0;
     for(cii=recipients.begin(); cii!=recipients.end(); cii++) {
-        pRecipientCert[i] = (*cii)->pcert;
+        LOG("    adding recipient cert %p\n", (*cii)->pcert);
+        pRecipientCert[i++] = (*cii)->pcert;
     }
+    LOG("    processed all recipient certs\n");
 
     // Инициализация структуры с нулем.
     memset(&EncryptAlgorithm, 0, sizeof(CRYPT_ALGORITHM_IDENTIFIER));
@@ -112,14 +114,15 @@ void CryptMsg::encrypt_data(BYTE *STRING, DWORD LENGTH, BYTE **s, DWORD *slen) t
     EncryptAlgorithm.pszObjId = (LPSTR)szOID_CP_GOST_28147;
 
     // Инициализация структуры CRYPT_ENCRYPT_MESSAGE_PARA.
-    memset(&EncryptParams, 0, sizeof(CRYPT_ENCRYPT_MESSAGE_PARA));
-    EncryptParams.cbSize =  sizeof(CRYPT_ENCRYPT_MESSAGE_PARA);
+    memset(&EncryptParams, 0, sizeof(EncryptParams));
+    EncryptParams.cbSize =  sizeof(EncryptParams);
     EncryptParams.dwMsgEncodingType = MY_ENCODING_TYPE;
     if (cprov) {
         EncryptParams.hCryptProv = cprov->hprov;
     }
     EncryptParams.ContentEncryptionAlgorithm = EncryptAlgorithm;
 
+    LOG("    getting encrypted data size\n");
     // Вызов функции CryptEncryptMessage.
     if(!CryptEncryptMessage(
                 &EncryptParams,
@@ -130,9 +133,11 @@ void CryptMsg::encrypt_data(BYTE *STRING, DWORD LENGTH, BYTE **s, DWORD *slen) t
                 NULL,
                 slen)) {
         DWORD err = GetLastError();
+        LOG("    error getting encrypted data size %x\n", err);
         delete[] pRecipientCert;
         throw CSPException("CryptMsg.encrypt_data: Getting EncrypBlob size failed.", err);
     }
+    LOG("    encrypted data size is %u\n", *slen);
     // Распределение памяти под возвращаемый BLOB.
     *s = (BYTE*)malloc(*slen);
 
@@ -142,6 +147,7 @@ void CryptMsg::encrypt_data(BYTE *STRING, DWORD LENGTH, BYTE **s, DWORD *slen) t
         throw CSPException("CryptMsg.encrypt_data: Memory allocation error while encrypting.", err);
     }
 
+    LOG("    encrypting data\n");
     // Повторный вызов функции CryptEncryptMessage для зашифрования содержимого.
     if(!CryptEncryptMessage(
                 &EncryptParams,
@@ -152,10 +158,12 @@ void CryptMsg::encrypt_data(BYTE *STRING, DWORD LENGTH, BYTE **s, DWORD *slen) t
                 *s,
                 slen)) {
         DWORD err = GetLastError();
+        LOG("    encryption error %x\n", err);
         delete[] pRecipientCert;
         free((void *)*s);
         throw CSPException("CryptMsg.encrypt_data: Encryption failed.", err);
     }
+    LOG("    encrypted succesfully\n");
     delete[] pRecipientCert;
 }
 
