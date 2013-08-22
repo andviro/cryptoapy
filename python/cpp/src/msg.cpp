@@ -85,6 +85,7 @@ CryptMsg::CryptMsg(Crypt *ctx) throw(CSPException)
 
 void CryptMsg::add_recipient(Cert *c) throw(CSPException)
 {
+    LOG("CryptMsg::add_recipient(%p)\n", c);
     if (c) {
         c->ref();
         recipients.push_back(c);
@@ -93,9 +94,11 @@ void CryptMsg::add_recipient(Cert *c) throw(CSPException)
 
 void CryptMsg::encrypt_data(BYTE *STRING, DWORD LENGTH, BYTE **s, DWORD *slen) throw(CSPException)
 {
+    LOG("CryptMsg::encrypt_data(%p, %u)\n", STRING, LENGTH);
     CRYPT_ALGORITHM_IDENTIFIER EncryptAlgorithm;
     CRYPT_ENCRYPT_MESSAGE_PARA EncryptParams;
     DWORD nrecs = recipients.size();
+    LOG("    nrecs: %i\n", nrecs);
     PCCERT_CONTEXT *pRecipientCert = new PCCERT_CONTEXT[nrecs];
     vector<Cert *>::const_iterator cii;
     int i = 0;
