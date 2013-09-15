@@ -587,3 +587,16 @@ def test_add_remove_cert():
             cert.remove_from_store()
     print(len(list(my)), n1)
     assert len(list(my)) == n1
+
+
+def test_enum_providers():
+    '''
+    Test Crypt.enumerate()
+    Статический метод `Crypt.enumerate` возвращает итератор, перечисляющий
+    описания установленных в системе криптопровайдеров. Описания имеют поля
+    `name` и `type`, по которым можно определить название и тип провайдера.
+    '''
+
+    providers = list((c.name, c.type) for c in csp.Crypt.enumerate())
+    print(providers)
+    assert len(providers)
