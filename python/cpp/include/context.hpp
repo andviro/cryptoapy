@@ -5,6 +5,31 @@
 #include "except.hpp"
 
 class Key;
+class CryptIter;
+
+class CryptDesc
+{
+public:
+    DWORD type;
+    char *name;
+    virtual ~CryptDesc()
+    {
+        delete[] name;
+    }
+};
+
+class CryptIter
+{
+    DWORD index;
+public:
+    CryptIter() throw (CSPException);
+
+    CryptIter *__iter__() {
+        return new CryptIter();
+    }
+
+    CryptDesc *next() throw (Stop_Iteration, CSPException);
+};
 
 class Crypt : public RCObj
 {
@@ -31,6 +56,8 @@ public:
     void set_password(char *pin, DWORD keyspec=AT_KEYEXCHANGE) throw(CSPException);
 
     static void remove(char *container, DWORD type, char *name) throw(CSPException, CSPNotFound);
+
+    static CryptIter *enumerate() throw(CSPException);
 
     friend class Cert;
     friend class CryptMsg;

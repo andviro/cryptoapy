@@ -186,3 +186,28 @@ void Crypt::remove(char *container, DWORD type, char *name) throw(CSPException, 
         }
     }
 }
+
+CryptIter *Crypt::enumerate() throw(CSPException) {
+    return new CryptIter();
+}
+
+CryptIter::CryptIter() throw(CSPException) {
+    index = 0;
+}
+
+CryptDesc *CryptIter::next() throw (Stop_Iteration, CSPException) {
+    DWORD slen, provtype;
+    if (CryptEnumProviders(index, NULL, 0, &provtype, NULL, &slen)) {
+        CryptDesc *cd = new CryptDesc();
+        cd->name = new char[slen];
+        cd->type = provtype;
+        if (!CryptEnumProviders(index, NULL, 0, &provtype, cd->name, &slen)) {
+            DWORD err = GetLastError();
+            delete cd;
+            throw CSPException("CryptIter.next: error getting provider name", err);
+        }
+        index ++;
+        return cd;
+    }
+    throw Stop_Iteration();
+}
