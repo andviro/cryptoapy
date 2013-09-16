@@ -4,7 +4,7 @@ from __future__ import unicode_literals, print_function
 from cprocsp import cryptoapi, certutils
 import sys
 
-from . import case_path
+from . import case_path, test_local
 
 if sys.version_info >= (3,):
         unicode = str

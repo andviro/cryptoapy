@@ -7,7 +7,7 @@ import sys
 from platform import architecture
 from base64 import b64encode
 
-from . import test_container, test_cn, case_path
+from . import test_container, test_cn, case_path, test_provider
 
 if sys.version_info >= (3,):
         unicode = str
@@ -34,6 +34,7 @@ def test_context_simple():
         None,
         csp.PROV_GOST_2001_DH,
         csp.CRYPT_VERIFYCONTEXT,
+        test_provider
     )
     assert context
     return context
@@ -48,6 +49,7 @@ def test_context_named_keystore():
         test_container,
         csp.PROV_GOST_2001_DH,
         0,
+        test_provider,
     )
     assert context
     return context
@@ -59,6 +61,7 @@ def test_context_not_found():
         b"some_wrong_ctx",
         csp.PROV_GOST_2001_DH,
         0,
+        test_provider,
     )
     assert not ctx
 
@@ -84,9 +87,9 @@ def test_export_import_pubkey():
     `Key` для расшифровки закрытого ключа.
 
     '''
-    context = csp.Crypt(test_container, csp.PROV_GOST_2001_DH, 0)
+    context = csp.Crypt(test_container, csp.PROV_GOST_2001_DH, 0, test_provider)
 
-    recipient = csp.Crypt(None, csp.PROV_GOST_2001_DH, csp.CRYPT_VERIFYCONTEXT)
+    recipient = csp.Crypt(None, csp.PROV_GOST_2001_DH, csp.CRYPT_VERIFYCONTEXT, test_provider)
 
     sk = context.get_key()
     assert sk
@@ -205,7 +208,7 @@ def test_cert_from_data():
 
 
 def test_store_key():
-    context = csp.Crypt(test_container, csp.PROV_GOST_2001_DH, 0)
+    context = csp.Crypt(test_container, csp.PROV_GOST_2001_DH, 0, test_provider)
     key = context.get_key()
     certdata = test_extract_cert()
     newc = csp.Cert(certdata)
@@ -345,7 +348,7 @@ def test_sign_data():
     ctx = csp.Crypt(
         test_container,
         csp.PROV_GOST_2001_DH,
-        0,
+        0, test_provider
     )
     cs = csp.CertStore(ctx, b"MY")
     cert = list(cs.find_by_name(test_cn))[0]
@@ -367,6 +370,7 @@ def test_detached_sign():
         test_container,
         csp.PROV_GOST_2001_DH,
         0,
+        test_provider 
     )
     assert ctx
     cs = csp.CertStore(None, b"MY")
@@ -401,6 +405,7 @@ def test_msg_signatures():
         None,
         csp.PROV_GOST_2001_DH,
         csp.CRYPT_VERIFYCONTEXT,
+        test_provider 
     )
     testdata = test_sign_data()
     # testdata = open('tests/logical.cms', 'rb').read()
@@ -451,6 +456,7 @@ def test_detached_sign2():
         test_container,
         csp.PROV_GOST_2001_DH,
         0,
+        test_provider 
     )
     assert ctx
     cs = csp.CertStore(ctx, b"MY")
