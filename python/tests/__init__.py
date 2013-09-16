@@ -7,8 +7,10 @@ from base64 import b64encode
 from pyasn1_modules.rfc2459 import id_at_commonName as CN
 from cprocsp import csp, cryptoapi
 
-test_container = b'csp_test_keyset'
-test_cn = b'CSP Test certificate'
+test_local = False
+test_provider = b"Crypto-Pro HSM CSP" if not test_local else None
+test_container = b'csp_test_keyset_hsm'
+test_cn = b'HSM CSP Test certificate'
 test_cer_fn = 'test_cer.cer'
 test_req_fn = 'test_req.req'
 test_thumb = None
@@ -24,7 +26,7 @@ def setup_package():
     Создание тестового ключевого контейнера и сертификата.
     '''
     global test_thumb
-    assert cryptoapi.gen_key(test_container)
+    assert cryptoapi.gen_key(test_container, local=test_local)
     cs = csp.CertStore(None, b"MY")
     certs = list(cs.find_by_name(test_cn))
     if not certs:
@@ -37,7 +39,8 @@ def setup_package():
                               # CertificatePolicies=[('1.2.643.100.113.1', []),
                               #('1.2.643.100.113.2', [])],
                               )
-            request = cryptoapi.create_request(test_container, req_params)
+            request = cryptoapi.create_request(test_container, req_params,
+                                               local=test_local)
             open(test_req_fn, 'wb').write(b64encode(request))
             print('''
 Creating certificate request in file '{req}'. Submit request to
@@ -46,7 +49,8 @@ CA and save certificate in file '{cer}'. Then re-run tests.
             assert False
         else:
             cert = open(test_cer_fn, 'rb').read()
-            test_thumb = cryptoapi.bind_cert_to_key(test_container, cert)
+            test_thumb = cryptoapi.bind_cert_to_key(test_container, cert,
+                                                    local=test_local)
 
 
 def teardown_package():
