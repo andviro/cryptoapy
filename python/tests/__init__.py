@@ -7,10 +7,10 @@ from base64 import b64encode
 from pyasn1_modules.rfc2459 import id_at_commonName as CN
 from cprocsp import csp, cryptoapi
 
-test_local = False
+test_local = True
 test_provider = b"Crypto-Pro HSM CSP" if not test_local else None
-test_container = b'csp_test_keyset_hsm'
-test_cn = b'HSM CSP Test certificate'
+test_container = b'csp_test_keyset_hsm' if not test_local else b'csp_test_keyset'
+test_cn = b'CSP Test certificate' if test_local else b'HSM CSP Test certificate'
 test_cer_fn = 'test_cer.cer'
 test_req_fn = 'test_req.req'
 test_thumb = None
