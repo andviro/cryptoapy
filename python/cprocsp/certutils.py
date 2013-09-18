@@ -6,6 +6,11 @@ from pyasn1.codec.der import encoder, decoder
 from pyasn1_modules import rfc2459, rfc2315
 from base64 import b64decode
 from datetime import timedelta
+import sys
+if sys.version_info >= (3,):
+        unicode = str
+else:
+        unicode = unicode
 
 
 def autopem(cert):

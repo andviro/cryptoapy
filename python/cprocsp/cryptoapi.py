@@ -9,7 +9,7 @@ from .certutils import Attributes, CertValidity, KeyUsage, EKU,\
 
 import platform
 from binascii import hexlify, unhexlify
-from filetimes import filetime_from_dec
+from .filetimes import filetime_from_dec
 from datetime import datetime, timedelta
 
 
@@ -28,19 +28,19 @@ def gen_key(cont, local=True, silent=False):
     silent_flag = csp.CRYPT_SILENT if silent else 0
     provider = b"Crypto-Pro HSM CSP" if not local else None
 
-    cont = bytes(cont)
+    cont = str(cont)
     try:
         ctx = csp.Crypt(cont, csp.PROV_GOST_2001_DH, silent_flag, provider)
     except (ValueError, SystemError):
 
         if platform.system() == 'Linux' and local:
-            cont = bytes(r'\\.\HDIMAGE\{0}'.format(cont))
+            cont = str(r'\\.\HDIMAGE\{0}'.format(cont))
 
         ctx = csp.Crypt(cont, csp.PROV_GOST_2001_DH, csp.CRYPT_NEWKEYSET |
                         silent_flag, provider)
 
-    ctx.set_password(b'', csp.AT_KEYEXCHANGE)
-    ctx.set_password(b'', csp.AT_SIGNATURE)
+    ctx.set_password(str(''), csp.AT_KEYEXCHANGE)
+    ctx.set_password(str(''), csp.AT_SIGNATURE)
     try:
         key = ctx.get_key()
     except ValueError:
