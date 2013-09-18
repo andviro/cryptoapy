@@ -73,7 +73,7 @@ class CertValidity(CertAttribute):
         """@todo: to be defined """
         val = univ.Sequence()
         for i, x in enumerate((not_before, not_after)):
-            val.setComponentByPosition(i, useful.UTCTime(bytes(x.strftime('%y%m%d%H%M%SZ'))))
+            val.setComponentByPosition(i, useful.UTCTime(str(x.strftime('%y%m%d%H%M%SZ'))))
         super(CertValidity, self).__init__(b'1.2.643.2.4.1.1.1.1.2', [val])
 
 
@@ -97,9 +97,9 @@ class CertExtension(object):
 
         """
         self.asn = rfc2459.Extension()
-        self.asn.setComponentByName(b'extnID', univ.ObjectIdentifier(bytes(oid)))
-        self.asn.setComponentByName(b'critical', univ.Boolean(bool(critical)))
-        self.asn.setComponentByName(b'extnValue', univ.OctetString(bytes(value)))
+        self.asn.setComponentByName(b'extnID', univ.ObjectIdentifier(str(oid)))
+        self.asn.setComponentByName(b'critical', univ.Boolean(str(critical)))
+        self.asn.setComponentByName(b'extnValue', univ.OctetString(str(value)))
 
 
 class EKU(CertExtension):
@@ -113,7 +113,7 @@ class EKU(CertExtension):
         """
         val = rfc2459.ExtKeyUsageSyntax()
         for i, x in enumerate(ekus):
-            val.setComponentByPosition(i, rfc2459.KeyPurposeId(bytes(x)))
+            val.setComponentByPosition(i, rfc2459.KeyPurposeId(str(x)))
         super(EKU, self).__init__(csp.szOID_ENHANCED_KEY_USAGE, encoder.encode(val))
 
 
@@ -126,7 +126,7 @@ class KeyUsage(CertExtension):
         :ekus: список OID-ов расш. использования
 
         """
-        val = rfc2459.KeyUsage(bytes(','.join(mask)))
+        val = rfc2459.KeyUsage(str(','.join(mask)))
         super(KeyUsage, self).__init__(csp.szOID_KEY_USAGE, encoder.encode(val))
 
 
@@ -158,7 +158,7 @@ class Attributes(object):
                 pairset = rfc2459.RelativeDistinguishedName()
                 for (j, (oid, val)) in enumerate(attr):
                     pair = rfc2459.AttributeTypeAndValue()
-                    pair.setComponentByName('type', rfc2459.AttributeType(bytes(oid)))
+                    pair.setComponentByName('type', rfc2459.AttributeType(str(oid)))
                     code, enc = self.special_encs.get(oid, (char.UTF8String, 'utf-8'))
                     pair.setComponentByName('value',
                                             rfc2459.AttributeValue(
@@ -247,8 +247,8 @@ class SubjectAltName(CertExtension):
     def otherName(self, val):
         res = rfc2459.AnotherName(
         ).subtype(implicitTag=tag.Tag(tag.tagClassContext, tag.tagFormatSimple, 0))
-        res.setComponentByName('type-id', bytes(val[0]))
-        res.setComponentByName('value', bytes(val[1]))
+        res.setComponentByName('type-id', str(val[0]))
+        res.setComponentByName('value', str(val[1]))
         return res
 
     def rfc822Name(self, st):
@@ -313,14 +313,14 @@ class CertificatePolicies(CertExtension):
         val = rfc2459.CertificatePolicies()
         for (i, (t, v)) in enumerate(policies or []):
             pol = rfc2459.PolicyInformation()
-            pol.setComponentByPosition(0, rfc2459.CertPolicyId(bytes(t)))
+            pol.setComponentByPosition(0, rfc2459.CertPolicyId(str(t)))
             v = v or []
             if len(v):
                 sq = univ.SequenceOf(componentType=rfc2459.PolicyQualifierInfo()
                                      ).subtype(subtypeSpec=constraint.ValueSizeConstraint(1, rfc2459.MAX))
                 for n, (ident, qualif) in enumerate(v):
                     pqi = rfc2459.PolicyQualifierInfo()
-                    pqi.setComponentByPosition(0, rfc2459.PolicyQualifierId(bytes(ident)))
+                    pqi.setComponentByPosition(0, rfc2459.PolicyQualifierId(str(ident)))
                     pqi.setComponentByPosition(1, univ.OctetString(qualif))
                     sq.setComponentByPosition(n, pqi)
                 pol.setComponentByPosition(1, sq)
