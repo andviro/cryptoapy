@@ -58,7 +58,7 @@ def test_context_named_keystore():
 @raises(ValueError)
 def test_context_not_found():
     ctx = csp.Crypt(
-        b"some_wrong_ctx",
+        str("some_wrong_ctx"),
         csp.PROV_GOST_2001_DH,
         0,
         test_provider,

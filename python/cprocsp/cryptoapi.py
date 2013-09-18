@@ -11,6 +11,12 @@ import platform
 from binascii import hexlify, unhexlify
 from .filetimes import filetime_from_dec
 from datetime import datetime, timedelta
+import sys
+if sys.version_info >= (3,):
+        unicode = str
+        ord = lambda x: x
+else:
+        unicode = unicode
 
 
 def gen_key(cont, local=True, silent=False):
