@@ -1,6 +1,6 @@
 # coding: utf-8
 from __future__ import unicode_literals, print_function
-import csp
+from . import csp
 from pyasn1.type import univ, useful, char, tag, constraint
 from pyasn1.codec.der import encoder, decoder
 from pyasn1_modules import rfc2459, rfc2315

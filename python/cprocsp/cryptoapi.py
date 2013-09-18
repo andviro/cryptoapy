@@ -2,8 +2,8 @@
 #-*- coding: utf-8 -*-
 from __future__ import unicode_literals, print_function
 
-import csp
-from certutils import Attributes, CertValidity, KeyUsage, EKU,\
+from . import csp
+from .certutils import Attributes, CertValidity, KeyUsage, EKU,\
     CertExtensions, SubjectAltName, CertificatePolicies, PKCS7Msg, \
     CertExtension, CertificateInfo, autopem, set_q_defaults
 
