@@ -12,11 +12,32 @@ from binascii import hexlify, unhexlify
 from .filetimes import filetime_from_dec
 from datetime import datetime, timedelta
 import sys
+import time
+from functools import wraps
 if sys.version_info >= (3,):
         unicode = str
         ord = lambda x: x
 else:
         unicode = unicode
+
+
+# Обертка для функций, которые могут не сработать из-за длительного простоя
+# туннеля, при работе с криптопровайдером внешнего хранилища. Максимальный
+# таймаут = 0.25 + 0.5 + 1.0 = 1.75 секунд
+def retry(f, timeout=0.25, num_tries=4):
+    @wraps(f)
+    def wrapper(*args, **nargs):
+        sleep_time = timeout
+        for tr in range(num_tries):
+            try:
+                return f(*args, **nargs)
+            except:
+                if tr == num_tries - 1:
+                    raise
+                time.sleep(sleep_time)
+                sleep_time *= 2
+
+    return wrapper
 
 
 def gen_key(cont, local=True, silent=False):
@@ -168,6 +189,7 @@ def get_certificate(thumb):
     return cert.extract()
 
 
+@retry
 def sign(thumb, data, include_data):
     """Подписывание данных сертификатом
 
@@ -186,6 +208,7 @@ def sign(thumb, data, include_data):
     return sign_data
 
 
+@retry
 def sign_and_encrypt(thumb, certs, data):
     """Подписывание данных сертификатом
 
@@ -209,6 +232,7 @@ def sign_and_encrypt(thumb, certs, data):
     return encrypted
 
 
+@retry
 def check_signature(cert, sig, data):
     """Проверка подписи под данными
 
@@ -233,6 +257,7 @@ def check_signature(cert, sig, data):
     return False
 
 
+@retry
 def encrypt(certs, data):
     """Шифрование данных на сертификатах получателей
 
@@ -251,6 +276,7 @@ def encrypt(certs, data):
     return encrypted
 
 
+@retry
 def decrypt(data, thumb):
     """Дешифрование данных из сообщения
 
