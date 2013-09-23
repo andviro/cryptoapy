@@ -103,8 +103,10 @@ void Crypt::set_password(char *pin, DWORD keyspec) throw (CSPException) {
 }
 
 void Crypt::change_password(char *pin) throw (CSPException) {
-    printf("%x\n", hprov);
-    if(!CryptSetProvParam( hprov, PP_CHANGE_PIN, (const BYTE *)pin, 0)) {
+    CRYPT_PIN_PARAM param;
+    param.type = CRYPT_PIN_PASSWD;
+    param.dest.passwd = pin;
+    if(!CryptSetProvParam( hprov, PP_CHANGE_PIN, (const BYTE *)&param, 0)) {
         throw CSPException("Crypt.change_password: Couldn't change password");
     }
 }
