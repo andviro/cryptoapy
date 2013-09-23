@@ -40,6 +40,8 @@ public:
 
     void bind(Crypt *ctx, DWORD keyspec=AT_KEYEXCHANGE);
 
+    void set_pin(char *pin) throw(CSPException);
+
     EKUIter *eku() throw(CSPException);
 
     friend class CryptMsg;

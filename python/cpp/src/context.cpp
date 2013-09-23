@@ -102,6 +102,13 @@ void Crypt::set_password(char *pin, DWORD keyspec) throw (CSPException) {
     }
 }
 
+void Crypt::change_password(char *pin) throw (CSPException) {
+    printf("%x\n", hprov);
+    if(!CryptSetProvParam( hprov, PP_CHANGE_PIN, (const BYTE *)pin, 0)) {
+        throw CSPException("Crypt.change_password: Couldn't change password");
+    }
+}
+
 Crypt::Crypt(char *container, DWORD type, DWORD flags, char *name) throw(CSPException, CSPNotFound)
 {
     LOG("Crypt::Crypt(%s, %u, %x, %s)\n", container, type, flags, name);

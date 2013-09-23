@@ -170,13 +170,13 @@ CertStore::CertStore(Crypt *parent, BYTE *STRING, DWORD LENGTH) throw(CSPExcepti
     hstore = CertOpenStore(
                  CERT_STORE_PROV_SYSTEM_A,          // The store provider type
                  0,                               // The encoding type is
-                                                    // not needed
+                 // not needed
                  hprov,                            // Use the default HCRYPTPROV
-                                                    // Set the store location in a
-                                                    // registry location
+                 // Set the store location in a
+                 // registry location
                  CERT_STORE_NO_CRYPT_RELEASE_FLAG | CERT_SYSTEM_STORE_CURRENT_USER,
                  proto                            // The store name as a Unicode
-                                                    // string
+                 // string
              );
     if (!hstore) {
         throw CSPException("CertStore: Couldn't open certificate store");
@@ -209,10 +209,10 @@ Cert *CertStore::add_cert(Cert *c) throw(CSPException)
             CERT_STORE_ADD_REPLACE_EXISTING, &copy)) {
         DWORD err = GetLastError();
         switch (err) {
-            case CRYPT_E_EXISTS:
-                throw CSPException("CertStore.add_cert: Matching or newer cerificate already exist in store", err);
-            default:
-                throw CSPException("CertStore.add_cert: Couldn't add cert to store");
+        case CRYPT_E_EXISTS:
+            throw CSPException("CertStore.add_cert: Matching or newer cerificate already exist in store", err);
+        default:
+            throw CSPException("CertStore.add_cert: Couldn't add cert to store");
         }
     }
     return new Cert(copy, this);
@@ -391,7 +391,54 @@ CertStore::~CertStore() throw(CSPException)
     LOG("Deleted store %p\n", this);
 }
 
-void Cert::bind(Crypt *ctx, DWORD keyspec) {
+void Cert::set_pin(char *pin) throw(CSPException)
+{
+    PCRYPT_KEY_PROV_INFO pckpi = NULL;
+    DWORD chpData;
+    CRYPT_KEY_PROV_PARAM key_prov_param;
+
+    if(!CertGetCertificateContextProperty(pcert,
+                                          CERT_KEY_PROV_INFO_PROP_ID,
+                                          0,
+                                          &chpData)) {
+        DWORD err = GetLastError();
+        throw CSPException("Cert::set_pin: couldn't acquire struct size", err);
+    }
+    if(!(pckpi = (CRYPT_KEY_PROV_INFO *)malloc(chpData))) {
+        throw CSPException("Cert::set_pin: memory allocation error", -1);
+    }
+    if(!CertGetCertificateContextProperty(
+                pcert,
+                CERT_KEY_PROV_INFO_PROP_ID,
+                pckpi,
+                &chpData)) {
+        DWORD err = GetLastError();
+        free(pckpi);
+        throw CSPException("Cert::set_pin: couldn't acquire provider info", err);
+    }
+
+    memset(&key_prov_param, 0, sizeof(CRYPT_KEY_PROV_PARAM));
+    key_prov_param.dwFlags = 0;
+    key_prov_param.dwParam = PP_KEYEXCHANGE_PIN;
+    key_prov_param.cbData = strlen(pin) + 1;
+    key_prov_param.pbData = (BYTE *)pin;
+
+    pckpi->cProvParam = 1;
+    pckpi->rgProvParam = &key_prov_param;
+
+    if(!CertSetCertificateContextProperty(pcert,
+        CERT_KEY_PROV_INFO_PROP_ID,
+        0,
+        pckpi))
+    {
+        DWORD err = GetLastError();
+        free(pckpi);
+        throw CSPException("Cert::set_pin: couldn't set context property", err);
+    }
+}
+
+void Cert::bind(Crypt *ctx, DWORD keyspec)
+{
     CRYPT_KEY_PROV_INFO ckpi;
     wchar_t w_ctx_name[1000];
     wchar_t w_prov_name[1000];
@@ -424,8 +471,9 @@ void Cert::bind(Crypt *ctx, DWORD keyspec) {
     delete[] ctx_name;
 }
 
-EKUIter *Cert::eku() throw(CSPException) {
-   return new EKUIter(this);
+EKUIter *Cert::eku() throw(CSPException)
+{
+    return new EKUIter(this);
 }
 
 
@@ -436,27 +484,28 @@ EKUIter::EKUIter (Cert *c)
     pekus = NULL;
     cbsize = 0;
     i = 0;
-    if (parent)
+    if (parent) {
         parent -> ref();
-    else
+    } else {
         return;
+    }
 
-   if (!CertGetEnhancedKeyUsage(parent->pcert, 0, NULL, &cbsize)) {
-       LOG("   failed 1\n");
-       pekus = NULL;
-       cbsize = 0;
-       return;
-   }
+    if (!CertGetEnhancedKeyUsage(parent->pcert, 0, NULL, &cbsize)) {
+        LOG("   failed 1\n");
+        pekus = NULL;
+        cbsize = 0;
+        return;
+    }
 
     LOG("   allocated %i bytes (%i needed)\n", cbsize, sizeof(CERT_ENHKEY_USAGE));
-   pekus = (CERT_ENHKEY_USAGE *)malloc(cbsize);
+    pekus = (CERT_ENHKEY_USAGE *)malloc(cbsize);
 
-   if (!CertGetEnhancedKeyUsage(parent->pcert, 0, pekus, &cbsize)) {
-       LOG("   failed 2\n");
-       free(pekus);
-       pekus= NULL;
-       cbsize = 0;
-   }
+    if (!CertGetEnhancedKeyUsage(parent->pcert, 0, pekus, &cbsize)) {
+        LOG("   failed 2\n");
+        free(pekus);
+        pekus= NULL;
+        cbsize = 0;
+    }
 }
 
 void EKUIter::next (BYTE **s, DWORD *slen) throw (CSPException, Stop_Iteration)
@@ -483,7 +532,8 @@ EKUIter::~EKUIter ()
         free(pekus);
     }
     LOG("    free 1\n", this);
-    if (parent)
+    if (parent) {
         parent -> unref();
+    }
     LOG("    free parent\n", this);
 }
