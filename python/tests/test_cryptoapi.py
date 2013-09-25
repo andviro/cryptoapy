@@ -5,7 +5,7 @@ from cprocsp import cryptoapi, certutils, csp
 import sys
 from binascii import hexlify
 
-from . import case_path, test_local, test_container, get_test_thumb
+from . import case_path, test_local, test_container, get_test_thumb, test_cn
 
 if sys.version_info >= (3,):
         unicode = str
@@ -41,8 +41,9 @@ def test_create_request():
 
 
 def test_get_certificate():
-    cert = cryptoapi.get_certificate(get_test_thumb())
-    assert cert
+    cert_by_thumb = cryptoapi.get_certificate(get_test_thumb())
+    cert_by_name = cryptoapi.get_certificate(name=test_cn)
+    assert cert_by_thumb == cert_by_name
 
 msg = b'Ahahahahahahahahahahahahahahaahahahahhahahahahah!!!!!!111111'
 
