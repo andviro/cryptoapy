@@ -38,6 +38,7 @@ def test_encrypt_for_certs():
 def test_create_request():
     req = cryptoapi.create_request(test_container, {}, test_local)
     assert req is not None and len(req)
+    open('test_request.req', 'wb').write(req)
 
 
 def test_get_certificate():

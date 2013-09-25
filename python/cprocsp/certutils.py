@@ -57,7 +57,8 @@ class CertAttribute(object):
     """
     def __init__(self, oid, values):
         """@todo: to be defined """
-        self.oid = oid
+        self.oid = oid.encode('ascii')
+        print(self.oid)
         self.vals = [encoder.encode(v) for v in values]
 
     def add_to(self, req):
@@ -73,8 +74,8 @@ class CertValidity(CertAttribute):
         """@todo: to be defined """
         val = univ.Sequence()
         for i, x in enumerate((not_before, not_after)):
-            val.setComponentByPosition(i, useful.UTCTime(str(x.strftime('%y%m%d%H%M%SZ'))))
-        super(CertValidity, self).__init__(b'1.2.643.2.4.1.1.1.1.2', [val])
+            val.setComponentByPosition(i, useful.UTCTime(x.strftime('%y%m%d%H%M%SZ')))
+        super(CertValidity, self).__init__('1.2.643.2.4.1.1.1.1.2', [val])
 
 
 class CertExtensions(CertAttribute):
@@ -97,9 +98,9 @@ class CertExtension(object):
 
         """
         self.asn = rfc2459.Extension()
-        self.asn.setComponentByName(b'extnID', univ.ObjectIdentifier(str(oid)))
-        self.asn.setComponentByName(b'critical', univ.Boolean(str(critical)))
-        self.asn.setComponentByName(b'extnValue', univ.OctetString(str(value)))
+        self.asn.setComponentByName('extnID', univ.ObjectIdentifier(oid))
+        self.asn.setComponentByName('critical', univ.Boolean(critical))
+        self.asn.setComponentByName('extnValue', univ.OctetString(value))
 
 
 class EKU(CertExtension):
@@ -113,7 +114,7 @@ class EKU(CertExtension):
         """
         val = rfc2459.ExtKeyUsageSyntax()
         for i, x in enumerate(ekus):
-            val.setComponentByPosition(i, rfc2459.KeyPurposeId(str(x)))
+            val.setComponentByPosition(i, rfc2459.KeyPurposeId(x))
         super(EKU, self).__init__(csp.szOID_ENHANCED_KEY_USAGE, encoder.encode(val))
 
 
@@ -126,7 +127,7 @@ class KeyUsage(CertExtension):
         :ekus: список OID-ов расш. использования
 
         """
-        val = rfc2459.KeyUsage(str(','.join(mask)))
+        val = rfc2459.KeyUsage(','.join(mask))
         super(KeyUsage, self).__init__(csp.szOID_KEY_USAGE, encoder.encode(val))
 
 
@@ -363,7 +364,7 @@ class PKCS7Msg(object):
         for si in self.content.getComponentByName('recipientInfos'):
             info = si.getComponentByName('issuerAndSerialNumber')
             attrs = Attributes(info[0]).decode()
-            sn = '{0:x}'.format(long(info[1]))
+            sn = '{0:x}'.format(int(info[1]))
             res.append(dict(Issuer=attrs, SerialNumber=sn))
         return dict(RecipientInfos=res)
 
@@ -372,7 +373,7 @@ class PKCS7Msg(object):
         for si in self.content.getComponentByName('signerInfos'):
             info = si.getComponentByName('issuerAndSerialNumber')
             attrs = Attributes(info[0]).decode()
-            sn = '{0:x}'.format(long(info[1]))
+            sn = '{0:x}'.format(int(info[1]))
             res.append(dict(Issuer=attrs, SerialNumber=sn))
         return dict(SignerInfos=res)
 
