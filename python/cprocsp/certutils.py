@@ -9,6 +9,7 @@ from datetime import timedelta
 import sys
 if sys.version_info >= (3,):
         unicode = str
+        long = int
 else:
         unicode = unicode
 
@@ -58,7 +59,6 @@ class CertAttribute(object):
     def __init__(self, oid, values):
         """@todo: to be defined """
         self.oid = oid.encode('ascii')
-        print(self.oid)
         self.vals = [encoder.encode(v) for v in values]
 
     def add_to(self, req):
@@ -114,7 +114,7 @@ class EKU(CertExtension):
         """
         val = rfc2459.ExtKeyUsageSyntax()
         for i, x in enumerate(ekus):
-            val.setComponentByPosition(i, rfc2459.KeyPurposeId(x))
+            val.setComponentByPosition(i, rfc2459.KeyPurposeId(str(x)))
         super(EKU, self).__init__(csp.szOID_ENHANCED_KEY_USAGE, encoder.encode(val))
 
 
@@ -127,7 +127,7 @@ class KeyUsage(CertExtension):
         :ekus: список OID-ов расш. использования
 
         """
-        val = rfc2459.KeyUsage(','.join(mask))
+        val = rfc2459.KeyUsage(str(','.join(mask)))
         super(KeyUsage, self).__init__(csp.szOID_KEY_USAGE, encoder.encode(val))
 
 
@@ -364,7 +364,7 @@ class PKCS7Msg(object):
         for si in self.content.getComponentByName('recipientInfos'):
             info = si.getComponentByName('issuerAndSerialNumber')
             attrs = Attributes(info[0]).decode()
-            sn = '{0:x}'.format(int(info[1]))
+            sn = '{0:x}'.format(long(info[1]))
             res.append(dict(Issuer=attrs, SerialNumber=sn))
         return dict(RecipientInfos=res)
 
@@ -373,7 +373,7 @@ class PKCS7Msg(object):
         for si in self.content.getComponentByName('signerInfos'):
             info = si.getComponentByName('issuerAndSerialNumber')
             attrs = Attributes(info[0]).decode()
-            sn = '{0:x}'.format(int(info[1]))
+            sn = '{0:x}'.format(long(info[1]))
             res.append(dict(Issuer=attrs, SerialNumber=sn))
         return dict(SignerInfos=res)
 
