@@ -53,7 +53,7 @@ def gen_key(cont, local=True, silent=False):
 
     '''
     silent_flag = csp.CRYPT_SILENT if silent else 0
-    provider = b"Crypto-Pro HSM CSP" if not local else None
+    provider = str("Crypto-Pro HSM CSP") if not local else None
 
     cont = str(cont)
     try:
@@ -93,8 +93,8 @@ def remove_key(cont, local=True):
     :returns: True, если операция успешна
 
     '''
-    provider = b"Crypto-Pro HSM CSP" if not local else None
-    csp.Crypt.remove(bytes(cont), csp.PROV_GOST_2001_DH, provider)
+    provider = str("Crypto-Pro HSM CSP") if not local else None
+    csp.Crypt.remove(str(cont), csp.PROV_GOST_2001_DH, provider)
     return True
 
 
@@ -132,8 +132,8 @@ def create_request(cont, params, local=True):
 
     """
 
-    provider = b"Crypto-Pro HSM CSP" if not local else None
-    ctx = csp.Crypt(bytes(cont), csp.PROV_GOST_2001_DH, 0, provider)
+    provider = str("Crypto-Pro HSM CSP") if not local else None
+    ctx = csp.Crypt(str(cont), csp.PROV_GOST_2001_DH, 0, provider)
     req = csp.CertRequest(ctx, )
     set_q_defaults(params)
     req.set_subject(Attributes(params.get('Attributes', [])).encode())
@@ -149,7 +149,7 @@ def create_request(cont, params, local=True):
     if len(pols):
         all_exts.append(CertificatePolicies(pols))
     for (oid, data, crit) in params.get('RawExtensions', []):
-        all_exts.append(CertExtension(bytes(oid), data, bool(crit)))
+        all_exts.append(CertExtension(str(oid), data, bool(crit)))
     ext_attr = CertExtensions(all_exts)
     validity.add_to(req)
     ext_attr.add_to(req)
@@ -165,9 +165,9 @@ def bind_cert_to_key(cont, cert, local=True):
     :returns: отпечаток сертификата в виде строки
 
     """
-    provider = b"Crypto-Pro HSM CSP" if not local else None
+    provider = str("Crypto-Pro HSM CSP") if not local else None
     cert = autopem(cert)
-    ctx = csp.Crypt(bytes(cont), csp.PROV_GOST_2001_DH, 0, provider)
+    ctx = csp.Crypt(str(cont), csp.PROV_GOST_2001_DH, 0, provider)
     newc = csp.Cert(cert)
     newc.bind(ctx)
     cs = csp.CertStore(ctx, b"MY")
