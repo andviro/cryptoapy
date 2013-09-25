@@ -6,6 +6,7 @@ from base64 import b64encode
 
 from pyasn1_modules.rfc2459 import id_at_commonName as CN
 from cprocsp import csp, cryptoapi
+from binascii import hexlify
 
 test_local = True
 test_provider = str("Crypto-Pro HSM CSP") if not test_local else None
@@ -25,7 +26,6 @@ def setup_package():
     '''
     Создание тестового ключевого контейнера и сертификата.
     '''
-    global test_thumb
     assert cryptoapi.gen_key(test_container, local=test_local)
     cs = csp.CertStore(None, b"MY")
     certs = list(cs.find_by_name(test_cn))
@@ -49,8 +49,8 @@ CA and save certificate in file '{cer}'. Then re-run tests.
             assert False
         else:
             cert = open(test_cer_fn, 'rb').read()
-            test_thumb = cryptoapi.bind_cert_to_key(test_container, cert,
-                                                    local=test_local)
+            cryptoapi.bind_cert_to_key(test_container, cert,
+                                       local=test_local)
 
 
 def teardown_package():
@@ -58,3 +58,10 @@ def teardown_package():
     Прибиение временных файлов.
     '''
     pass
+
+
+def get_test_thumb():
+    cs = csp.CertStore(None, b"MY")
+    certs = list(cs.find_by_name(test_cn))
+    assert len(certs), 'Test certificate not found'
+    return hexlify(certs[0].thumbprint())
