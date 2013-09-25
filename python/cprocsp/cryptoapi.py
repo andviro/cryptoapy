@@ -236,14 +236,20 @@ def sign_and_encrypt(thumb, certs, data):
 def check_signature(cert, sig, data):
     """Проверка подписи под данными
 
-    :cert: сертификат в байтовой строке
+    :cert: сертификат в байтовой строке или `None`
     :data: бинарные данные в байтовой строке
     :sig: данные подписи в байтовой строке
     :local: Если True, работа идет с локальным хранилищем
     :returns: True или False
 
+    Если :cert: передан как None, осуществляется проверка всех подписантов в
+    подписи, с использованием сертификатов, которые содержатся в самой подписи.
+    Иначе проверяется только подписант, соответствующий переданному сертификату.
+
     """
     sign = csp.Signature(sig)
+    if cert is None:
+        return all(sign.verify_data(data, i) for i in range(sign.num_signers()))
     cert = autopem(cert)
     cert = csp.Cert(cert)
     icert = csp.CertInfo(cert)
