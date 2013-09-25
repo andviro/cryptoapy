@@ -175,15 +175,20 @@ def bind_cert_to_key(cont, cert, local=True):
     return hexlify(newc.thumbprint())
 
 
-def get_certificate(thumb):
+def get_certificate(thumb=None, name=None):
     """Поиск сертификатов по отпечатку
 
     :thumb: отпечаток, возвращенный функцией `bind_cert_to_key`
+    :name: имя субъекта для поиска (передается вместо параметра :thumb:)
     :returns: сертификат в байтовой строке
 
     """
+    assert thumb or name and not (thumb and name), 'Only one thumb or name allowed'
     cs = csp.CertStore(None, b"MY")
-    res = list(cs.find_by_thumb(unhexlify(thumb)))
+    if thumb is not None:
+        res = list(cs.find_by_thumb(unhexlify(thumb)))
+    else:
+        res = list(cs.find_by_name(bytes(name)))
     assert len(res), 'Cert not found'
     cert = res[0]
     return cert.extract()
