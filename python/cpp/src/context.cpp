@@ -111,13 +111,14 @@ void Crypt::change_password(char *pin) throw (CSPException) {
     }
 }
 
-Crypt::Crypt(char *container, DWORD type, DWORD flags, char *name) throw(CSPException, CSPNotFound)
+Crypt::Crypt (BYTE *STRING, DWORD LENGTH, DWORD type, DWORD flags, char *name) throw(CSPException, CSPNotFound)
 {
     LOG("Crypt::Crypt(%s, %u, %x, %s)\n", container, type, flags, name);
     cont_name = NULL;
-    if (container) {
-        cont_name = new char[strlen(container) + 1];
-        strcpy(cont_name, container);
+    if (STRING) {
+        cont_name = new char[LENGTH + 1];
+        strncpy(cont_name, (const char *)STRING, LENGTH);
+        cont_name[LENGTH] = 0;
     }
  
     pr_name = NULL;
