@@ -40,6 +40,12 @@ def retry(f, timeout=0.25, num_tries=4):
     return wrapper
 
 
+def _bytes(s):
+    if isinstance(s, unicode):
+        return s.encode('utf-8', 'replace')
+    return bytes(s)
+
+
 def gen_key(cont, local=True, silent=False):
     '''
     Создание контейнера и двух пар ключей в нем
@@ -54,14 +60,14 @@ def gen_key(cont, local=True, silent=False):
     '''
     silent_flag = csp.CRYPT_SILENT if silent else 0
     provider = str("Crypto-Pro HSM CSP") if not local else None
+    cont = _bytes(cont)
 
-    cont = str(cont)
     try:
         ctx = csp.Crypt(cont, csp.PROV_GOST_2001_DH, silent_flag, provider)
     except (ValueError, SystemError):
 
         if platform.system() == 'Linux' and local:
-            cont = str(r'\\.\HDIMAGE\{0}'.format(cont))
+            cont = b'\\\\.\\HDIMAGE\\' + cont
 
         ctx = csp.Crypt(cont, csp.PROV_GOST_2001_DH, csp.CRYPT_NEWKEYSET |
                         silent_flag, provider)
@@ -93,8 +99,9 @@ def remove_key(cont, local=True):
     :returns: True, если операция успешна
 
     '''
+    cont = _bytes(cont)
     provider = str("Crypto-Pro HSM CSP") if not local else None
-    csp.Crypt.remove(str(cont), csp.PROV_GOST_2001_DH, provider)
+    csp.Crypt.remove(cont, csp.PROV_GOST_2001_DH, provider)
     return True
 
 
@@ -133,7 +140,8 @@ def create_request(cont, params, local=True):
     """
 
     provider = str("Crypto-Pro HSM CSP") if not local else None
-    ctx = csp.Crypt(str(cont), csp.PROV_GOST_2001_DH, 0, provider)
+    cont = _bytes(cont)
+    ctx = csp.Crypt(cont, csp.PROV_GOST_2001_DH, 0, provider)
     req = csp.CertRequest(ctx, )
     set_q_defaults(params)
     req.set_subject(Attributes(params.get('Attributes', [])).encode())
@@ -167,7 +175,8 @@ def bind_cert_to_key(cont, cert, local=True):
     """
     provider = str("Crypto-Pro HSM CSP") if not local else None
     cert = autopem(cert)
-    ctx = csp.Crypt(str(cont), csp.PROV_GOST_2001_DH, 0, provider)
+    cont = _bytes(cont)
+    ctx = csp.Crypt(cont, csp.PROV_GOST_2001_DH, 0, provider)
     newc = csp.Cert(cert)
     newc.bind(ctx)
     cs = csp.CertStore(ctx, b"MY")

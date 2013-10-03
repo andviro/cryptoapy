@@ -39,7 +39,7 @@ class Crypt : public RCObj
 
 public:
 
-    Crypt (char *container, DWORD type, DWORD flags, char *name=NULL) throw(CSPException, CSPNotFound);
+    Crypt (BYTE *STRING, DWORD LENGTH, DWORD type, DWORD flags, char *name=NULL) throw(CSPException, CSPNotFound);
     ~Crypt() throw(CSPException);
 
     char *name();

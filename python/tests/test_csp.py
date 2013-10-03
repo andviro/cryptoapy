@@ -31,7 +31,7 @@ def test_context_simple():
 
     '''
     context = csp.Crypt(
-        None,
+        b'',
         csp.PROV_GOST_2001_DH,
         csp.CRYPT_VERIFYCONTEXT,
         test_provider
@@ -58,7 +58,7 @@ def test_context_named_keystore():
 @raises(ValueError)
 def test_context_not_found():
     ctx = csp.Crypt(
-        str("some_wrong_ctx"),
+        b"some_wrong_ctx",
         csp.PROV_GOST_2001_DH,
         0,
         test_provider,
@@ -89,7 +89,7 @@ def test_export_import_pubkey():
     '''
     context = csp.Crypt(test_container, csp.PROV_GOST_2001_DH, 0, test_provider)
 
-    recipient = csp.Crypt(None, csp.PROV_GOST_2001_DH, csp.CRYPT_VERIFYCONTEXT, test_provider)
+    recipient = csp.Crypt(b'', csp.PROV_GOST_2001_DH, csp.CRYPT_VERIFYCONTEXT, test_provider)
 
     sk = context.get_key()
     assert sk
@@ -402,7 +402,7 @@ def test_msg_signatures():
 
     '''
     ctx = csp.Crypt(
-        None,
+        b'',
         csp.PROV_GOST_2001_DH,
         csp.CRYPT_VERIFYCONTEXT,
         test_provider 
