@@ -11,6 +11,7 @@ import platform
 from binascii import hexlify, unhexlify
 from .filetimes import filetime_from_dec
 from datetime import datetime, timedelta
+from binascii import b2a_qp, a2b_qp
 import sys
 import time
 from functools import wraps
@@ -40,10 +41,14 @@ def retry(f, timeout=0.25, num_tries=4):
     return wrapper
 
 
-def _bytes(s):
-    if isinstance(s, unicode):
-        return s.encode('utf-8', 'replace')
-    return bytes(s)
+def _to_hex(s):
+    return unicode(b2a_qp(s), 'ascii').replace('=', '\\x')
+
+
+def _from_hex(s):
+    if isinstance(s, bytes):
+        s = unicode(s, 'ascii')
+    return a2b_qp(s.replace('\\x', '='))
 
 
 def gen_key(cont, local=True, silent=False):
@@ -60,7 +65,7 @@ def gen_key(cont, local=True, silent=False):
     '''
     silent_flag = csp.CRYPT_SILENT if silent else 0
     provider = str("Crypto-Pro HSM CSP") if not local else None
-    cont = _bytes(cont)
+    cont = _from_hex(cont)
 
     try:
         ctx = csp.Crypt(cont, csp.PROV_GOST_2001_DH, silent_flag, provider)
@@ -99,7 +104,7 @@ def remove_key(cont, local=True):
     :returns: True, если операция успешна
 
     '''
-    cont = _bytes(cont)
+    cont = _from_hex(cont)
     provider = str("Crypto-Pro HSM CSP") if not local else None
     csp.Crypt.remove(cont, csp.PROV_GOST_2001_DH, provider)
     return True
@@ -140,7 +145,7 @@ def create_request(cont, params, local=True):
     """
 
     provider = str("Crypto-Pro HSM CSP") if not local else None
-    cont = _bytes(cont)
+    cont = _from_hex(cont)
     ctx = csp.Crypt(cont, csp.PROV_GOST_2001_DH, 0, provider)
     req = csp.CertRequest(ctx, )
     set_q_defaults(params)
@@ -175,7 +180,7 @@ def bind_cert_to_key(cont, cert, local=True):
     """
     provider = str("Crypto-Pro HSM CSP") if not local else None
     cert = autopem(cert)
-    cont = _bytes(cont)
+    cont = _from_hex(cont)
     ctx = csp.Crypt(cont, csp.PROV_GOST_2001_DH, 0, provider)
     newc = csp.Cert(cert)
     newc.bind(ctx)

@@ -51,6 +51,7 @@ CA and save certificate in file '{cer}'. Then re-run tests.
             cert = open(test_cer_fn, 'rb').read()
             cryptoapi.bind_cert_to_key(test_container, cert,
                                        local=test_local)
+            os.remove(test_cer_fn)
 
 
 def teardown_package():
