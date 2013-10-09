@@ -51,7 +51,7 @@ def _from_hex(s):
     return a2b_qp(s.replace('\\x', '='))
 
 
-def gen_key(cont, local=True, silent=False):
+def gen_key(cont, local=True, silent=False, provider=None):
     '''
     Создание контейнера и двух пар ключей в нем
 
@@ -60,18 +60,21 @@ def gen_key(cont, local=True, silent=False):
     :silent: Если True, включает режим без диалоговых окон. Без аппаратного датчика случайных
         чисел в таком режиме контейнер создать невозможно!
         По умолчанию silent=False
+    :provider: Если не None, флаг local игнорируется и криптопровайдер
+        выбирается принудительно
     :returns: True, если операция успешна
 
     '''
     silent_flag = csp.CRYPT_SILENT if silent else 0
-    provider = str("Crypto-Pro HSM CSP") if not local else None
+    if provider is None:
+        provider = str("Crypto-Pro HSM CSP") if not local else None
     cont = _from_hex(cont)
 
     try:
         ctx = csp.Crypt(cont, csp.PROV_GOST_2001_DH, silent_flag, provider)
     except (ValueError, SystemError):
 
-        if platform.system() == 'Linux' and local:
+        if platform.system() == 'Linux' and provider is None:
             cont = b'\\\\.\\HDIMAGE\\' + cont
 
         ctx = csp.Crypt(cont, csp.PROV_GOST_2001_DH, csp.CRYPT_NEWKEYSET |
@@ -95,22 +98,25 @@ def gen_key(cont, local=True, silent=False):
     return True
 
 
-def remove_key(cont, local=True):
+def remove_key(cont, local=True, provider=None):
     '''
     Удаление контейнера
 
     :cont: Имя контейнера
-    :local: Если True, контейнер создается в локальном хранилище по умолчанию
+    :local: Если True, контейнер удаляется в локальном хранилище по умолчанию
+    :provider: Если не None, флаг local игнорируется и криптопровайдер
+        выбирается принудительно
     :returns: True, если операция успешна
 
     '''
     cont = _from_hex(cont)
-    provider = str("Crypto-Pro HSM CSP") if not local else None
+    if provider is None:
+        provider = str("Crypto-Pro HSM CSP") if not local else None
     csp.Crypt.remove(cont, csp.PROV_GOST_2001_DH, provider)
     return True
 
 
-def create_request(cont, params, local=True):
+def create_request(cont, params, local=True, provider=None):
     """Создание запроса на сертификат
 
     :cont: Имя контейнера
@@ -140,11 +146,14 @@ def create_request(cont, params, local=True):
             закодированных в DER-кодировку внешними средставми
         }
     :local: Если True, работа идет с локальным хранилищем
+    :provider: Если не None, флаг local игнорируется и криптопровайдер
+        выбирается принудительно
     :returns: байтовая строка с запросом в DER-кодировке
 
     """
 
-    provider = str("Crypto-Pro HSM CSP") if not local else None
+    if provider is None:
+        provider = str("Crypto-Pro HSM CSP") if not local else None
     cont = _from_hex(cont)
     ctx = csp.Crypt(cont, csp.PROV_GOST_2001_DH, 0, provider)
     req = csp.CertRequest(ctx, )
@@ -169,16 +178,19 @@ def create_request(cont, params, local=True):
     return req.get_data()
 
 
-def bind_cert_to_key(cont, cert, local=True):
+def bind_cert_to_key(cont, cert, local=True, provider=None):
     """Привязка сертификата к закрытому ключу в контейнере
 
     :cont: Имя контейнера
     :cert: Сертификат в байтовой строке
     :local: Если True, работа идет с локальным хранилищем
+    :provider: Если не None, флаг local игнорируется и криптопровайдер
+        выбирается принудительно
     :returns: отпечаток сертификата в виде строки
 
     """
-    provider = str("Crypto-Pro HSM CSP") if not local else None
+    if provider is None:
+        provider = str("Crypto-Pro HSM CSP") if not local else None
     cert = autopem(cert)
     cont = _from_hex(cont)
     ctx = csp.Crypt(cont, csp.PROV_GOST_2001_DH, 0, provider)
