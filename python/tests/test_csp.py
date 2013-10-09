@@ -60,7 +60,7 @@ def test_context_not_found():
     ctx = csp.Crypt(
         str("some_wrong_ctx"),
         csp.PROV_GOST_2001_DH,
-        0,
+        csp.CRYPT_SILENT,
         test_provider,
     )
     assert not ctx
