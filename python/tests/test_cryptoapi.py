@@ -6,7 +6,8 @@ import sys
 from binascii import hexlify
 from datetime import datetime
 
-from . import case_path, test_local, test_container, get_test_thumb, test_cn
+from . import case_path, test_local, test_container,\
+    get_test_thumb, test_cn, test_provider
 
 if sys.version_info >= (3,):
         unicode = str
@@ -36,7 +37,7 @@ def test_encrypt_for_certs():
     assert res
 
 
-def test_create_request():
+def test_create_request(provider=None):
     req_params = {
         u'SubjectAltName': [(u'ediPartyName', '9876543210')],
         # req_params = {u'SubjectAltName': [(u'ediPartyName', ('9876543210', 'asldkj'))],
@@ -69,9 +70,14 @@ def test_create_request():
          (u'1.2.643.100.3', u'02209709525')],
         u'EKU': [u'1.3.6.1.5.5.7.3.2', u'1.3.6.1.5.5.7.3.4'],
         u'ValidFrom': datetime(2013, 7, 30, 10, 19, 31)}
-    req = cryptoapi.create_request(test_container, req_params, test_local)
+    req = cryptoapi.create_request(test_container, req_params, test_local,
+                                   provider)
     assert req is not None and len(req)
     open('test_request.req', 'wb').write(req)
+
+
+def test_force_provider():
+    return test_create_request(provider=test_provider)
 
 
 def test_get_certificate():
