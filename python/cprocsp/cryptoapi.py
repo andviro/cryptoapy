@@ -325,12 +325,10 @@ def decrypt(data, thumb):
     cs = csp.CertStore(None, b"MY")
     certs = list(cs.find_by_thumb(unhexlify(thumb)))
     assert len(certs), 'Certificate for thumbprint not found'
-    decrcs = csp.CertStore()
-    decrcs.add_cert(certs[0])
     bin_data = data
     msg = csp.CryptMsg(bin_data)
-    decrypted = msg.decrypt(decrcs)
-    return decrypted
+    msg.decrypt_by_cert(certs[0])
+    return msg.get_data()
 
 
 def pkcs7_info(data):
