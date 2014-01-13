@@ -32,6 +32,8 @@ def test_encode_address():
 
 def test_encrypt_for_certs():
     certs = [open(case_path(x), 'rb').read() for x in ('res1.cer', 'res2.cer', 'res3.cer')]
+    our_cert = cryptoapi.get_certificate(name=test_cn)
+    certs.append(our_cert)
     data = open(case_path('res.bin'), 'rb').read()
     res = cryptoapi.encrypt(certs, data)
     assert res
@@ -120,9 +122,12 @@ def test_encrypt_decrypt():
     thumb = get_test_thumb()
     cert = cryptoapi.get_certificate(thumb)
     cs = csp.CertStore(None, b'My')
+    certs = [open(case_path(x), 'rb').read() for x in ('res1.cer',)]
+    certs.insert(0, cert)
     wrong_thumbs = list(t for t in (hexlify(c.thumbprint()) for c in cs) if t != thumb)
 
-    encrypted_data = cryptoapi.encrypt([cert], msg)
+    encrypted_data = cryptoapi.encrypt(certs, msg)
+    open('encrypted_data.bin', 'wb').write(encrypted_data)
     assert encrypted_data
     decrypted_data = cryptoapi.decrypt(encrypted_data, thumb)
     assert msg == decrypted_data
