@@ -122,8 +122,10 @@ def test_encrypt_decrypt():
     thumb = get_test_thumb()
     cert = cryptoapi.get_certificate(thumb)
     cs = csp.CertStore(None, b'My')
-    certs = [open(case_path(x), 'rb').read() for x in ('res1.cer',)]
-    certs.insert(0, cert)
+    certs = []
+    for x in ('res1.cer',):
+        certs.append(open(case_path(x), 'rb').read())
+    certs.append(cert)
     wrong_thumbs = list(t for t in (hexlify(c.thumbprint()) for c in cs) if t != thumb)
 
     encrypted_data = cryptoapi.encrypt(certs, msg)

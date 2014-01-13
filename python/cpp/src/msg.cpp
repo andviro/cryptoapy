@@ -15,7 +15,7 @@ HCRYPTMSG CryptMsg::get_handle() throw (CSPException) {
         throw CSPException("CryptMsg.get_handle: Couldn't open message for decode");
     }
     if ( !CryptMsgUpdate(hmsg, data, data_length, TRUE) ) {
-        throw CSPException("CCryptMsg.get_handle: ouldn't update message");
+        throw CSPException("CCryptMsg.get_handle: couldn't update message");
     }
     return hmsg;
 }
@@ -165,6 +165,81 @@ void CryptMsg::encrypt_data(BYTE *STRING, DWORD LENGTH, BYTE **s, DWORD *slen) t
     }
     LOG("    encrypted succesfully\n");
     delete[] pRecipientCert;
+}
+
+void CryptMsg::decrypt_by_cert(Cert *crt) throw(CSPException, CSPNotFound)
+{
+    HCRYPTPROV hprov;
+    DWORD dwKeySpec;
+
+    if(!( CryptAcquireCertificatePrivateKey(
+        crt->pcert,
+        0,
+        NULL,
+        &hprov,
+        &dwKeySpec,
+        NULL)))
+    {
+        DWORD err = GetLastError();
+        throw CSPException("CryptMsg.decrypt_by_cert: couldn't acquire cert private key", err);
+    }
+    HCRYPTMSG hmsg = get_handle();
+    DWORD recipient_idx = 0;
+    DWORD num_recipients = 0;
+    DWORD temp = sizeof(DWORD);
+    PCERT_INFO pci = NULL;
+
+    if (!CryptMsgGetParam(hmsg, CMSG_RECIPIENT_COUNT_PARAM, 0, &num_recipients, &temp)) {
+        DWORD err = GetLastError();
+        throw CSPException("CryptMsg.decrypt_by_cert: couldn't get recipient count", err);
+    }
+
+    for (recipient_idx = 0; recipient_idx < num_recipients; recipient_idx++)
+    {
+        temp = 0;
+        if (pci) {
+            free(pci);
+            pci = NULL;
+        }
+        if (!CryptMsgGetParam(hmsg, CMSG_RECIPIENT_INFO_PARAM, recipient_idx, NULL, &temp)) {
+            DWORD err = GetLastError();
+            throw CSPException("CryptMsg.decrypt_by_cert: couldn't get recipient info size", err);
+        }
+        pci = (PCERT_INFO) malloc(temp);
+        if (!CryptMsgGetParam(hmsg, CMSG_RECIPIENT_INFO_PARAM, recipient_idx, pci, &temp)) {
+            if (pci) {
+                free(pci);
+            }
+            DWORD err = GetLastError();
+            throw CSPException("CryptMsg.decrypt_by_cert: couldn't get recipient info data", err);
+        }
+        if (CertCompareCertificate(MY_ENCODING_TYPE, pci, crt->pcert->pCertInfo)) {
+            break;
+        }
+    }
+    if (pci) {
+        free(pci);
+    }
+    if (recipient_idx >= num_recipients) {
+        throw CSPNotFound("CryptMsg.decrypt_by_cert: cert not found in recipient infos", 0);
+    }
+
+    CMSG_CTRL_DECRYPT_PARA decr_para;
+    ZeroMemory(&decr_para, sizeof(decr_para));
+    decr_para.cbSize = sizeof(decr_para);
+    decr_para.hCryptProv = hprov;
+    decr_para.dwKeySpec = dwKeySpec;
+    decr_para.dwRecipientIndex = recipient_idx;
+
+    if (!CryptMsgControl(hmsg, 0, CMSG_CTRL_DECRYPT, &decr_para)) {
+        DWORD err = GetLastError();
+        throw CSPException("CryptMsg.decrypt_by_cert: decrypt failed", err);
+    }
+
+    if (!CryptReleaseContext(hprov, 0)) {
+        DWORD err = GetLastError();
+        throw CSPException("CryptMsg.decrypt_by_cert: couldn't release private key", err);
+    }
 }
 
 void CryptMsg::decrypt(BYTE **s, DWORD *slen, CertStore *store) throw(CSPException, CSPNotFound)

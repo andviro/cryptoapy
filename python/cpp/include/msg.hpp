@@ -26,6 +26,7 @@ public:
 
     // инициализация сообщения для кодирования
     CryptMsg(Crypt *ctx=NULL) throw(CSPException);
+    void decrypt_by_cert(Cert *crt) throw(CSPException, CSPNotFound);
 
     virtual ~CryptMsg() throw(CSPException);
     int num_signers() throw(CSPException);
