@@ -122,6 +122,21 @@ void Cert::thumbprint(BYTE **s, DWORD *slen) throw(CSPException)
         throw CSPException("Cert.thumbprint: Couldn't get certificate thumbprint");
     }
 }
+
+void Cert::subject_id(BYTE **s, DWORD *slen) throw(CSPException)
+{
+    LOG("Cert::subject_id\n");
+    if(!CertGetCertificateContextProperty(pcert, CERT_KEY_IDENTIFIER_PROP_ID, NULL, slen)) {
+        LOG("    Error: %p\n", pcert);
+        throw CSPException("Cert.thumbprint: Couldn't get certificate subject key id size");
+    }
+    *s = (BYTE *)malloc(*slen);
+    if(!CertGetCertificateContextProperty(pcert, CERT_KEY_IDENTIFIER_PROP_ID, (void *)*s, slen)) {
+        free((void *)*s);
+        throw CSPException("Cert.thumbprint: Couldn't get certificate subject key id");
+    }
+}
+
 CertFind::CertFind(CertStore *p, DWORD et, DWORD ft, BYTE *STRING, DWORD LENGTH) : CertIter(p)
 {
     LOG("CertFind::CertFind(%p, %u, %u, %u)\n", p, et, ft, LENGTH);

@@ -16,10 +16,10 @@ import sys
 import time
 from functools import wraps
 if sys.version_info >= (3,):
-        unicode = str
-        ord = lambda x: x
+    unicode = str
+    ord = lambda x: x
 else:
-        unicode = unicode
+    unicode = unicode
 
 
 # Обертка для функций, которые могут не сработать из-за длительного простоя
@@ -353,6 +353,18 @@ def pkcs7_info(data):
     res['Content'] = msg.get_data()
     res['Certificates'] = list(x.extract() for x in csp.CertStore(msg))
     return res
+
+
+def cert_subject_id(cert):
+    """Функция получения Subject Key Id сертификата.
+
+    :cert: сертификат в base64, или в бинарнике
+    :returns: Строку из шестнадцатиричных цифр.
+
+    """
+    cert = autopem(cert)
+    cert = csp.Cert(cert)
+    return hexlify(cert.subject_id())
 
 
 def cert_info(cert):

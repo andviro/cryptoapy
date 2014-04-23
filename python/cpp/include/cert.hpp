@@ -38,6 +38,8 @@ public:
 
     void thumbprint(BYTE **s, DWORD *slen) throw(CSPException);
 
+    void subject_id(BYTE **s, DWORD *slen) throw(CSPException);
+
     void bind(Crypt *ctx, DWORD keyspec=AT_KEYEXCHANGE);
 
     void set_pin(char *pin) throw(CSPException);
