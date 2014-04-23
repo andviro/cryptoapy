@@ -1,6 +1,7 @@
 /* vim: ft=swig
 */
 %newobject Cert::thumbprint;
+%newobject Cert::subject_id;
 %newobject Cert::duplicate;
 %newobject Cert::extract;
 %newobject Cert::self_sign;

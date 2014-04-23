@@ -10,9 +10,9 @@ from base64 import b64encode
 from . import test_container, test_cn, case_path, test_provider
 
 if sys.version_info >= (3,):
-        unicode = str
+    unicode = str
 else:
-        unicode = unicode
+    unicode = unicode
 
 
 if architecture()[0] == '32bit':
@@ -99,28 +99,28 @@ def test_export_import_pubkey():
 
 # def test_create_named_container():
     #'''
-    #Новый контейнер ключей может быть создан вызовом функции `Context` с
-    #флагом `csp.CRYPT_NEWKEYSET`. Первый параметр должен при этом содержать
-    #полное имя создаваемого контейнера. Хранилище ключей создается пустым.
-    #Идентифицирует контейнер имя, которое возвращается функцией `Crypt.name()`.
-    #Создать ключ в новом хранилище можно функцией `Crypt.create_key(flags, keyspec)`.
-    #Параметр `flags` может принимать значение `csp.CRYPT_EXPORTABLE`, что
-    #делает ключ извлекаемым или `0`, тогда ключ нельзя будет экспортировать
-    #функцией `Key.encode()`. Параметр `keyspec` принимает значение
+    # Новый контейнер ключей может быть создан вызовом функции `Context` с
+    # флагом `csp.CRYPT_NEWKEYSET`. Первый параметр должен при этом содержать
+    # полное имя создаваемого контейнера. Хранилище ключей создается пустым.
+    # Идентифицирует контейнер имя, которое возвращается функцией `Crypt.name()`.
+    # Создать ключ в новом хранилище можно функцией `Crypt.create_key(flags, keyspec)`.
+    # Параметр `flags` может принимать значение `csp.CRYPT_EXPORTABLE`, что
+    # делает ключ извлекаемым или `0`, тогда ключ нельзя будет экспортировать
+    # функцией `Key.encode()`. Параметр `keyspec` принимает значение
     #`csp.AT_KEYEXCHANGE` или `csp.AT_SIGNATURE`.
     #'''
     # ctx = csp.Context('new_test', csp.PROV_GOST_2001_DH, 0)
     # if ctx is None:
-        # ctx = csp.Context(r'\\.\hdimage\new_test', csp.PROV_GOST_2001_DH, csp.CRYPT_NEWKEYSET)
+    # ctx = csp.Context(r'\\.\hdimage\new_test', csp.PROV_GOST_2001_DH, csp.CRYPT_NEWKEYSET)
     # assert ctx
     # name = ctx.name()
     # assert name == 'new_test'
     # key = ctx.get_key()
     # if key is None:
-        # key = ctx.create_key(csp.CRYPT_EXPORTABLE)
+    # key = ctx.create_key(csp.CRYPT_EXPORTABLE)
     # ekey = ctx.get_key(csp.AT_KEYEXCHANGE)
     # if ekey is None:
-        # ekey = ctx.create_key(csp.CRYPT_EXPORTABLE, csp.AT_KEYEXCHANGE)
+    # ekey = ctx.create_key(csp.CRYPT_EXPORTABLE, csp.AT_KEYEXCHANGE)
     # assert ekey
     # return name
 # def test_export_import_private_key():
@@ -370,7 +370,7 @@ def test_detached_sign():
         test_container,
         csp.PROV_GOST_2001_DH,
         0,
-        test_provider 
+        test_provider
     )
     assert ctx
     cs = csp.CertStore(None, b"MY")
@@ -405,7 +405,7 @@ def test_msg_signatures():
         b'',
         csp.PROV_GOST_2001_DH,
         csp.CRYPT_VERIFYCONTEXT,
-        test_provider 
+        test_provider
     )
     testdata = test_sign_data()
     # testdata = open('tests/logical.cms', 'rb').read()
@@ -456,7 +456,7 @@ def test_detached_sign2():
         test_container,
         csp.PROV_GOST_2001_DH,
         0,
-        test_provider 
+        test_provider
     )
     assert ctx
     cs = csp.CertStore(ctx, b"MY")
@@ -606,3 +606,14 @@ def test_enum_providers():
     providers = list((c.name, c.type) for c in csp.Crypt.enumerate())
     print(providers)
     assert len(providers)
+
+
+def test_cert_subject_id():
+    '''
+    Метод `Cert.subject_id()` возвращает идентификатор SubjectKeyId сертификата в виде бинарной
+    строки. Для перевода в обычную строку, может потребоваться кодирование в
+    base64 или вызов функции `hexlify()`.
+    '''
+    cs = csp.CertStore(None, b"MY")
+    ids = [cert.subject_id() for cert in cs]
+    assert len(ids) and all(len(x) == 20 for x in ids)
