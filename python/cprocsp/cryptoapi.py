@@ -116,7 +116,7 @@ def remove_key(cont, local=True, provider=None):
     return True
 
 
-def create_request(cont, params, local=True, provider=None):
+def create_request(cont, params, local=True, provider=None, defaults=False):
     """Создание запроса на сертификат
 
     :cont: Имя контейнера
@@ -157,7 +157,8 @@ def create_request(cont, params, local=True, provider=None):
     cont = _from_hex(cont)
     ctx = csp.Crypt(cont, csp.PROV_GOST_2001_DH, 0, provider)
     req = csp.CertRequest(ctx, )
-    set_q_defaults(params)
+    if defaults:
+        set_q_defaults(params)
     req.set_subject(Attributes(params.get('Attributes', [])).encode())
     validity = CertValidity(params.get('ValidFrom', datetime.now()),
                             params.get('ValidTo', datetime.now() + timedelta(days=365)))
