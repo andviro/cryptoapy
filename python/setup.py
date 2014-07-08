@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-#-*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 from distutils.core import setup, Extension, Command
 from platform import architecture
 import sys
@@ -25,6 +25,7 @@ except ImportError:
 
 
 class TestCommand(Command):
+
     """Custom distutils command to run the test suite."""
 
     user_options = []
@@ -44,6 +45,7 @@ class TestCommand(Command):
 
 
 class SWIGCommand(Command):
+
     """Custom distutils command to generate wrappers"""
 
     user_options = []
@@ -81,7 +83,7 @@ library_dirs = ['cpp']
 libraries = []
 extra_compile_args = ['-DSIZEOF_VOID_P={0}'.format(size)]
 
-#extra_compile_args.append('-DDEBUG_LOG')
+# extra_compile_args.append('-DDEBUG_LOG')
 
 if platform.system() == 'Windows':
     include_dirs += [
@@ -119,17 +121,25 @@ csp = Extension('cprocsp._csp',
                 extra_compile_args=extra_compile_args,)
 
 
-setup(name='cryptoapy',
-      version='0.4.36',
-      author='Andrew Rodionoff',
-      author_email='andviro@gmail.com',
-      license='LGPL',
-      platforms=['Linux', 'Windows'],
-      install_requires=['pyasn1', 'pyasn1_modules'],
-      ext_modules=[csp],
-      description='Python/C++ wrapper for Microsoft cryptoapi services (currently, Russian GOST algorithms only)',
-      packages=['cprocsp'],
-      py_modules=['cprocsp.csp', 'cprocsp.rdn', 'cprocsp.cryptoapi',
-                  'cprocsp.filetimes'],
-      cmdclass=cmdclass,
-      )
+setup(
+    name='cryptoapy',
+    version='0.4.37',
+    author='Andrew Rodionoff',
+    author_email='andviro@gmail.com',
+    license='LGPL',
+    platforms=[
+        'Linux',
+        'Windows'],
+    install_requires=[
+        'pyasn1',
+        'pyasn1_modules'],
+    ext_modules=[csp],
+    description='Python/C++ wrapper for Microsoft cryptoapi services (currently, Russian GOST algorithms only)',
+    packages=['cprocsp'],
+    py_modules=[
+        'cprocsp.csp',
+        'cprocsp.rdn',
+        'cprocsp.cryptoapi',
+        'cprocsp.filetimes'],
+    cmdclass=cmdclass,
+)

@@ -5,13 +5,12 @@ from pyasn1.type import univ, useful, char, tag, constraint
 from pyasn1.codec.der import encoder, decoder
 from pyasn1_modules import rfc2459, rfc2315
 from base64 import b64decode
-from datetime import timedelta
 import sys
 if sys.version_info >= (3,):
-        unicode = str
-        long = int
+    unicode = str
+    long = int
 else:
-        unicode = unicode
+    unicode = unicode
 
 
 def autopem(cert):
@@ -31,17 +30,19 @@ def _deep_find(lst, oid):
     return False
 
 
-def set_q_defaults(params):
-    attrs = params.get('Attributes', [])[:]
-    defaults = {
-        '1.2.643.100.1': '0' * 13,
-        '1.2.643.100.3': '0' * 11,
-        '1.2.643.3.131.1.1': '0' * 12,
-    }
-    for oid in defaults:
-        if not _deep_find(attrs, oid):
-            attrs.append((oid, defaults[oid]))
-    params['Attributes'] = attrs
+def set_q_defaults(params, insert_zeroes=False):
+    if insert_zeroes:
+        attrs = params.get('Attributes', [])[:]
+        defaults = {
+            '1.2.643.100.1': '0' * 13,
+            '1.2.643.100.3': '0' * 11,
+            '1.2.643.3.131.1.1': '0' * 12,
+        }
+        for oid in defaults:
+            if not _deep_find(attrs, oid):
+                attrs.append((oid, defaults[oid]))
+
+        params['Attributes'] = attrs
 
     raw = params.get('RawExtensions', [])[:]
     if not any(oid == '1.2.643.100.111' for (oid, _, _) in raw):
@@ -51,11 +52,13 @@ def set_q_defaults(params):
 
 
 class CertAttribute(object):
+
     """Атрибут запроса на сертификат
 
     в закодированном виде добавляется в запрос методом
     CertRequest.add_attribute()
     """
+
     def __init__(self, oid, values):
         """@todo: to be defined """
         self.oid = oid.encode('ascii')
@@ -68,6 +71,7 @@ class CertAttribute(object):
 
 
 class CertValidity(CertAttribute):
+
     """Атрибут для установки интервала действия серта в запросе"""
 
     def __init__(self, not_before, not_after):
@@ -79,6 +83,7 @@ class CertValidity(CertAttribute):
 
 
 class CertExtensions(CertAttribute):
+
     """Атрибут для задания расширений сертификата"""
 
     def __init__(self, exts):
@@ -90,6 +95,7 @@ class CertExtensions(CertAttribute):
 
 
 class CertExtension(object):
+
     def __init__(self, oid, value, critical=False):
         """Общий класс для всех видов расширений
 
@@ -104,6 +110,7 @@ class CertExtension(object):
 
 
 class EKU(CertExtension):
+
     """Расширенное использование ключа"""
 
     def __init__(self, ekus):
@@ -119,6 +126,7 @@ class EKU(CertExtension):
 
 
 class KeyUsage(CertExtension):
+
     """Расширенное использование ключа"""
 
     def __init__(self, mask):
@@ -138,6 +146,7 @@ def _stupidAddress(s):
 
 
 class Attributes(object):
+
     """Набор пар (тип, значение)"""
     special_encs = {
         '1.2.643.100.1': (char.NumericString, 'ascii'),
@@ -161,9 +170,15 @@ class Attributes(object):
                     pair = rfc2459.AttributeTypeAndValue()
                     pair.setComponentByName('type', rfc2459.AttributeType(str(oid)))
                     code, enc = self.special_encs.get(oid, (char.UTF8String, 'utf-8'))
-                    pair.setComponentByName('value',
-                                            rfc2459.AttributeValue(
-                                                univ.OctetString(encoder.encode(code(unicode(val).encode(enc, 'replace'))))))
+                    pair.setComponentByName(
+                        'value',
+                        rfc2459.AttributeValue(
+                            univ.OctetString(
+                                encoder.encode(
+                                    code(
+                                        unicode(val).encode(
+                                            enc,
+                                            'replace'))))))
 
                     pairset.setComponentByPosition(j, pair)
 
@@ -200,6 +215,7 @@ class Attributes(object):
 
 
 class CertificateInfo(object):
+
     def __init__(self, certdata):
         """@todo: Docstring for __init__
 
@@ -220,11 +236,17 @@ class CertificateInfo(object):
 
 
 class SubjectAltName(CertExtension):
+
     """Расширенное использование ключа"""
 
     def x400Address(self, val):
-        return decoder.decode(val,
-                              asn1Spec=rfc2459.ORAddress().subtype(implicitTag=tag.Tag(tag.tagClassContext, tag.tagFormatSimple, 3)))
+        return decoder.decode(
+            val,
+            asn1Spec=rfc2459.ORAddress().subtype(
+                implicitTag=tag.Tag(
+                    tag.tagClassContext,
+                    tag.tagFormatSimple,
+                    3)))
 
     def ediPartyName(self, val):
         res = rfc2459.EDIPartyName(
@@ -301,6 +323,7 @@ class SubjectAltName(CertExtension):
 
 
 class CertificatePolicies(CertExtension):
+
     def __init__(self, policies):
         '''создане CertificatePolicies
 
@@ -317,8 +340,10 @@ class CertificatePolicies(CertExtension):
             pol.setComponentByPosition(0, rfc2459.CertPolicyId(str(t)))
             v = v or []
             if len(v):
-                sq = univ.SequenceOf(componentType=rfc2459.PolicyQualifierInfo()
-                                     ).subtype(subtypeSpec=constraint.ValueSizeConstraint(1, rfc2459.MAX))
+                sq = univ.SequenceOf(
+                    componentType=rfc2459.PolicyQualifierInfo()).subtype(
+                    subtypeSpec=constraint.ValueSizeConstraint(
+                        1, rfc2459.MAX))
                 for n, (ident, qualif) in enumerate(v):
                     pqi = rfc2459.PolicyQualifierInfo()
                     pqi.setComponentByPosition(0, rfc2459.PolicyQualifierId(str(ident)))
@@ -331,6 +356,7 @@ class CertificatePolicies(CertExtension):
 
 
 class PKCS7Msg(object):
+
     """Парсинг свойств pkcs7 сообщения"""
 
     def __init__(self, data):

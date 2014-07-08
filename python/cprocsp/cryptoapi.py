@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-#-*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 from __future__ import unicode_literals, print_function
 
 from . import csp
@@ -32,7 +32,7 @@ def retry(f, timeout=0.25, num_tries=4):
         for tr in range(num_tries):
             try:
                 return f(*args, **nargs)
-            except:
+            except Exception:
                 if tr == num_tries - 1:
                     raise
                 time.sleep(sleep_time)
@@ -116,7 +116,7 @@ def remove_key(cont, local=True, provider=None):
     return True
 
 
-def create_request(cont, params, local=True, provider=None, defaults=False):
+def create_request(cont, params, local=True, provider=None, insert_zeroes=False):
     """Создание запроса на сертификат
 
     :cont: Имя контейнера
@@ -148,6 +148,7 @@ def create_request(cont, params, local=True, provider=None, defaults=False):
     :local: Если True, работа идет с локальным хранилищем
     :provider: Если не None, флаг local игнорируется и криптопровайдер
         выбирается принудительно
+    :insert_zeroes: Если True, в запрос добавляются нулевые значения для ИНН, ОГРН
     :returns: байтовая строка с запросом в DER-кодировке
 
     """
@@ -157,8 +158,7 @@ def create_request(cont, params, local=True, provider=None, defaults=False):
     cont = _from_hex(cont)
     ctx = csp.Crypt(cont, csp.PROV_GOST_2001_DH, 0, provider)
     req = csp.CertRequest(ctx, )
-    if defaults:
-        set_q_defaults(params)
+    set_q_defaults(params, insert_zeroes)
     req.set_subject(Attributes(params.get('Attributes', [])).encode())
     validity = CertValidity(params.get('ValidFrom', datetime.now()),
                             params.get('ValidTo', datetime.now() + timedelta(days=365)))
