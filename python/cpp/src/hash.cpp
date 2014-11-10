@@ -61,3 +61,32 @@ void Hash::update(BYTE *STRING, DWORD LENGTH) throw(CSPException)
         throw CSPException("Hash::update() failed");
     }
 }
+
+void Hash::sign(DWORD dwKeyspec, BYTE **s, DWORD *slen) throw(CSPException) 
+{
+    if(!CryptSignHash(
+        hhash, 
+        dwKeyspec, 
+        NULL, 
+        0, 
+        NULL, 
+        slen)) 
+    {
+        throw CSPException("Hash.sign(): Couldn't determine signature size");
+    }
+
+    *s = (BYTE*)malloc(*slen);
+
+    if (!CryptSignHash(
+        hhash, 
+        dwKeyspec, 
+        NULL, 
+        0, 
+        *s, 
+        slen)) 
+    {
+        DWORD err = GetLastError();
+        free((void *)*s);
+        throw CSPException("Hash.sign(): Couldn't get signature value", err);
+    }
+}
