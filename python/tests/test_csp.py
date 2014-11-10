@@ -642,3 +642,16 @@ def test_hash_digest():
     digest1 = hash1.digest()
     digest2 = hash2.digest()
     assert digest1 == digest2
+
+
+def test_sign():
+    ctx = csp.Crypt(
+        test_container,
+        csp.PROV_GOST_2001_DH,
+        0,
+        test_provider
+    )
+    data = os.urandom(1024)
+    hash1 = csp.Hash(ctx, data)
+    signature1 = hash1.sign(csp.AT_SIGNATURE)
+    return signature1

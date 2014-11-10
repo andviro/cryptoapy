@@ -24,6 +24,7 @@ public:
 
     void digest(BYTE **s, DWORD *slen) throw(CSPException);
     void update(BYTE *STRING, DWORD LENGTH) throw(CSPException);
+    void sign(DWORD dwKeyspec, BYTE **s, DWORD *slen) throw(CSPException);
 
     friend class Crypt;
 };
