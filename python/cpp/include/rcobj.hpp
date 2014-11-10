@@ -1,6 +1,8 @@
 #ifndef RCOBJ_HPP_INCLUDED
 #define RCOBJ_HPP_INCLUDED
 
+#include "except.hpp"
+
 class RCObj
 {
 protected:
@@ -10,7 +12,7 @@ public:
         refcount = 0;
     }
 
-    virtual ~RCObj() {};
+    virtual ~RCObj() throw(CSPException) {};
 
     int ref();
 

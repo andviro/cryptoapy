@@ -5,6 +5,7 @@
 #include "except.hpp"
 
 class Key;
+class Hash;
 class CryptIter;
 
 class CryptDesc
@@ -61,6 +62,7 @@ public:
     static CryptIter *enumerate() throw(CSPException);
 
     friend class Cert;
+    friend class Hash;
     friend class CryptMsg;
     friend class Signature;
     friend class CertStore;
