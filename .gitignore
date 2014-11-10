@@ -3,10 +3,12 @@ build
 dist
 log
 MANIFEST
+*wrap*
 *.log
 *.cer
 *.rpm
 *.der
+*.bin
 *.req
 wiki
 *.exe
