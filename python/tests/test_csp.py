@@ -6,6 +6,7 @@ from nose.tools import raises
 import sys
 from platform import architecture
 from base64 import b64encode
+import os
 
 from . import test_container, test_cn, case_path, test_provider
 
@@ -617,3 +618,27 @@ def test_cert_subject_id():
     cs = csp.CertStore(None, b"MY")
     ids = [cert.subject_id() for cert in cs]
     assert len(ids) and all(len(x) == 20 for x in ids)
+
+
+def test_hash_digest():
+    '''
+    Test Hash()
+
+    Объект Hash может инициализироваться данными из байтовой строки или быть
+    пустым. Метод `Hash.update()` добавляет данные из байтовой строки `s` к
+    хэшу. Метод `Hash.digest()` возвращает хэш в виде байтовой строки.
+    После вызова digest() добавлять данные больше нельзя.
+    '''
+    ctx = csp.Crypt(
+        b'',
+        csp.PROV_GOST_2001_DH,
+        csp.CRYPT_VERIFYCONTEXT,
+        test_provider
+    )
+    data = os.urandom(1024)
+    hash1 = csp.Hash(ctx, data)
+    hash2 = csp.Hash(ctx)
+    hash2.update(data)
+    digest1 = hash1.digest()
+    digest2 = hash2.digest()
+    assert digest1 == digest2

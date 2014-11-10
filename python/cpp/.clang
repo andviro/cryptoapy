@@ -4,4 +4,6 @@
 -I/opt/cprocsp/include/cpcsp
 -I/opt/cprocsp/include/asn1c/rtsrc
 -I/opt/cprocsp/include/asn1data
+-DUNIX
+-DSIZEOF_VOID_P=8
 -std=c++11

@@ -23,6 +23,7 @@
 #include "rcobj.hpp"
 #include "sign.hpp"
 #include "request.hpp"
+#include "hash.hpp"
 %}
 
 %include "wintypes.i"
@@ -38,3 +39,4 @@
 %include "ext.i"
 %include "sign.i"
 %include "request.i"
+%include "hash.i"
