@@ -10,6 +10,7 @@ class CryptMsg;
 class CertInfo;
 class EKUIter;
 class Key;
+class Hash;
 
 class Cert : public RCObj
 {
@@ -51,6 +52,7 @@ public:
     friend class CertInfo;
     friend class EKUIter;
     friend class Key;
+    friend class Hash;
 };
 
 class CertIter

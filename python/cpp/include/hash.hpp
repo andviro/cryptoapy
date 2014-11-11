@@ -6,6 +6,7 @@
 #include "except.hpp"
 
 class Crypt;
+class Cert;
 
 
 /**
@@ -30,6 +31,7 @@ public:
     void digest(BYTE **s, DWORD *slen) throw(CSPException);
     void update(BYTE *STRING, DWORD LENGTH) throw(CSPException);
     void sign(DWORD dwKeyspec, BYTE **s, DWORD *slen) throw(CSPException);
+    bool verify(Cert *cert, BYTE *STRING, DWORD LENGTH) throw(CSPException);
 
     friend class Crypt;
 };
