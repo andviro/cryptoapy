@@ -6,6 +6,13 @@
 #include "except.hpp"
 
 class Crypt;
+
+
+/**
+ * Provides simple hash functions, like data hash calculation, signing and
+ * veriying hashes. Used primarily for XML DSIG, for general message signing
+ * and verifying see `Msg` class.
+ */
 class Hash : public RCObj
 {
 private:
@@ -15,9 +22,7 @@ private:
 protected:
     //
 public:
-    // инициализация хеша начальными данными
     Hash(Crypt *ctx, BYTE *STRING, DWORD LENGTH) throw(CSPException);
-    // инициализация пустого хеша
     Hash(Crypt *ctx) throw(CSPException);
 
     virtual ~Hash() throw(CSPException);
