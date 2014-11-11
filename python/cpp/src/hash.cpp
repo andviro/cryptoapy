@@ -16,7 +16,13 @@ void Hash::init(Crypt *ctx) throw(CSPException)
     }
 }
 
-
+/**
+ * Create hash from initial data
+ *
+ * * ctx -- cryptoprovider context, used for hashing, signing and verifying
+ * * STRING, LENGTH -- initial binary data.
+ *
+ */
 Hash::Hash(Crypt *ctx, BYTE *STRING, DWORD LENGTH) throw(CSPException)
 {
     init(ctx);

@@ -2,6 +2,7 @@ doc/_*
 build
 dist
 log
+doxydocs
 MANIFEST
 *wrap*
 *.log
