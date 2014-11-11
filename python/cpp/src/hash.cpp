@@ -1,5 +1,6 @@
 #include "hash.hpp"
 #include "context.hpp"
+#include "cert.hpp"
 
 void Hash::init(Crypt *ctx) throw(CSPException)
 {
@@ -95,4 +96,45 @@ void Hash::sign(DWORD dwKeyspec, BYTE **s, DWORD *slen) throw(CSPException)
         free((void *)*s);
         throw CSPException("Hash.sign(): Couldn't get signature value", err);
     }
+}
+
+/**
+ * Проверка подписи под данными, полученной путем вызова `Hash::sign`
+ *
+ * * `cert` -- сертификат с открытым ключом для проверки
+ * * `STRING`, `LENGTH` -- подпись в виде бинарной строки
+ *
+ * На момент вызова данные должны быть загружены в хэш путем начальной
+ * инициализации или вызовом `Hash::update()`.
+ *
+ */
+bool Hash::verify(Cert *cert, BYTE *STRING, DWORD LENGTH) throw (CSPException)
+{
+    HCRYPTKEY hPubKey = NULL;
+    // Get the public key from the certificate
+    if (!CryptImportPublicKeyInfo(
+        parent->hprov, 
+        MY_ENC_TYPE,
+        &cert->pcert->pCertInfo->SubjectPublicKeyInfo,
+        &hPubKey))
+    {
+        throw CSPException("Hash.verify(): Couldn't get certificate public key handle");
+    }
+
+    if (!CryptVerifySignature(
+            hhash, 
+            STRING, 
+            LENGTH, 
+            hPubKey,
+            NULL, 
+            0
+        ))
+    {
+        DWORD err = GetLastError();
+        if (err == NTE_BAD_SIGNATURE) {
+            return false;
+        }
+        throw CSPException("Hash.verify(): error verifying hash", err);
+    }
+    return true;
 }

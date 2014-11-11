@@ -654,4 +654,18 @@ def test_sign():
     data = os.urandom(1024)
     hash1 = csp.Hash(ctx, data)
     signature1 = hash1.sign(csp.AT_SIGNATURE)
-    return signature1
+    return signature1, data
+
+
+def test_verify():
+    ctx = csp.Crypt(
+        b'',
+        csp.PROV_GOST_2001_DH,
+        csp.CRYPT_VERIFYCONTEXT,
+        test_provider
+    )
+    sign, data = test_sign()
+    cs = csp.CertStore(ctx, b"MY")
+    cert = list(cs.find_by_name(test_cn))[0]
+    hash1 = csp.Hash(ctx, data)
+    assert hash1.verify(cert, sign)
