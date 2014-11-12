@@ -620,6 +620,22 @@ def test_cert_subject_id():
     assert len(ids) and all(len(x) == 20 for x in ids)
 
 
+def test_cert_acquire_key():
+    '''
+    Контекст криптопровайдера может быть создан путем вызова конструктора на
+    объект `Cert`. При этом вернется контекст, связанный с контейнером ключа
+    данного сертификата. Если получить ключ не удастся, будет брошено
+    исключение `ValueError`.
+    '''
+    cs = csp.CertStore(None, b"MY")
+    cert = list(cs.find_by_name(test_cn))[0]
+    ctx = csp.Crypt(cert)
+    return ctx
+
+# @raises(ValueError)
+# def test_cert_acquire_key_bad():
+
+
 def test_hash_digest():
     '''
     Test Hash()
@@ -644,27 +660,22 @@ def test_hash_digest():
     assert digest1 == digest2
 
 
-def test_sign():
-    ctx = csp.Crypt(
-        test_container,
-        csp.PROV_GOST_2001_DH,
-        0,
-        test_provider
-    )
+def test_sign_hash():
+    ctx = test_cert_acquire_key()
     data = os.urandom(1024)
     hash1 = csp.Hash(ctx, data)
-    signature1 = hash1.sign(csp.AT_SIGNATURE)
+    signature1 = hash1.sign()
     return signature1, data
 
 
-def test_verify():
+def test_verify_hash():
     ctx = csp.Crypt(
         b'',
         csp.PROV_GOST_2001_DH,
         csp.CRYPT_VERIFYCONTEXT,
         test_provider
     )
-    sign, data = test_sign()
+    sign, data = test_sign_hash()
     cs = csp.CertStore(ctx, b"MY")
     cert = list(cs.find_by_name(test_cn))[0]
     hash1 = csp.Hash(ctx, data)

@@ -1,5 +1,6 @@
 #include "common.hpp"
 #include "context.hpp"
+#include "cert.hpp"
 #include "key.hpp"
 
 Crypt::~Crypt() throw(CSPException) {
@@ -20,6 +21,9 @@ Crypt::~Crypt() throw(CSPException) {
     if (pr_name) {
         LOG("freeing pr_name(%p)\n", pr_name);
         delete[] pr_name;
+    }
+    if(parent) {
+        parent->unref();
     }
     LOG("    Freed ctx %p (%x)\n", this, hprov);
 }
@@ -115,6 +119,7 @@ Crypt::Crypt (BYTE *STRING, DWORD LENGTH, DWORD type, DWORD flags, char *name) t
 {
     LOG("Crypt::Crypt(%s, %u, %x, %s)\n", container, type, flags, name);
     cont_name = NULL;
+    parent = NULL;
     if (STRING) {
         cont_name = new char[LENGTH + 1];
         strncpy(cont_name, (const char *)STRING, LENGTH);
@@ -142,6 +147,27 @@ Crypt::Crypt (BYTE *STRING, DWORD LENGTH, DWORD type, DWORD flags, char *name) t
         default:
             throw CSPException("Crypt: Couldn't acquire context", err);
         }
+    }
+}
+
+Crypt::Crypt (Cert *pcert) throw(CSPNotFound)
+{
+    LOG("Crypt::Crypt(%x)\n", parent);
+    DWORD dwKeySpec; // XXX: not used
+    cont_name = NULL;
+    pr_name = NULL;
+    parent = pcert;
+    parent->ref();
+
+    if(!(CryptAcquireCertificatePrivateKey(
+            parent->pcert,
+            0,
+            NULL,
+            &hprov,
+            &dwKeySpec,
+            NULL)))
+    {
+        throw CSPNotFound("Crypt: Couldn't acquire certificate private key");
     }
 }
 
