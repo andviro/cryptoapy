@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-#-*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 
 from fabric.api import run, env, local, settings, cd, put
 from platform import architecture
@@ -87,3 +87,8 @@ def rebuild(pyversion=''):
     local("python{0} setup.py swig".format(pyversion))
     local("python{0} setup.py build_ext --inplace".format(pyversion))
     # test(pyversion)
+
+
+def publish(pyversion=''):
+    rebuild(pyversion)
+    local("python{0} setup.py sdist upload".format(pyversion))
