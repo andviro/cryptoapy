@@ -7,7 +7,7 @@ void Hash::init(Crypt *ctx) throw(CSPException)
     parent = ctx;
     parent->ref();
     if(!CryptCreateHash(
-        parent->hprov, // hProv
+        parent->hprov,
         CALG_GR3411, 
         0, 
         0, 
@@ -18,10 +18,17 @@ void Hash::init(Crypt *ctx) throw(CSPException)
 }
 
 /**
+ * \~english
  * Create hash from initial data
  *
- * * ctx -- cryptoprovider context, used for hashing, signing and verifying
+ * * ctx -- `csp.Crypt`, used for hashing, signing and verifying
  * * STRING, LENGTH -- initial binary data.
+ * 
+ * \~russian
+ * Создание хэша из начальных данных
+ *
+ * * ctx -- Экземпляр `csp.Crypt` для хэширования, подписывания и проверки * подписи
+ * * STRING, LENGTH -- начальные данные.
  *
  */
 Hash::Hash(Crypt *ctx, BYTE *STRING, DWORD LENGTH) throw(CSPException)
@@ -69,7 +76,7 @@ void Hash::update(BYTE *STRING, DWORD LENGTH) throw(CSPException)
     }
 }
 
-void Hash::sign(DWORD dwKeyspec, BYTE **s, DWORD *slen) throw(CSPException) 
+void Hash::sign(BYTE **s, DWORD *slen, DWORD dwKeyspec) throw(CSPException) 
 {
     if(!CryptSignHash(
         hhash, 
@@ -99,6 +106,7 @@ void Hash::sign(DWORD dwKeyspec, BYTE **s, DWORD *slen) throw(CSPException)
 }
 
 /**
+ * \~russian
  * Проверка подписи под данными, полученной путем вызова `Hash::sign`
  *
  * * `cert` -- сертификат с открытым ключом для проверки
@@ -106,6 +114,8 @@ void Hash::sign(DWORD dwKeyspec, BYTE **s, DWORD *slen) throw(CSPException)
  *
  * На момент вызова данные должны быть загружены в хэш путем начальной
  * инициализации или вызовом `Hash::update()`.
+ * \~english
+ * Test Test Test
  *
  */
 bool Hash::verify(Cert *cert, BYTE *STRING, DWORD LENGTH) throw (CSPException)

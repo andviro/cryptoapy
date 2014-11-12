@@ -30,7 +30,7 @@ public:
 
     void digest(BYTE **s, DWORD *slen) throw(CSPException);
     void update(BYTE *STRING, DWORD LENGTH) throw(CSPException);
-    void sign(DWORD dwKeyspec, BYTE **s, DWORD *slen) throw(CSPException);
+    void sign(BYTE **s, DWORD *slen, DWORD dwKeyspec=AT_KEYEXCHANGE) throw(CSPException);
     bool verify(Cert *cert, BYTE *STRING, DWORD LENGTH) throw(CSPException);
 
     friend class Crypt;

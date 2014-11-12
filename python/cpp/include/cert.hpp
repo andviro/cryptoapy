@@ -48,6 +48,7 @@ public:
     EKUIter *eku() throw(CSPException);
 
     friend class CryptMsg;
+    friend class Crypt;
     friend class CertStore;
     friend class CertInfo;
     friend class EKUIter;
