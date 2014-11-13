@@ -636,7 +636,7 @@ def test_cert_acquire_key():
 # def test_cert_acquire_key_bad():
 
 
-def test_hash_digest():
+def test_hash_digest_random():
     '''
     Test Hash()
 
@@ -658,6 +658,19 @@ def test_hash_digest():
     digest1 = hash1.digest()
     digest2 = hash2.digest()
     assert digest1 == digest2
+
+
+def test_hash_digest_empty():
+    ctx = csp.Crypt(
+        b'',
+        csp.PROV_GOST_2001_DH,
+        csp.CRYPT_VERIFYCONTEXT,
+        test_provider
+    )
+    data = b''
+    hash1 = csp.Hash(ctx, data)
+    digest_str = hash1.digest().encode("base64").rstrip()
+    assert digest_str == 'mB5fPKMMhBSHgw+E+0M+E6wRAVabnBNYSsSDI0zWVsA='
 
 
 def test_sign_hash():
