@@ -91,4 +91,5 @@ def rebuild(pyversion=''):
 
 def publish(pyversion=''):
     rebuild(pyversion)
+    test(pyversion)
     local("python{0} setup.py sdist upload".format(pyversion))
