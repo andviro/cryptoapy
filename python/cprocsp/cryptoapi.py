@@ -404,3 +404,119 @@ def cert_info(cert):
         Extensions=infoasn.EKU(),
     )
     return res
+
+
+class Hash(object):
+
+    """Хэш по ГОСТ 3411, имитирующий интерфейс дайджестов из `hashlib`.
+
+    ВАЖНО: после первого вызова digest() или hexdigest(), к хэшу больше нельзя
+    добавлять данные (ограничения CryptoAPI 2.0)
+
+    Пример использования:
+    > data = os.urandom(10000)
+    > h = GOSTR3411(data)
+    > print(h.DIGEST_URI)
+    > print(h.hexdigest())
+
+    """
+
+    DIGEST_URI = "http://www.w3.org/2001/04/xmldsig-more#gostr3411"
+
+    def _init_hash(self, ctx, data):
+        self._hash = csp.Hash(ctx, data) if data else csp.Hash(ctx)
+
+    def __init__(self, data=None):
+        '''
+        Инициализация хэша. Если присутствует параметр `data`, в него
+        подгружаются начальные данные.
+
+        '''
+        ctx = csp.Crypt(
+            b'',
+            csp.PROV_GOST_2001_DH,
+            csp.CRYPT_VERIFYCONTEXT,
+            None
+        )
+        self._init_hash(ctx, data)
+
+    def update(self, data):
+        '''
+        Добавление данных в хэш.
+
+        '''
+        self._hash.update(data)
+
+    def digest(self):
+        '''
+        Возвращает дайджест данных и закрывает хэш от дальнейших обновлений.
+
+        '''
+        return self._hash.digest()
+
+    def hexdigest(self):
+        '''
+        Возвращает шестнадцатиричное представление хэша.
+
+        '''
+        return hexlify(self.digest())
+
+    def verify(self, cert, signature):
+        '''
+        Проверка подписи, полученной из экземпляра класса `SignedHash`.
+
+        :cert: Сертификат с открытым ключом подписанта в PEM или DER
+        :signature: Бинарные данные подписи
+        :returns: True или False
+
+        '''
+        cert = csp.Cert(autopem(cert))
+        return self._hash.verify(cert, signature)
+
+
+class SignedHash(Hash):
+
+    '''
+    Хэш ГОСТ 3411 с возможностью подписывания. Требует наличия в хранилище
+    сертификата, привязанного к контейнеру закрытого ключа.
+
+    Пример использования:
+    > data = os.urandom(10000)
+    > digest = SignedHash('0123456789ABCDEF123456789ABCD')
+    > print(digest.SIGNATURE_URI)
+    > digest.update(data)
+    > sig = digest.sign()
+    > print(sig.encode('base64').rstrip())
+
+    Для проверки подписи не требуется закрытый ключ, поэтому используется
+    базовый класс:
+
+    > new_digest = Hash(data)
+    > cert = open('cert.pem').read()
+    или
+    > cert = get_certificate('0123456789ABCDEF123456789ABCD')
+    > res = new_digest.verify(cert, sig)
+    > print(res)
+
+    '''
+
+    SIGNATURE_URI = "http://www.w3.org/2001/04/xmldsig-more#gostr34102001-gostr3411"
+
+    def __init__(self, thumb, data=None):
+        '''
+        Инициализация хэша. Помимо параметров базового класса, получает `thumb`
+        -- отпечаток
+
+        '''
+        cs = csp.CertStore(None, b"MY")
+        store_lst = list(cs.find_by_thumb(unhexlify(thumb)))
+        assert len(store_lst), 'Unable to find signing cert in system store'
+        ctx = csp.Crypt(store_lst[0])
+        self._init_hash(ctx, data)
+
+    def sign(self):
+        '''
+        Возвращает подпись хэша данных и закрывает хэш от дальнейших обновлений.
+
+        '''
+        return self._hash.sign()

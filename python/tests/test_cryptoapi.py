@@ -5,6 +5,7 @@ from cprocsp import cryptoapi, certutils, csp
 import sys
 from binascii import hexlify
 from datetime import datetime
+import os
 
 from . import case_path, test_local, test_container,\
     get_test_thumb, test_cn, test_provider
@@ -138,7 +139,7 @@ def test_encrypt_decrypt():
     for th in wrong_thumbs[:1]:
         try:
             cryptoapi.decrypt(encrypted_data, th)
-        except:
+        except Exception:
             bad_thumbs.append(th)
     assert bad_thumbs == wrong_thumbs[:1]
 
@@ -164,3 +165,26 @@ def test_cert_key_id():
     cert = cryptoapi.get_certificate(thumb)
     si = cryptoapi.cert_subject_id(cert)
     assert si
+
+
+def test_hash_digest_empty():
+    data = b''
+    h = cryptoapi.Hash(data)
+    digest_str = h.digest().encode('base64').rstrip()
+    assert digest_str == 'mB5fPKMMhBSHgw+E+0M+E6wRAVabnBNYSsSDI0zWVsA='
+
+
+def test_hash_sign_verify():
+    data = os.urandom(1024)
+    bad_data = os.urandom(1024)
+    thumb = get_test_thumb()
+    cert = cryptoapi.get_certificate(thumb)
+
+    h = cryptoapi.SignedHash(thumb, data)
+    sig = h.sign()
+
+    good = cryptoapi.Hash(data)
+    assert good.verify(cert, sig)
+
+    bad = cryptoapi.Hash(bad_data)
+    assert not bad.verify(cert, sig)
