@@ -1,7 +1,7 @@
 #include "common.hpp"
 #include "key.hpp"
 
-Key::Key(Crypt *pctx, HCRYPTKEY hk) throw(CSPException) {
+Key::Key(RCObj *pctx, HCRYPTKEY hk) throw(CSPException) {
     parent = pctx;
     parent->ref();
     hkey = hk;
