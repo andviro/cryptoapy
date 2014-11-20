@@ -4,13 +4,14 @@
 #include "context.hpp"
 #include "except.hpp"
 #include "cert.hpp"
+#include "rcobj.hpp"
 
 class Key
 {
     HCRYPTKEY hkey;
-    Crypt *parent;
+    RCObj *parent;
 public:
-    Key(Crypt *pctx, HCRYPTKEY hk) throw(CSPException);
+    Key(RCObj *pctx, HCRYPTKEY hk) throw(CSPException);
 
     ~Key() throw(CSPException);
 
