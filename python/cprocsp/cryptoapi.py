@@ -423,8 +423,9 @@ class Hash(object):
 
     DIGEST_URI = "http://www.w3.org/2001/04/xmldsig-more#gostr3411"
 
-    def _init_hash(self, ctx, data):
-        self._hash = csp.Hash(ctx, data) if data else csp.Hash(ctx)
+    def _init_hash(self, data, key=None):
+        self._hash = (csp.Hash(self._ctx, data, key)
+                      if data else csp.Hash(self._ctx, key))
 
     def __init__(self, data=None):
         '''
@@ -432,13 +433,13 @@ class Hash(object):
         подгружаются начальные данные.
 
         '''
-        ctx = csp.Crypt(
+        self._ctx = csp.Crypt(
             b'',
             csp.PROV_GOST_2001_DH,
             csp.CRYPT_VERIFYCONTEXT,
             None
         )
-        self._init_hash(ctx, data)
+        self._init_hash(data)
 
     def update(self, data):
         '''
@@ -453,6 +454,13 @@ class Hash(object):
 
         '''
         return self._hash.digest()
+
+    def _derive_key(self):
+        '''
+        Возвращает ключевой объект для использования в HMAC
+
+        '''
+        return self._hash.derive_key()
 
     def hexdigest(self):
         '''
@@ -474,6 +482,36 @@ class Hash(object):
         return self._hash.verify(cert, signature)
 
 
+class HMAC(Hash):
+
+    '''
+    Вычисление HMAC в соответствии с ГОСТ 3411-94
+
+    Пример использования:
+    > data = os.urandom(10000)
+    > key = b'some secret password'
+    > mac = HMAC(key, data)
+    или
+    > mac = HMAC(key)
+    > mac.update(data)
+
+    > print(mac.hexdigest())
+
+    '''
+
+    def __init__(self, key, data=None):
+        '''
+        Инициализация HMAC-а. Помимо параметров базового класса, получает `key`
+        -- байтовую строку с секретом
+
+        '''
+        _keyhash = Hash(key)
+        _key = _keyhash._derive_key()
+
+        self._ctx = _keyhash._ctx
+        self._init_hash(data, _key)
+
+
 class SignedHash(Hash):
 
     '''
@@ -488,13 +526,14 @@ class SignedHash(Hash):
     > sig = digest.sign()
     > print(sig.encode('base64').rstrip())
 
-    Для проверки подписи не требуется закрытый ключ, поэтому используется
-    базовый класс:
-
+    Для проверки подписи не требуется закрытый ключ, поэтому может
+    использоваться базовый класс:
     > new_digest = Hash(data)
+
     > cert = open('cert.pem').read()
     или
     > cert = get_certificate('0123456789ABCDEF123456789ABCD')
+
     > res = new_digest.verify(cert, sig)
     > print(res)
 
@@ -511,8 +550,8 @@ class SignedHash(Hash):
         cs = csp.CertStore(None, b"MY")
         store_lst = list(cs.find_by_thumb(unhexlify(thumb)))
         assert len(store_lst), 'Unable to find signing cert in system store'
-        ctx = csp.Crypt(store_lst[0])
-        self._init_hash(ctx, data)
+        self._ctx = csp.Crypt(store_lst[0])
+        self._init_hash(data)
 
     def sign(self):
         '''
