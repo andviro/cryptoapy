@@ -25,7 +25,7 @@ void Key::encode(BYTE **s, DWORD *slen, Key *cryptkey) throw(CSPException) {
     DWORD blobtype;
     if (cryptkey) {
         expkey = cryptkey -> hkey;
-        blobtype = SIMPLEBLOB;
+        blobtype = PLAINTEXTKEYBLOB;
     } else {
         expkey = 0;
         blobtype = PUBLICKEYBLOB;
