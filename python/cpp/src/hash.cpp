@@ -1,20 +1,39 @@
 #include "hash.hpp"
 #include "context.hpp"
 #include "cert.hpp"
+#include "key.hpp"
 
-void Hash::init(Crypt *ctx) throw(CSPException)
+void Hash::init(Crypt *ctx, Key *key) throw(CSPException)
 {
-    parent = ctx;
-    parent->ref();
+    parent = 0;
+    pkey = 0;
     if(!CryptCreateHash(
-        parent->hprov,
-        CALG_GR3411, 
-        0, 
+        ctx->hprov,
+        (key? CALG_GR3411_HMAC : CALG_GR3411), 
+        (key? key->hkey : 0), 
         0, 
         &hhash)) 
     {
         throw CSPException("Hash::init() failed");
     }
+    if (key) {
+        // XXX: КриптоПро на это плюется, хотя и надо бы установить параметры
+
+        //ZeroMemory(&HmacInfo, sizeof(HmacInfo));
+        //HmacInfo.HashAlgid = CALG_GR3411;
+        //if (!CryptSetHashParam(
+            //hhash,                // handle of the HMAC hash object
+            //HP_HMAC_INFO,             // setting an HMAC_INFO object
+            //(BYTE*)&HmacInfo,         // the HMAC_INFO object
+            //0))                       // reserved
+        //{
+            //throw CSPException("Hash::init() failed to set HMAC info");
+        //}
+        pkey = key;
+        pkey->ref();
+    }
+    parent = ctx;
+    parent->ref();
 }
 
 /**
@@ -23,23 +42,25 @@ void Hash::init(Crypt *ctx) throw(CSPException)
  *
  * * ctx -- `csp.Crypt`, used for hashing, signing and verifying
  * * STRING, LENGTH -- initial binary data.
+ * * key -- `csp.Key`, if present, hash is created as HMAC
  * 
  * \~russian
  * Создание хэша из начальных данных
  *
  * * ctx -- Экземпляр `csp.Crypt` для хэширования, подписывания и проверки * подписи
  * * STRING, LENGTH -- начальные данные.
+ * * key -- `csp.Key`, если задан, хэш будет создан как HMAC
  *
  */
-Hash::Hash(Crypt *ctx, BYTE *STRING, DWORD LENGTH) throw(CSPException)
+Hash::Hash(Crypt *ctx, BYTE *STRING, DWORD LENGTH, Key *key) throw(CSPException)
 {
-    init(ctx);
+    init(ctx, key);
     this->update(STRING, LENGTH);
 }
 
-Hash::Hash(Crypt *ctx) throw(CSPException)
+Hash::Hash(Crypt *ctx, Key *key) throw(CSPException)
 {
-    init(ctx);
+    init(ctx, key);
 }
 
 Hash::~Hash() throw(CSPException)
@@ -47,7 +68,12 @@ Hash::~Hash() throw(CSPException)
     if (hhash && !CryptDestroyHash(hhash)) {
         throw CSPException("~Hash: Couldn't release handle");
     }
-    parent->unref();
+    if (parent) {
+        parent->unref();
+    }
+    if (pkey) {
+        pkey->unref();
+    }
 }
 
 void Hash::digest(BYTE **s, DWORD *slen) throw(CSPException) 
@@ -147,4 +173,20 @@ bool Hash::verify(Cert *cert, BYTE *STRING, DWORD LENGTH) throw (CSPException)
         throw CSPException("Hash.verify(): error verifying hash", err);
     }
     return true;
+}
+
+Key *Hash::derive_key() throw(CSPException) 
+{
+    HCRYPTKEY hkey;
+
+    if (!CryptDeriveKey(
+        parent->hprov,                    // handle of the CSP
+        CALG_G28147,                 // algorithm ID
+        hhash,                    // handle to the hash object
+        CRYPT_EXPORTABLE,                        // flags
+        &hkey))                   // address of the key handle
+    {
+        throw CSPException("Hash.derive_key(): error deriving key");
+    }
+    return new Key(this, hkey);
 }

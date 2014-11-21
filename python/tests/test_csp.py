@@ -7,6 +7,7 @@ import sys
 from platform import architecture
 from base64 import b64encode
 import os
+from binascii import hexlify
 
 from . import test_container, test_cn, case_path, test_provider
 
@@ -673,6 +674,20 @@ def test_hash_digest_empty():
     assert digest_str == 'mB5fPKMMhBSHgw+E+0M+E6wRAVabnBNYSsSDI0zWVsA='
 
 
+def test_hash_digest_string():
+    ctx = csp.Crypt(
+        b'',
+        csp.PROV_GOST_2001_DH,
+        csp.CRYPT_VERIFYCONTEXT,
+        test_provider
+    )
+    data = b'The quick brown fox jumps over the lazy dog'
+    hash1 = csp.Hash(ctx, data)
+    digest_str = hexlify(hash1.digest()).upper()
+    print(digest_str)
+    assert digest_str == '9004294A361A508C586FE53D1F1B02746765E71B765472786E4770D565830A76'
+
+
 def test_sign_hash():
     ctx = test_cert_acquire_key()
     data = os.urandom(1024)
@@ -693,3 +708,30 @@ def test_verify_hash():
     cert = list(cs.find_by_name(test_cn))[0]
     hash1 = csp.Hash(ctx, data)
     assert hash1.verify(cert, sign)
+
+
+def test_derive_key():
+    ctx = csp.Crypt(
+        b'',
+        csp.PROV_GOST_2001_DH,
+        csp.CRYPT_VERIFYCONTEXT,
+        test_provider
+    )
+    data = b'1234'
+    hash1 = csp.Hash(ctx, data)
+    key1 = hash1.derive_key()
+    return key1
+
+
+def test_hash_hmac():
+    key = test_derive_key()
+    ctx = csp.Crypt(
+        b'',
+        csp.PROV_GOST_2001_DH,
+        csp.CRYPT_VERIFYCONTEXT,
+        test_provider
+    )
+    data = b'The quick brown fox jumps over the lazy dog'
+    hash1 = csp.Hash(ctx, data, key)
+    digest_str = hexlify(hash1.digest())
+    assert digest_str == '7b61bdd0c74c9eb391c640ccff001ff0ac533bcdff2e0f063e453c2eb8d7508d'

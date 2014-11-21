@@ -6,7 +6,8 @@
 #include "cert.hpp"
 #include "rcobj.hpp"
 
-class Key
+class Hash;
+class Key : public RCObj
 {
     HCRYPTKEY hkey;
     RCObj *parent;
@@ -22,6 +23,7 @@ public:
     void extract_cert(BYTE **s, DWORD *slen) throw (CSPException);
 
     friend class Crypt;
+    friend class Hash;
 };
 
 #endif

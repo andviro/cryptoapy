@@ -156,11 +156,10 @@ Crypt::Crypt (Cert *pcert) throw(CSPNotFound)
     DWORD dwKeySpec; // XXX: not used
     cont_name = NULL;
     pr_name = NULL;
-    parent = pcert;
-    parent->ref();
+    parent = 0;
 
     if(!(CryptAcquireCertificatePrivateKey(
-            parent->pcert,
+            pcert->pcert,
             0,
             NULL,
             &hprov,
@@ -169,6 +168,8 @@ Crypt::Crypt (Cert *pcert) throw(CSPNotFound)
     {
         throw CSPNotFound("Crypt: Couldn't acquire certificate private key");
     }
+    parent = pcert;
+    parent->ref();
 }
 
 Key *Crypt::get_key(DWORD keyspec) throw(CSPException, CSPNotFound)
