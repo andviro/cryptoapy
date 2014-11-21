@@ -188,3 +188,10 @@ def test_hash_sign_verify():
 
     bad = cryptoapi.Hash(bad_data)
     assert not bad.verify(cert, sig)
+
+
+def test_hmac():
+    key = b'1234'
+    data = b'The quick brown fox jumps over the lazy dog'
+    mac = cryptoapi.HMAC(key, data)
+    assert mac.hexdigest() == '7b61bdd0c74c9eb391c640ccff001ff0ac533bcdff2e0f063e453c2eb8d7508d'
