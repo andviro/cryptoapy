@@ -4,6 +4,7 @@ from __future__ import unicode_literals, print_function
 from cprocsp import csp
 from nose.tools import raises
 import sys
+import os
 from platform import architecture
 from base64 import b64encode
 import os
@@ -21,6 +22,8 @@ if architecture()[0] == '32bit':
     arch = 'ia32'
 else:
     arch = 'amd64'
+
+bindata = os.urandom(100 * 1024 * 1024)  # test 100M data size
 
 
 def test_context_simple():
@@ -540,7 +543,7 @@ def test_encrypt_data():
     re_cert = list(cs.find_by_name(test_cn))[0]
     msg = csp.CryptMsg()
     msg.add_recipient(re_cert)
-    data = msg.encrypt_data(b'murblehurblewurble')
+    data = msg.encrypt_data(bindata)
     assert data
     return data
 
@@ -557,13 +560,11 @@ def test_decrypt_data():
 
     '''
     data = test_encrypt_data()
-    print(b64encode(data))
     decrcs = csp.CertStore(None, b'MY')
     msg = csp.CryptMsg(data)
     assert msg
     res = msg.decrypt(decrcs)
-    print(res)
-    assert res == b'murblehurblewurble'
+    assert res == bindata
 
 
 def test_add_remove_cert():

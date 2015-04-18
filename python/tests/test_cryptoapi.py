@@ -195,3 +195,11 @@ def test_hmac():
     data = b'The quick brown fox jumps over the lazy dog'
     mac = cryptoapi.HMAC(key, data)
     assert mac.hexdigest() == '7b61bdd0c74c9eb391c640ccff001ff0ac533bcdff2e0f063e453c2eb8d7508d'
+
+
+def test_pkcs7_info_from_file():
+    pkcs_msg = open(case_path('msg.bin'), 'rb').read()
+    info = cryptoapi.pkcs7_info(pkcs_msg)
+    print(info)
+    assert info
+    assert info['ContentType'] == 'envelopedData'
