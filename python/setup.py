@@ -7,7 +7,7 @@ import os
 import platform
 import glob
 import subprocess as sub
-import multiprocessing
+import multiprocessing  # noqa
 
 major, minor = sys.version_info[:2]
 
@@ -75,6 +75,7 @@ class SWIGCommand(Command):
             ]
             sub.call(swig_cmd)
 
+
 cmdclass = {'test': TestCommand,
             'swig': SWIGCommand}
 
@@ -95,13 +96,9 @@ else:
     include_dirs += [
         '/opt/cprocsp/include',
         '/opt/cprocsp/include/cpcsp',
-        '/opt/cprocsp/include/asn1c/rtsrc',
-        '/opt/cprocsp/include/asn1data',
     ]
     library_dirs += ['/opt/cprocsp/lib/{0}'.format(arch)]
-    libraries += ['asn1data',
-                  'ssp',
-                  'capi20']
+    libraries += ['ssp', 'capi20']
     extra_compile_args += [
         '-DUNIX',
         '-DHAVE_LIMITS_H',
@@ -123,7 +120,7 @@ csp = Extension('cprocsp._csp',
 
 setup(
     name='cryptoapy',
-    version='0.4.42',
+    version='0.4.44',
     author='Andrew Rodionoff',
     author_email='andviro@gmail.com',
     license='LGPL',
