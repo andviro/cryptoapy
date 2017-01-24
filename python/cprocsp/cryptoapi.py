@@ -160,8 +160,12 @@ def create_request(cont, params, local=True, provider=None, insert_zeroes=False)
     req = csp.CertRequest(ctx, )
     set_q_defaults(params, insert_zeroes)
     req.set_subject(Attributes(params.get('Attributes', [])).encode())
-    validity = CertValidity(params.get('ValidFrom', datetime.now()),
-                            params.get('ValidTo', datetime.now() + timedelta(days=365)))
+    validFrom, validTo = params.get('ValidFrom'), params.get('ValidTo')
+    if validFrom is None and validTo is None:
+        validity = None
+    else:
+        validity = CertValidity(validFrom or datetime.now(),
+                                validTo or datetime.now() + timedelta(days=365))
     eku = EKU(params.get('EKU', []))
     usage = KeyUsage(params.get('KeyUsage', []))
     all_exts = [usage, eku]
@@ -174,7 +178,8 @@ def create_request(cont, params, local=True, provider=None, insert_zeroes=False)
     for (oid, data, crit) in params.get('RawExtensions', []):
         all_exts.append(CertExtension(str(oid), data, bool(crit)))
     ext_attr = CertExtensions(all_exts)
-    validity.add_to(req)
+    if validity is not None:
+        validity.add_to(req)
     ext_attr.add_to(req)
     return req.get_data()
 
