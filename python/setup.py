@@ -64,6 +64,7 @@ class SWIGCommand(Command):
                 '-python',
                 '-py3',
                 '-builtin',
+                '-threads',
                 '-c++',
                 '-o',
                 'cprocsp/csp_wrap_{0}.cxx'.format(arch),
