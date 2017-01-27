@@ -152,6 +152,7 @@ class Attributes(object):
     special_encs = {
         '1.2.643.100.1': (char.NumericString, 'ascii'),
         '1.2.643.100.3': (char.NumericString, 'ascii'),
+        '1.2.643.100.5': (char.NumericString, 'ascii'),
         '1.2.643.3.131.1.1': (char.NumericString, 'ascii'),
         '2.5.4.6': (char.PrintableString, 'ascii'),
         '1.2.840.113549.1.9.1': (char.IA5String, 'ascii'),
