@@ -90,6 +90,18 @@ def test_request_valid_time():
     assert b"\x06\x0A\x2A\x85\x03\x02\x04\x01\x01\x01\x01\x02" not in request2
 
 
+def test_request_fields_encoding():
+    req_params = dict(Attributes=[(CN, test_cn), ('1.2.643.100.5', '111111111111111')],
+                      ValidFrom=datetime.now(),
+                      ValidTo=datetime.now() + timedelta(days=30),
+                      KeyUsage=['dataEncipherment', 'nonRepudiation',
+                                'keyEncipherment', 'digitalSignature'],
+                      EKU=[csp.szOID_PKIX_KP_EMAIL_PROTECTION,
+                           csp.szOID_PKIX_KP_CLIENT_AUTH])
+    request = cryptoapi.create_request(test_container, req_params, local=test_local)
+    assert b"\x30\x18\x06\x05\x2A\x85\x03\x64\x05\x12\x0F\x31\x31\x31\x31\x31\x31\x31\x31\x31\x31\x31\x31\x31\x31\x31" in request
+
+
 def test_force_provider():
     return test_create_request(provider=test_provider)
 
