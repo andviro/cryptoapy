@@ -573,13 +573,17 @@ class SignedHash(Hash):
 
     SIGNATURE_URI = "http://www.w3.org/2001/04/xmldsig-more#gostr34102001-gostr3411"
 
-    def __init__(self, thumb, data=None):
+    def __init__(self, thumb, data=None, cont=None, provider=None):
         '''
         Инициализация хэша. Помимо параметров базового класса, получает `thumb`
         -- отпечаток
 
+        :cont: контейнер для поиска сертификата (по умолчанию -- системный)
+        :provider: провайдер для поиска сертификата (по умолчанию -- HSM)
+
         '''
-        cs = csp.CertStore(None, b"MY")
+        ctx = _mkcontext(cont, provider)
+        cs = csp.CertStore(ctx, b"MY")
         store_lst = list(cs.find_by_thumb(unhexlify(thumb)))
         assert len(store_lst), 'Unable to find signing cert in system store'
         self._ctx = csp.Crypt(store_lst[0])
