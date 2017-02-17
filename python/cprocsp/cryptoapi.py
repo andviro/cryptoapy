@@ -342,15 +342,19 @@ def encrypt(certs, data):
 
 
 @retry
-def decrypt(data, thumb):
+def decrypt(data, thumb, cont=None, provider=None):
     """Дешифрование данных из сообщения
 
     :thumb: отпечаток сертификата для расшифровки
     :data: данные в байтовой строке
+    :cont: контейнер для поиска сертификата (по умолчанию -- системный)
+    :provider: провайдер для поиска сертификата (по умолчанию -- HSM)
     :returns: шифрованные данные в байтовой строке
 
     """
-    cs = csp.CertStore(None, b"MY")
+
+    ctx = _mkcontext(cont, provider)
+    cs = csp.CertStore(ctx, b"MY")
     certs = list(cs.find_by_thumb(unhexlify(thumb)))
     assert len(certs), 'Certificate for thumbprint not found'
     bin_data = data
