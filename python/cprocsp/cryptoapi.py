@@ -53,6 +53,24 @@ def _from_hex(s):
     return a2b_qp(s.replace('\\x', '='))
 
 
+def _mkcontext(cont, provider, flags=None):
+    if cont is None:
+        return None
+
+    cont = _from_hex(cont)
+
+    if platform.system() == 'Linux' and provider is None:
+        cont = b'\\\\.\\HDIMAGE\\' + cont
+
+    if flags is None:
+        flags = csp.CRYPT_VERIFYCONTEXT,
+
+    if provider is None:
+        provider = str("Crypto-Pro HSM CSP")
+
+    return csp.Crypt(cont, csp.PROV_GOST_2001_DH, flags, provider)
+
+
 def gen_key(cont, local=True, silent=False, provider=None):
     '''
     Создание контейнера и двух пар ключей в нем
