@@ -217,9 +217,8 @@ def bind_cert_to_key(cont, cert, local=True, provider=None):
     """
     if provider is None:
         provider = str("Crypto-Pro HSM CSP") if not local else None
+    ctx = _mkcontext(cont, provider, 0)
     cert = autopem(cert)
-    cont = _from_hex(cont)
-    ctx = csp.Crypt(cont, csp.PROV_GOST_2001_DH, 0, provider)
     newc = csp.Cert(cert)
     newc.bind(ctx)
     cs = csp.CertStore(ctx, b"MY")
