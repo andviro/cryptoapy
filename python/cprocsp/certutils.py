@@ -172,16 +172,8 @@ class Attributes(object):
                     pair = rfc2459.AttributeTypeAndValue()
                     pair.setComponentByName('type', rfc2459.AttributeType(str(oid)))
                     code, enc = self.special_encs.get(oid, (char.UTF8String, 'utf-8'))
-                    pair.setComponentByName(
-                        'value',
-                        rfc2459.AttributeValue(
-                            univ.OctetString(
-                                encoder.encode(
-                                    code(
-                                        unicode(val).encode(
-                                            enc,
-                                            'replace'))))))
-
+                    pair.setComponentByName('value',
+                                            rfc2459.AttributeValue(univ.OctetString(encoder.encode(code(unicode(val).encode(enc, 'replace'))))))
                     pairset.setComponentByPosition(j, pair)
 
                 vals.setComponentByPosition(i, pairset)
@@ -205,7 +197,7 @@ class Attributes(object):
                 oid = unicode(dn[0])
                 a = decoder.decode(dn[1])[0]
                 if oid == '2.5.4.16':
-                    s = ' '.join(unicode(x) for x in a)
+                    s = ' '.join(unicode(a[i]) for i in range(len(a)))
                 else:
                     s = unicode(a)
                 item.append((oid, s))
