@@ -226,16 +226,20 @@ def bind_cert_to_key(cont, cert, local=True, provider=None):
     return hexlify(newc.thumbprint())
 
 
-def get_certificate(thumb=None, name=None):
+def get_certificate(thumb=None, name=None, cont=None, provider=None):
     """Поиск сертификатов по отпечатку
 
     :thumb: отпечаток, возвращенный функцией `bind_cert_to_key`
     :name: имя субъекта для поиска (передается вместо параметра :thumb:)
+    :cont: контейнер для поиска сертификата (по умолчанию -- системный)
+    :provider: провайдер для поиска сертификата (по умолчанию -- HSM)
     :returns: сертификат в байтовой строке
 
     """
-    assert thumb or name and not (thumb and name), 'Only one thumb or name allowed'
-    cs = csp.CertStore(None, b"MY")
+    assert thumb or name and not (
+        thumb and name), 'Only one thumb or name allowed'
+    ctx = _mkcontext(cont, provider)
+    cs = csp.CertStore(ctx, b"MY")
     if thumb is not None:
         res = list(cs.find_by_thumb(unhexlify(thumb)))
     else:
