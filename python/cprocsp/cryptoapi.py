@@ -17,7 +17,9 @@ import time
 from functools import wraps
 if sys.version_info >= (3,):
     unicode = str
-    ord = lambda x: x
+
+    def ord(x):
+        return x
 else:
     unicode = unicode
 
@@ -294,8 +296,7 @@ def check_signature(cert, sig, data):
     cserial = icert.serial()
     for i in range(sign.num_signers()):
         isign = csp.CertInfo(sign, i)
-        if (cissuer == isign.issuer() and
-                cserial == isign.serial()):
+        if (cissuer == isign.issuer() and cserial == isign.serial()):
             return sign.verify_data(data, i)
     return False
 
@@ -404,7 +405,8 @@ def cert_info(cert):
         Thumbprint=hexlify(cert.thumbprint()),
         UseToSign=bool(info.usage() & csp.CERT_DIGITAL_SIGNATURE_KEY_USAGE),
         UseToEncrypt=bool(info.usage() & csp.CERT_DATA_ENCIPHERMENT_KEY_USAGE),
-        SerialNumber=':'.join(hex(ord(x))[2:] for x in reversed(info.serial())),
+        SerialNumber=':'.join(hex(ord(x))[2:]
+                              for x in reversed(info.serial())),
         Subject=Attributes.load(info.name(False)).decode(),
         Extensions=infoasn.EKU(),
     )
