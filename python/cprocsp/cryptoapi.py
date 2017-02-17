@@ -17,7 +17,9 @@ import time
 from functools import wraps
 if sys.version_info >= (3,):
     unicode = str
-    ord = lambda x: x
+
+    def ord(x):
+        return x
 else:
     unicode = unicode
 
@@ -49,6 +51,24 @@ def _from_hex(s):
     if isinstance(s, bytes):
         s = unicode(s, 'ascii')
     return a2b_qp(s.replace('\\x', '='))
+
+
+def _mkcontext(cont, provider, flags=None):
+    if cont is None:
+        return None
+
+    cont = _from_hex(cont)
+
+    if platform.system() == 'Linux' and provider is None:
+        cont = b'\\\\.\\HDIMAGE\\' + cont
+
+    if flags is None:
+        flags = csp.CRYPT_VERIFYCONTEXT,
+
+    if provider is None:
+        provider = str("Crypto-Pro HSM CSP")
+
+    return csp.Crypt(cont, csp.PROV_GOST_2001_DH, flags, provider)
 
 
 def gen_key(cont, local=True, silent=False, provider=None):
@@ -197,9 +217,8 @@ def bind_cert_to_key(cont, cert, local=True, provider=None):
     """
     if provider is None:
         provider = str("Crypto-Pro HSM CSP") if not local else None
+    ctx = _mkcontext(cont, provider, 0)
     cert = autopem(cert)
-    cont = _from_hex(cont)
-    ctx = csp.Crypt(cont, csp.PROV_GOST_2001_DH, 0, provider)
     newc = csp.Cert(cert)
     newc.bind(ctx)
     cs = csp.CertStore(ctx, b"MY")
@@ -207,16 +226,20 @@ def bind_cert_to_key(cont, cert, local=True, provider=None):
     return hexlify(newc.thumbprint())
 
 
-def get_certificate(thumb=None, name=None):
+def get_certificate(thumb=None, name=None, cont=None, provider=None):
     """Поиск сертификатов по отпечатку
 
     :thumb: отпечаток, возвращенный функцией `bind_cert_to_key`
     :name: имя субъекта для поиска (передается вместо параметра :thumb:)
+    :cont: контейнер для поиска сертификата (по умолчанию -- системный)
+    :provider: провайдер для поиска сертификата (по умолчанию -- HSM)
     :returns: сертификат в байтовой строке
 
     """
-    assert thumb or name and not (thumb and name), 'Only one thumb or name allowed'
-    cs = csp.CertStore(None, b"MY")
+    assert thumb or name and not (
+        thumb and name), 'Only one thumb or name allowed'
+    ctx = _mkcontext(cont, provider)
+    cs = csp.CertStore(ctx, b"MY")
     if thumb is not None:
         res = list(cs.find_by_thumb(unhexlify(thumb)))
     else:
@@ -294,8 +317,7 @@ def check_signature(cert, sig, data):
     cserial = icert.serial()
     for i in range(sign.num_signers()):
         isign = csp.CertInfo(sign, i)
-        if (cissuer == isign.issuer() and
-                cserial == isign.serial()):
+        if (cissuer == isign.issuer() and cserial == isign.serial()):
             return sign.verify_data(data, i)
     return False
 
@@ -320,15 +342,19 @@ def encrypt(certs, data):
 
 
 @retry
-def decrypt(data, thumb):
+def decrypt(data, thumb, cont=None, provider=None):
     """Дешифрование данных из сообщения
 
     :thumb: отпечаток сертификата для расшифровки
     :data: данные в байтовой строке
+    :cont: контейнер для поиска сертификата (по умолчанию -- системный)
+    :provider: провайдер для поиска сертификата (по умолчанию -- HSM)
     :returns: шифрованные данные в байтовой строке
 
     """
-    cs = csp.CertStore(None, b"MY")
+
+    ctx = _mkcontext(cont, provider)
+    cs = csp.CertStore(ctx, b"MY")
     certs = list(cs.find_by_thumb(unhexlify(thumb)))
     assert len(certs), 'Certificate for thumbprint not found'
     bin_data = data
@@ -404,7 +430,8 @@ def cert_info(cert):
         Thumbprint=hexlify(cert.thumbprint()),
         UseToSign=bool(info.usage() & csp.CERT_DIGITAL_SIGNATURE_KEY_USAGE),
         UseToEncrypt=bool(info.usage() & csp.CERT_DATA_ENCIPHERMENT_KEY_USAGE),
-        SerialNumber=':'.join(hex(ord(x))[2:] for x in reversed(info.serial())),
+        SerialNumber=':'.join(hex(ord(x))[2:]
+                              for x in reversed(info.serial())),
         Subject=Attributes.load(info.name(False)).decode(),
         Extensions=infoasn.EKU(),
     )
@@ -546,13 +573,17 @@ class SignedHash(Hash):
 
     SIGNATURE_URI = "http://www.w3.org/2001/04/xmldsig-more#gostr34102001-gostr3411"
 
-    def __init__(self, thumb, data=None):
+    def __init__(self, thumb, data=None, cont=None, provider=None):
         '''
         Инициализация хэша. Помимо параметров базового класса, получает `thumb`
         -- отпечаток
 
+        :cont: контейнер для поиска сертификата (по умолчанию -- системный)
+        :provider: провайдер для поиска сертификата (по умолчанию -- HSM)
+
         '''
-        cs = csp.CertStore(None, b"MY")
+        ctx = _mkcontext(cont, provider)
+        cs = csp.CertStore(ctx, b"MY")
         store_lst = list(cs.find_by_thumb(unhexlify(thumb)))
         assert len(store_lst), 'Unable to find signing cert in system store'
         self._ctx = csp.Crypt(store_lst[0])
