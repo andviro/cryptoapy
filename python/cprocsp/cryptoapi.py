@@ -23,10 +23,17 @@ if sys.version_info >= (3,):
 else:
     unicode = unicode
 
+PROV_KC1_GR3410_2001 = str("Crypto-Pro GOST R 34.10-2001 KC1 CSP")
+PROV_KC2_GR3410_2001 = str("Crypto-Pro GOST R 34.10-2001 KC2 CSP")
+PROV_HSM = str("Crypto-Pro HSM CSP")
+PROV_GR3410_2001_HSM_LOCAL = str("Crypto-Pro GOST R 34.10-2001 HSM Local CSP")
+
 
 # Обертка для функций, которые могут не сработать из-за длительного простоя
 # туннеля, при работе с криптопровайдером внешнего хранилища. Максимальный
 # таймаут = 0.25 + 0.5 + 1.0 = 1.75 секунд
+
+
 def retry(f, timeout=0.25, num_tries=4):
     @wraps(f)
     def wrapper(*args, **nargs):
@@ -59,14 +66,11 @@ def _mkcontext(cont, provider, flags=None):
 
     cont = _from_hex(cont)
 
-    if platform.system() == 'Linux' and provider is None:
+    if platform.system() == 'Linux' and provider != PROV_HSM and not cont.startswith('\\\\'):
         cont = b'\\\\.\\HDIMAGE\\' + cont
 
     if flags is None:
-        flags = csp.CRYPT_VERIFYCONTEXT,
-
-    if provider is None:
-        provider = str("Crypto-Pro HSM CSP")
+        flags = csp.CRYPT_VERIFYCONTEXT
 
     return csp.Crypt(cont, csp.PROV_GOST_2001_DH, flags, provider)
 
@@ -87,14 +91,14 @@ def gen_key(cont, local=True, silent=False, provider=None):
     '''
     silent_flag = csp.CRYPT_SILENT if silent else 0
     if provider is None:
-        provider = str("Crypto-Pro HSM CSP") if not local else None
+        provider = PROV_HSM if not local else None
     cont = _from_hex(cont)
 
     try:
         ctx = csp.Crypt(cont, csp.PROV_GOST_2001_DH, silent_flag, provider)
     except (ValueError, SystemError):
 
-        if platform.system() == 'Linux' and provider is None:
+        if platform.system() == 'Linux' and provider != PROV_HSM and not cont.startswith('\\\\'):
             cont = b'\\\\.\\HDIMAGE\\' + cont
 
         ctx = csp.Crypt(cont, csp.PROV_GOST_2001_DH, csp.CRYPT_NEWKEYSET |
@@ -131,7 +135,7 @@ def remove_key(cont, local=True, provider=None):
     '''
     cont = _from_hex(cont)
     if provider is None:
-        provider = str("Crypto-Pro HSM CSP") if not local else None
+        provider = PROV_HSM if not local else None
     csp.Crypt.remove(cont, csp.PROV_GOST_2001_DH, provider)
     return True
 
@@ -174,7 +178,7 @@ def create_request(cont, params, local=True, provider=None, insert_zeroes=False)
     """
 
     if provider is None:
-        provider = str("Crypto-Pro HSM CSP") if not local else None
+        provider = PROV_HSM if not local else None
     cont = _from_hex(cont)
     ctx = csp.Crypt(cont, csp.PROV_GOST_2001_DH, 0, provider)
     req = csp.CertRequest(ctx, )
@@ -216,7 +220,7 @@ def bind_cert_to_key(cont, cert, local=True, provider=None):
 
     """
     if provider is None:
-        provider = str("Crypto-Pro HSM CSP") if not local else None
+        provider = PROV_HSM if not local else None
     ctx = _mkcontext(cont, provider, 0)
     cert = autopem(cert)
     newc = csp.Cert(cert)
@@ -232,7 +236,7 @@ def get_certificate(thumb=None, name=None, cont=None, provider=None):
     :thumb: отпечаток, возвращенный функцией `bind_cert_to_key`
     :name: имя субъекта для поиска (передается вместо параметра :thumb:)
     :cont: контейнер для поиска сертификата (по умолчанию -- системный)
-    :provider: провайдер для поиска сертификата (по умолчанию -- HSM)
+    :provider: провайдер для поиска сертификата (по умолчанию дефолтный для контейнера)
     :returns: сертификат в байтовой строке
 
     """
@@ -250,16 +254,19 @@ def get_certificate(thumb=None, name=None, cont=None, provider=None):
 
 
 @retry
-def sign(thumb, data, include_data):
+def sign(thumb, data, include_data, cont=None, provider=None):
     """Подписывание данных сертификатом
 
     :thumb: отпечаток сертификата, которым будем подписывать
     :data: бинарные данные, байтовая строка
     :include_data: булев флаг, если True -- данные прицепляются вместе с подписью
+    :cont: контейнер для поиска сертификата (по умолчанию -- системный)
+    :provider: провайдер для поиска сертификата (по умолчанию дефолтный для контейнера)
     :returns: данные и/или подпись в виде байтовой строки
 
     """
-    cs = csp.CertStore(None, b"MY")
+    ctx = _mkcontext(cont, provider)
+    cs = csp.CertStore(ctx, b"MY")
     store_lst = list(cs.find_by_thumb(unhexlify(thumb)))
     assert len(store_lst), 'Unable to find signing cert in system store'
     signcert = store_lst[0]
@@ -269,17 +276,20 @@ def sign(thumb, data, include_data):
 
 
 @retry
-def sign_and_encrypt(thumb, certs, data):
+def sign_and_encrypt(thumb, certs, data, cont=None, provider=None):
     """Подписывание данных сертификатом
 
     :thumb: отпечаток сертификата, которым будем подписывать
     :certs: список сертификатов получателей
     :data: байтовая строка с данными
+    :cont: контейнер для поиска сертификата (по умолчанию -- системный)
+    :provider: провайдер для поиска сертификата (по умолчанию дефолтный для контейнера)
     :returns: данные и подпись, зашифрованные и закодированные в байтовую строку
 
     """
     certs = [autopem(c) for c in certs]
-    cs = csp.CertStore(None, b"MY")
+    ctx = _mkcontext(cont, provider)
+    cs = csp.CertStore(ctx, b"MY")
     store_lst = list(cs.find_by_thumb(unhexlify(thumb)))
     assert len(store_lst), 'Unable to find signing cert in system store'
     signcert = store_lst[0]
@@ -348,7 +358,7 @@ def decrypt(data, thumb, cont=None, provider=None):
     :thumb: отпечаток сертификата для расшифровки
     :data: данные в байтовой строке
     :cont: контейнер для поиска сертификата (по умолчанию -- системный)
-    :provider: провайдер для поиска сертификата (по умолчанию -- HSM)
+    :provider: провайдер для поиска сертификата (по умолчанию дефолтный для контейнера)
     :returns: шифрованные данные в байтовой строке
 
     """
@@ -579,7 +589,7 @@ class SignedHash(Hash):
         -- отпечаток
 
         :cont: контейнер для поиска сертификата (по умолчанию -- системный)
-        :provider: провайдер для поиска сертификата (по умолчанию -- HSM)
+        :provider: провайдер для поиска сертификата (по умолчанию дефолтный для контейнера)
 
         '''
         ctx = _mkcontext(cont, provider)
