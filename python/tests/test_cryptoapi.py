@@ -112,6 +112,14 @@ def test_get_certificate():
     assert cert_by_thumb == cert_by_name
 
 
+def test_get_certificate_cont_provider():
+    cert_by_thumb = cryptoapi.get_certificate(
+        get_test_thumb(), cont=test_container, provider=cryptoapi.PROV_KC1_GR3410_2001)
+    cert_by_name = cryptoapi.get_certificate(
+        name=test_cn, cont=test_container, provider=cryptoapi.PROV_KC1_GR3410_2001)
+    assert cert_by_thumb == cert_by_name
+
+
 msg = b'Ahahahahahahahahahahahahahahaahahahahhahahahahah!!!!!!111111'
 
 
@@ -122,6 +130,21 @@ def test_signing():
     signed_data = cryptoapi.sign(thumb, msg, True)
     assert signed_data
     signed_and_encrypted = cryptoapi.sign_and_encrypt(thumb, [cert], msg)
+    assert signed_and_encrypted
+    return signed_data
+
+
+def test_signing_cont_provider():
+    thumb = get_test_thumb()
+    cert = cryptoapi.get_certificate(thumb, cont=test_container,
+                                     provider=cryptoapi.PROV_KC1_GR3410_2001)
+
+    signed_data = cryptoapi.sign(thumb, msg, True, cont=test_container,
+                                 provider=cryptoapi.PROV_KC1_GR3410_2001)
+    assert signed_data
+
+    signed_and_encrypted = cryptoapi.sign_and_encrypt(
+        thumb, [cert], msg, cont=test_container, provider=cryptoapi.PROV_KC1_GR3410_2001)
     assert signed_and_encrypted
     return signed_data
 
@@ -168,6 +191,19 @@ def test_encrypt_decrypt():
     assert bad_thumbs == wrong_thumbs[:1]
 
 
+def test_encrypt_decrypt_cont_provider():
+    thumb = get_test_thumb()
+    cert = cryptoapi.get_certificate(thumb, cont=test_container,
+                                     provider=cryptoapi.PROV_KC1_GR3410_2001)
+    certs = [cert]
+    encrypted_data = cryptoapi.encrypt(certs, msg)
+    assert encrypted_data
+
+    decrypted_data = cryptoapi.decrypt(
+        encrypted_data, thumb, cont=test_container, provider=cryptoapi.PROV_KC1_GR3410_2001)
+    assert msg == decrypted_data
+
+
 def test_pkcs7_info():
     pkcs_msg = test_signing()
     info = cryptoapi.pkcs7_info(pkcs_msg)
@@ -212,6 +248,20 @@ def test_hash_sign_verify():
 
     bad = cryptoapi.Hash(bad_data)
     assert not bad.verify(cert, sig)
+
+
+def test_hash_sign_verify_cont_provider():
+    data = os.urandom(1024)
+    thumb = get_test_thumb()
+
+    h = cryptoapi.SignedHash(thumb, data, cont=test_container,
+                             provider=cryptoapi.PROV_KC1_GR3410_2001)
+    sig = h.sign()
+
+    cert = cryptoapi.get_certificate(thumb, cont=test_container,
+                                     provider=cryptoapi.PROV_KC1_GR3410_2001)
+    good = cryptoapi.Hash(data)
+    assert good.verify(cert, sig)
 
 
 def test_hmac():
