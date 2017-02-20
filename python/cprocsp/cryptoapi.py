@@ -303,13 +303,14 @@ def sign_and_encrypt(thumb, certs, data, cont=None, provider=None):
 
 
 @retry
-def check_signature(cert, sig, data):
+def check_signature(cert, sig, data, cont=None, provider=None):
     """Проверка подписи под данными
 
     :cert: сертификат в байтовой строке или `None`
     :data: бинарные данные в байтовой строке
     :sig: данные подписи в байтовой строке
-    :local: Если True, работа идет с локальным хранилищем
+    :cont: контейнер для поиска сертификата (по умолчанию -- системный)
+    :provider: провайдер для поиска сертификата (по умолчанию дефолтный для контейнера)
     :returns: True или False
 
     Если :cert: передан как None, осуществляется проверка всех подписантов в
@@ -318,17 +319,21 @@ def check_signature(cert, sig, data):
 
     """
     sign = csp.Signature(sig)
-    if cert is None:
-        return all(sign.verify_data(data, i) for i in range(sign.num_signers()))
-    cert = autopem(cert)
-    cert = csp.Cert(cert)
-    icert = csp.CertInfo(cert)
-    cissuer = icert.issuer()
-    cserial = icert.serial()
+
+    if cert is not None:
+        cert = autopem(cert)
+        cert = csp.Cert(cert)
+        cs = csp.CertStore()
+        cs.add_cert(cert)
+    else:
+        ctx = _mkcontext(cont, provider)
+        cs = csp.CertStore(ctx, b"MY")
+
     for i in range(sign.num_signers()):
         isign = csp.CertInfo(sign, i)
-        if (cissuer == isign.issuer() and cserial == isign.serial()):
-            return sign.verify_data(data, i)
+        if not cs.get_cert_by_info(isign):
+            continue
+        return sign.verify_data(data, i)
     return False
 
 
