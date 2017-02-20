@@ -149,7 +149,7 @@ def test_signing_cont_provider():
     return signed_data
 
 
-def test_verifying():
+def _test_verifying():
     thumb = get_test_thumb()
     cert = cryptoapi.get_certificate(thumb)
     cs = csp.CertStore(None, b'My')
@@ -164,6 +164,15 @@ def test_verifying():
     if len(wrong_certs):
         assert not any(cryptoapi.check_signature(c, sig, msg) for c in
                        wrong_certs)
+    return sig
+
+
+def test_check_signature():
+    sig = _test_verifying()
+    assert cryptoapi.check_signature(
+        None, sig, msg, cont=test_container, provider=cryptoapi.PROV_KC1_GR3410_2001)
+    assert not cryptoapi.check_signature(
+        None, sig, msg[:-1], cont=test_container, provider=cryptoapi.PROV_KC1_GR3410_2001)
 
 
 def test_encrypt_decrypt():
