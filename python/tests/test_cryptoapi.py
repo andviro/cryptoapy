@@ -22,6 +22,7 @@ def test_address_oid():
     info = cryptoapi.cert_info(cert)
     assert 'Subject' in info
     subj = dict(info['Subject'])
+    print(subj['2.5.4.16'])
     assert subj['2.5.4.16'] == '107139, Орликов переулок, дом 3А'
 
 
@@ -29,6 +30,7 @@ def test_encode_address():
     testaddr = [('2.5.4.16', '107139, Орликов переулок, дом 3А')]
     att = certutils.Attributes(testaddr)
     att2 = certutils.Attributes.load(att.encode())
+    print(att2.decode())
     assert att2.decode() == testaddr
 
 
@@ -239,8 +241,9 @@ def test_cert_key_id():
 def test_hash_digest_empty():
     data = b''
     h = cryptoapi.Hash(data)
-    digest_str = h.digest().encode('base64').rstrip()
-    assert digest_str == 'mB5fPKMMhBSHgw+E+0M+E6wRAVabnBNYSsSDI0zWVsA='
+    digest_str = hexlify(h.digest())
+    print(digest_str)
+    assert digest_str == b'981e5f3ca30c841487830f84fb433e13ac1101569b9c13584ac483234cd656c0'
 
 
 def test_hash_sign_verify():
@@ -277,7 +280,7 @@ def test_hmac():
     key = b'1234'
     data = b'The quick brown fox jumps over the lazy dog'
     mac = cryptoapi.HMAC(key, data)
-    assert mac.hexdigest() == '7b61bdd0c74c9eb391c640ccff001ff0ac533bcdff2e0f063e453c2eb8d7508d'
+    assert mac.hexdigest() == b'7b61bdd0c74c9eb391c640ccff001ff0ac533bcdff2e0f063e453c2eb8d7508d'
 
 
 def test_pkcs7_info_from_file():
