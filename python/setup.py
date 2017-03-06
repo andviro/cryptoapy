@@ -44,9 +44,11 @@ class TestCommand(Command):
         if not nose:
             print('W: nose package not found')
             return True
-        argv = ["", '-v', '-w', os.path.join(self._dir, 'tests')]
+        argv = ["", '-v']
         if self.nose_args is not None:
             argv.extend(self.nose_args.split())
+        else:
+            argv.append(os.path.join(self._dir, 'tests'))
         return nose.core.run(argv=argv)
 
 
