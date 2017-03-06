@@ -196,8 +196,9 @@ class Attributes(object):
             for dn in rdn:
                 oid = unicode(dn[0])
                 a = decoder.decode(dn[1])[0]
-                if oid == '2.5.4.16':
-                    s = ' '.join(unicode(a[i]) for i in range(len(a)))
+                if isinstance(a[0], char.UTF8String):
+                    # XXX evil hack!!!
+                    s = unicode(bytes(dn[1])[4:], 'utf-8')
                 else:
                     s = unicode(a)
                 item.append((oid, s))

@@ -4,7 +4,7 @@ from __future__ import unicode_literals, print_function
 from pyasn1_modules.rfc2459 import id_at_commonName as CN
 from cprocsp import cryptoapi, certutils, csp
 import sys
-from binascii import hexlify
+from binascii import hexlify, unhexlify
 from datetime import datetime, timedelta
 import os
 
@@ -28,8 +28,10 @@ def test_address_oid():
 
 def test_encode_address():
     testaddr = [('2.5.4.16', '107139, Орликов переулок, дом 3А')]
-    att = certutils.Attributes(testaddr)
-    att2 = certutils.Attributes.load(att.encode())
+    att = certutils.Attributes(testaddr).encode()
+    print(hexlify(att))
+    assert att == unhexlify('3040313e303c060355041030350c333130373133392c20d09ed180d0bbd0b8d0bad0bed0b220d0bfd0b5d180d0b5d183d0bbd0bed0ba2c20d0b4d0bed0bc2033d090')
+    att2 = certutils.Attributes.load(att)
     print(att2.decode())
     assert att2.decode() == testaddr
 
