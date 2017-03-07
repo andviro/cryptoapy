@@ -4,7 +4,8 @@ from __future__ import unicode_literals, print_function
 from pyasn1_modules.rfc2459 import id_at_commonName as CN
 from cprocsp import cryptoapi, certutils, csp
 import sys
-from binascii import hexlify, unhexlify
+from binascii import hexlify
+from base64 import b64decode
 from datetime import datetime, timedelta
 import os
 
@@ -26,14 +27,37 @@ def test_address_oid():
     assert subj['2.5.4.16'] == '107139, Орликов переулок, дом 3А'
 
 
-def test_encode_address():
-    testaddr = [('2.5.4.16', '107139, Орликов переулок, дом 3А')]
-    att = certutils.Attributes(testaddr).encode()
+def test_encode_attributes():
+    testattrs = [
+        ('1.2.643.100.1', '1111111111111'),
+        ('2.5.4.9', 'Лизюкова ул 3   3'),
+        ('2.5.4.16', '000000, Не дом и не улица'),
+        ('1.2.643.3.131.1.1', '000000000000'),
+        ('2.5.4.6', 'R'),
+        ('2.5.4.7', 'Воронеж'),
+        ('2.5.4.8', '36 г. Воронеж'),
+        ('2.5.4.10', 'тестБегемот'),
+        ('2.5.4.3', 'тестБегемот'),
+        ('2.5.4.4', 'Иванов'),
+        ('2.5.4.42', 'Иван'),
+        ('2.5.4.12', 'Гениальный директор'),
+        ('1.2.643.100.3', '22222222222')
+    ]
+
+    att = certutils.Attributes(testattrs).encode()
+    open('testattrs.der', 'wb').write(att)
     print(hexlify(att))
-    assert att == unhexlify('3040313e303c060355041030350c333130373133392c20d09ed180d0bbd0b8d0bad0bed0b220d0bfd0b5d180d0b5d183d0bbd0bed0ba2c20d0b4d0bed0bc2033d090')
+    assert att == b64decode(
+        '''MIIBiDEYMBYGBSqFA2QBEg0xMTExMTExMTExMTExMSQwIgYDVQQJDBvQm9C40LfRjtC60L7QstCw
+           INGD0LsgMyAgIDMxMTAvBgNVBBAwKAwmMDAwMDAwLCDQndC1INC00L7QvCDQuCDQvdC1INGD0LvQ
+           uNGG0LAxGjAYBggqhQMDgQMBARIMMDAwMDAwMDAwMDAwMQowCAYDVQQGEwFSMRcwFQYDVQQHDA7Q
+           ktC+0YDQvtC90LXQtjEeMBwGA1UECAwVMzYg0LMuINCS0L7RgNC+0L3QtdC2MR8wHQYDVQQKDBbR
+           gtC10YHRgtCR0LXQs9C10LzQvtGCMR8wHQYDVQQDDBbRgtC10YHRgtCR0LXQs9C10LzQvtGCMRUw
+           EwYDVQQEDAzQmNCy0LDQvdC+0LIxETAPBgNVBCoMCNCY0LLQsNC9MS4wLAYDVQQMDCXQk9C10L3Q
+           uNCw0LvRjNC90YvQuSDQtNC40YDQtdC60YLQvtGAMRYwFAYFKoUDZAMSCzIyMjIyMjIyMjIy''')
     att2 = certutils.Attributes.load(att)
     print(att2.decode())
-    assert att2.decode() == testaddr
+    assert att2.decode() == testattrs
 
 
 def test_encrypt_for_certs():
