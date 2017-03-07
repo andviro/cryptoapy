@@ -13,6 +13,7 @@
 #define SWIGPYTHON
 #endif
 
+#define SWIG_PYTHON_THREADS
 #define SWIG_PYTHON_DIRECTOR_NO_VTABLE
 #define SWIGPYTHON_BUILTIN
 
@@ -4193,7 +4194,11 @@ SWIGINTERN PyObject *_wrap_GUID_Data1_set(PyObject *self, PyObject *args) {
     SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "GUID_Data1_set" "', argument " "2"" of type '" "unsigned long""'");
   } 
   arg2 = static_cast< unsigned long >(val2);
-  if (arg1) (arg1)->Data1 = arg2;
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    if (arg1) (arg1)->Data1 = arg2;
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
   resultobj = SWIG_Py_Void();
   return resultobj;
 fail:
@@ -4214,7 +4219,11 @@ SWIGINTERN PyObject *_wrap_GUID_Data1_get(PyObject *self, PyObject *args) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "GUID_Data1_get" "', argument " "1"" of type '" "_GUID *""'"); 
   }
   arg1 = reinterpret_cast< _GUID * >(argp1);
-  result = (unsigned long) ((arg1)->Data1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (unsigned long) ((arg1)->Data1);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
   resultobj = SWIG_From_unsigned_SS_long(static_cast< unsigned long >(result));
   return resultobj;
 fail:
@@ -4243,7 +4252,11 @@ SWIGINTERN PyObject *_wrap_GUID_Data2_set(PyObject *self, PyObject *args) {
     SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "GUID_Data2_set" "', argument " "2"" of type '" "unsigned short""'");
   } 
   arg2 = static_cast< unsigned short >(val2);
-  if (arg1) (arg1)->Data2 = arg2;
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    if (arg1) (arg1)->Data2 = arg2;
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
   resultobj = SWIG_Py_Void();
   return resultobj;
 fail:
@@ -4264,7 +4277,11 @@ SWIGINTERN PyObject *_wrap_GUID_Data2_get(PyObject *self, PyObject *args) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "GUID_Data2_get" "', argument " "1"" of type '" "_GUID *""'"); 
   }
   arg1 = reinterpret_cast< _GUID * >(argp1);
-  result = (unsigned short) ((arg1)->Data2);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (unsigned short) ((arg1)->Data2);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
   resultobj = SWIG_From_unsigned_SS_short(static_cast< unsigned short >(result));
   return resultobj;
 fail:
@@ -4293,7 +4310,11 @@ SWIGINTERN PyObject *_wrap_GUID_Data3_set(PyObject *self, PyObject *args) {
     SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "GUID_Data3_set" "', argument " "2"" of type '" "unsigned short""'");
   } 
   arg2 = static_cast< unsigned short >(val2);
-  if (arg1) (arg1)->Data3 = arg2;
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    if (arg1) (arg1)->Data3 = arg2;
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
   resultobj = SWIG_Py_Void();
   return resultobj;
 fail:
@@ -4314,7 +4335,11 @@ SWIGINTERN PyObject *_wrap_GUID_Data3_get(PyObject *self, PyObject *args) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "GUID_Data3_get" "', argument " "1"" of type '" "_GUID *""'"); 
   }
   arg1 = reinterpret_cast< _GUID * >(argp1);
-  result = (unsigned short) ((arg1)->Data3);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (unsigned short) ((arg1)->Data3);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
   resultobj = SWIG_From_unsigned_SS_short(static_cast< unsigned short >(result));
   return resultobj;
 fail:
@@ -4344,12 +4369,16 @@ SWIGINTERN PyObject *_wrap_GUID_Data4_set(PyObject *self, PyObject *args) {
   } 
   arg2 = reinterpret_cast< unsigned char * >(argp2);
   {
-    if (arg2) {
-      size_t ii = 0;
-      for (; ii < (size_t)8; ++ii) *(unsigned char *)&arg1->Data4[ii] = *((unsigned char *)arg2 + ii);
-    } else {
-      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in variable '""Data4""' of type '""unsigned char [8]""'");
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    {
+      if (arg2) {
+        size_t ii = 0;
+        for (; ii < (size_t)8; ++ii) *(unsigned char *)&arg1->Data4[ii] = *((unsigned char *)arg2 + ii);
+      } else {
+        SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in variable '""Data4""' of type '""unsigned char [8]""'");
+      }
     }
+    SWIG_PYTHON_THREAD_END_ALLOW;
   }
   resultobj = SWIG_Py_Void();
   return resultobj;
@@ -4371,7 +4400,11 @@ SWIGINTERN PyObject *_wrap_GUID_Data4_get(PyObject *self, PyObject *args) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "GUID_Data4_get" "', argument " "1"" of type '" "_GUID *""'"); 
   }
   arg1 = reinterpret_cast< _GUID * >(argp1);
-  result = (unsigned char *)(unsigned char *) ((arg1)->Data4);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (unsigned char *)(unsigned char *) ((arg1)->Data4);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
   resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_unsigned_char, 0 |  0 );
   return resultobj;
 fail:
@@ -4384,7 +4417,11 @@ SWIGINTERN int _wrap_new_GUID(PyObject *self, PyObject *args) {
   _GUID *result = 0 ;
   
   if (args && PyTuple_Check(args) && PyTuple_GET_SIZE(args) > 0) SWIG_exception_fail(SWIG_TypeError, "new_GUID takes no arguments");
-  result = (_GUID *)new _GUID();
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (_GUID *)new _GUID();
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
   resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p__GUID, SWIG_BUILTIN_INIT |  0 );
   return resultobj == Py_None ? -1 : 0;
 fail:
@@ -4404,7 +4441,11 @@ SWIGINTERN PyObject *_wrap_delete_GUID(PyObject *self, PyObject *args) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "delete_GUID" "', argument " "1"" of type '" "_GUID *""'"); 
   }
   arg1 = reinterpret_cast< _GUID * >(argp1);
-  delete arg1;
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    delete arg1;
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
   resultobj = SWIG_Py_Void();
   return resultobj;
 fail:
@@ -4431,7 +4472,11 @@ SWIGINTERN PyObject *_wrap_LARGE_INTEGER_LowPart_set(PyObject *self, PyObject *a
 #else
   arg2 = PyInt_AsUnsignedLongMask(obj1);
 #endif
-  if (arg1) (arg1)->LowPart = arg2;
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    if (arg1) (arg1)->LowPart = arg2;
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
   resultobj = SWIG_Py_Void();
   return resultobj;
 fail:
@@ -4452,7 +4497,11 @@ SWIGINTERN PyObject *_wrap_LARGE_INTEGER_LowPart_get(PyObject *self, PyObject *a
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "LARGE_INTEGER_LowPart_get" "', argument " "1"" of type '" "_LARGE_INTEGER *""'"); 
   }
   arg1 = reinterpret_cast< _LARGE_INTEGER * >(argp1);
-  result = (DWORD) ((arg1)->LowPart);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (DWORD) ((arg1)->LowPart);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
   resultobj = SWIG_From_unsigned_SS_int(static_cast< unsigned int >(result));
   return resultobj;
 fail:
@@ -4481,7 +4530,11 @@ SWIGINTERN PyObject *_wrap_LARGE_INTEGER_HighPart_set(PyObject *self, PyObject *
     SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "LARGE_INTEGER_HighPart_set" "', argument " "2"" of type '" "LONG""'");
   } 
   arg2 = static_cast< LONG >(val2);
-  if (arg1) (arg1)->HighPart = arg2;
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    if (arg1) (arg1)->HighPart = arg2;
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
   resultobj = SWIG_Py_Void();
   return resultobj;
 fail:
@@ -4502,7 +4555,11 @@ SWIGINTERN PyObject *_wrap_LARGE_INTEGER_HighPart_get(PyObject *self, PyObject *
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "LARGE_INTEGER_HighPart_get" "', argument " "1"" of type '" "_LARGE_INTEGER *""'"); 
   }
   arg1 = reinterpret_cast< _LARGE_INTEGER * >(argp1);
-  result = (LONG) ((arg1)->HighPart);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (LONG) ((arg1)->HighPart);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
   resultobj = SWIG_From_int(static_cast< int >(result));
   return resultobj;
 fail:
@@ -4515,7 +4572,11 @@ SWIGINTERN int _wrap_new_LARGE_INTEGER(PyObject *self, PyObject *args) {
   _LARGE_INTEGER *result = 0 ;
   
   if (args && PyTuple_Check(args) && PyTuple_GET_SIZE(args) > 0) SWIG_exception_fail(SWIG_TypeError, "new_LARGE_INTEGER takes no arguments");
-  result = (_LARGE_INTEGER *)new _LARGE_INTEGER();
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (_LARGE_INTEGER *)new _LARGE_INTEGER();
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
   resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p__LARGE_INTEGER, SWIG_BUILTIN_INIT |  0 );
   return resultobj == Py_None ? -1 : 0;
 fail:
@@ -4535,7 +4596,11 @@ SWIGINTERN PyObject *_wrap_delete_LARGE_INTEGER(PyObject *self, PyObject *args) 
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "delete_LARGE_INTEGER" "', argument " "1"" of type '" "_LARGE_INTEGER *""'"); 
   }
   arg1 = reinterpret_cast< _LARGE_INTEGER * >(argp1);
-  delete arg1;
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    delete arg1;
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
   resultobj = SWIG_Py_Void();
   return resultobj;
 fail:
@@ -4562,7 +4627,11 @@ SWIGINTERN PyObject *_wrap_LUID_LowPart_set(PyObject *self, PyObject *args) {
 #else
   arg2 = PyInt_AsUnsignedLongMask(obj1);
 #endif
-  if (arg1) (arg1)->LowPart = arg2;
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    if (arg1) (arg1)->LowPart = arg2;
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
   resultobj = SWIG_Py_Void();
   return resultobj;
 fail:
@@ -4583,7 +4652,11 @@ SWIGINTERN PyObject *_wrap_LUID_LowPart_get(PyObject *self, PyObject *args) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "LUID_LowPart_get" "', argument " "1"" of type '" "_LUID *""'"); 
   }
   arg1 = reinterpret_cast< _LUID * >(argp1);
-  result = (DWORD) ((arg1)->LowPart);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (DWORD) ((arg1)->LowPart);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
   resultobj = SWIG_From_unsigned_SS_int(static_cast< unsigned int >(result));
   return resultobj;
 fail:
@@ -4612,7 +4685,11 @@ SWIGINTERN PyObject *_wrap_LUID_HighPart_set(PyObject *self, PyObject *args) {
     SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "LUID_HighPart_set" "', argument " "2"" of type '" "LONG""'");
   } 
   arg2 = static_cast< LONG >(val2);
-  if (arg1) (arg1)->HighPart = arg2;
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    if (arg1) (arg1)->HighPart = arg2;
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
   resultobj = SWIG_Py_Void();
   return resultobj;
 fail:
@@ -4633,7 +4710,11 @@ SWIGINTERN PyObject *_wrap_LUID_HighPart_get(PyObject *self, PyObject *args) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "LUID_HighPart_get" "', argument " "1"" of type '" "_LUID *""'"); 
   }
   arg1 = reinterpret_cast< _LUID * >(argp1);
-  result = (LONG) ((arg1)->HighPart);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (LONG) ((arg1)->HighPart);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
   resultobj = SWIG_From_int(static_cast< int >(result));
   return resultobj;
 fail:
@@ -4646,7 +4727,11 @@ SWIGINTERN int _wrap_new_LUID(PyObject *self, PyObject *args) {
   _LUID *result = 0 ;
   
   if (args && PyTuple_Check(args) && PyTuple_GET_SIZE(args) > 0) SWIG_exception_fail(SWIG_TypeError, "new_LUID takes no arguments");
-  result = (_LUID *)new _LUID();
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (_LUID *)new _LUID();
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
   resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p__LUID, SWIG_BUILTIN_INIT |  0 );
   return resultobj == Py_None ? -1 : 0;
 fail:
@@ -4666,7 +4751,11 @@ SWIGINTERN PyObject *_wrap_delete_LUID(PyObject *self, PyObject *args) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "delete_LUID" "', argument " "1"" of type '" "_LUID *""'"); 
   }
   arg1 = reinterpret_cast< _LUID * >(argp1);
-  delete arg1;
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    delete arg1;
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
   resultobj = SWIG_Py_Void();
   return resultobj;
 fail:
@@ -4679,7 +4768,11 @@ SWIGINTERN int _wrap_new_RCObj(PyObject *self, PyObject *args) {
   RCObj *result = 0 ;
   
   if (args && PyTuple_Check(args) && PyTuple_GET_SIZE(args) > 0) SWIG_exception_fail(SWIG_TypeError, "new_RCObj takes no arguments");
-  result = (RCObj *)new RCObj();
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (RCObj *)new RCObj();
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
   resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_RCObj, SWIG_BUILTIN_INIT |  0 );
   return resultobj == Py_None ? -1 : 0;
 fail:
@@ -4699,7 +4792,11 @@ SWIGINTERN PyObject *_wrap_delete_RCObj(PyObject *self, PyObject *args) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "delete_RCObj" "', argument " "1"" of type '" "RCObj *""'"); 
   }
   arg1 = reinterpret_cast< RCObj * >(argp1);
-  delete arg1;
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    delete arg1;
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
   resultobj = SWIG_Py_Void();
   return resultobj;
 fail:
@@ -4720,7 +4817,11 @@ SWIGINTERN PyObject *_wrap_RCObj_ref(PyObject *self, PyObject *args) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "RCObj_ref" "', argument " "1"" of type '" "RCObj *""'"); 
   }
   arg1 = reinterpret_cast< RCObj * >(argp1);
-  result = (int)(arg1)->ref();
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (int)(arg1)->ref();
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
   resultobj = SWIG_From_int(static_cast< int >(result));
   return resultobj;
 fail:
@@ -4741,7 +4842,11 @@ SWIGINTERN PyObject *_wrap_RCObj_unref(PyObject *self, PyObject *args) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "RCObj_unref" "', argument " "1"" of type '" "RCObj *""'"); 
   }
   arg1 = reinterpret_cast< RCObj * >(argp1);
-  result = (int)(arg1)->unref();
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (int)(arg1)->unref();
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
   resultobj = SWIG_From_int(static_cast< int >(result));
   return resultobj;
 fail:
@@ -4768,7 +4873,11 @@ SWIGINTERN PyObject *_wrap_CRYPTOAPI_BLOB_cbData_set(PyObject *self, PyObject *a
 #else
   arg2 = PyInt_AsUnsignedLongMask(obj1);
 #endif
-  if (arg1) (arg1)->cbData = arg2;
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    if (arg1) (arg1)->cbData = arg2;
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
   resultobj = SWIG_Py_Void();
   return resultobj;
 fail:
@@ -4789,7 +4898,11 @@ SWIGINTERN PyObject *_wrap_CRYPTOAPI_BLOB_cbData_get(PyObject *self, PyObject *a
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "CRYPTOAPI_BLOB_cbData_get" "', argument " "1"" of type '" "_CRYPTOAPI_BLOB *""'"); 
   }
   arg1 = reinterpret_cast< _CRYPTOAPI_BLOB * >(argp1);
-  result = (DWORD) ((arg1)->cbData);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (DWORD) ((arg1)->cbData);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
   resultobj = SWIG_From_unsigned_SS_int(static_cast< unsigned int >(result));
   return resultobj;
 fail:
@@ -4818,7 +4931,11 @@ SWIGINTERN PyObject *_wrap_CRYPTOAPI_BLOB_pbData_set(PyObject *self, PyObject *a
     SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "CRYPTOAPI_BLOB_pbData_set" "', argument " "2"" of type '" "BYTE *""'"); 
   }
   arg2 = reinterpret_cast< BYTE * >(argp2);
-  if (arg1) (arg1)->pbData = arg2;
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    if (arg1) (arg1)->pbData = arg2;
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
   resultobj = SWIG_Py_Void();
   return resultobj;
 fail:
@@ -4839,7 +4956,11 @@ SWIGINTERN PyObject *_wrap_CRYPTOAPI_BLOB_pbData_get(PyObject *self, PyObject *a
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "CRYPTOAPI_BLOB_pbData_get" "', argument " "1"" of type '" "_CRYPTOAPI_BLOB *""'"); 
   }
   arg1 = reinterpret_cast< _CRYPTOAPI_BLOB * >(argp1);
-  result = (BYTE *) ((arg1)->pbData);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (BYTE *) ((arg1)->pbData);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
   resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_unsigned_char, 0 |  0 );
   return resultobj;
 fail:
@@ -4852,7 +4973,11 @@ SWIGINTERN int _wrap_new_CRYPTOAPI_BLOB(PyObject *self, PyObject *args) {
   _CRYPTOAPI_BLOB *result = 0 ;
   
   if (args && PyTuple_Check(args) && PyTuple_GET_SIZE(args) > 0) SWIG_exception_fail(SWIG_TypeError, "new_CRYPTOAPI_BLOB takes no arguments");
-  result = (_CRYPTOAPI_BLOB *)new _CRYPTOAPI_BLOB();
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (_CRYPTOAPI_BLOB *)new _CRYPTOAPI_BLOB();
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
   resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p__CRYPTOAPI_BLOB, SWIG_BUILTIN_INIT |  0 );
   return resultobj == Py_None ? -1 : 0;
 fail:
@@ -4872,7 +4997,11 @@ SWIGINTERN PyObject *_wrap_delete_CRYPTOAPI_BLOB(PyObject *self, PyObject *args)
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "delete_CRYPTOAPI_BLOB" "', argument " "1"" of type '" "_CRYPTOAPI_BLOB *""'"); 
   }
   arg1 = reinterpret_cast< _CRYPTOAPI_BLOB * >(argp1);
-  delete arg1;
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    delete arg1;
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
   resultobj = SWIG_Py_Void();
   return resultobj;
 fail:
@@ -4899,7 +5028,11 @@ SWIGINTERN PyObject *_wrap_CMS_DH_KEY_INFO_dwVersion_set(PyObject *self, PyObjec
 #else
   arg2 = PyInt_AsUnsignedLongMask(obj1);
 #endif
-  if (arg1) (arg1)->dwVersion = arg2;
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    if (arg1) (arg1)->dwVersion = arg2;
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
   resultobj = SWIG_Py_Void();
   return resultobj;
 fail:
@@ -4920,7 +5053,11 @@ SWIGINTERN PyObject *_wrap_CMS_DH_KEY_INFO_dwVersion_get(PyObject *self, PyObjec
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "CMS_DH_KEY_INFO_dwVersion_get" "', argument " "1"" of type '" "_CMS_DH_KEY_INFO *""'"); 
   }
   arg1 = reinterpret_cast< _CMS_DH_KEY_INFO * >(argp1);
-  result = (DWORD) ((arg1)->dwVersion);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (DWORD) ((arg1)->dwVersion);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
   resultobj = SWIG_From_unsigned_SS_int(static_cast< unsigned int >(result));
   return resultobj;
 fail:
@@ -4949,7 +5086,11 @@ SWIGINTERN PyObject *_wrap_CMS_DH_KEY_INFO_Algid_set(PyObject *self, PyObject *a
     SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "CMS_DH_KEY_INFO_Algid_set" "', argument " "2"" of type '" "ALG_ID""'");
   } 
   arg2 = static_cast< ALG_ID >(val2);
-  if (arg1) (arg1)->Algid = arg2;
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    if (arg1) (arg1)->Algid = arg2;
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
   resultobj = SWIG_Py_Void();
   return resultobj;
 fail:
@@ -4970,7 +5111,11 @@ SWIGINTERN PyObject *_wrap_CMS_DH_KEY_INFO_Algid_get(PyObject *self, PyObject *a
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "CMS_DH_KEY_INFO_Algid_get" "', argument " "1"" of type '" "_CMS_DH_KEY_INFO *""'"); 
   }
   arg1 = reinterpret_cast< _CMS_DH_KEY_INFO * >(argp1);
-  result = (ALG_ID) ((arg1)->Algid);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (ALG_ID) ((arg1)->Algid);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
   resultobj = SWIG_From_unsigned_SS_int(static_cast< unsigned int >(result));
   return resultobj;
 fail:
@@ -5000,12 +5145,16 @@ SWIGINTERN PyObject *_wrap_CMS_DH_KEY_INFO_pszContentEncObjId_set(PyObject *self
     SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "CMS_DH_KEY_INFO_pszContentEncObjId_set" "', argument " "2"" of type '" "LPSTR""'");
   }
   arg2 = reinterpret_cast< LPSTR >(buf2);
-  if (arg1->pszContentEncObjId) delete[] arg1->pszContentEncObjId;
-  if (arg2) {
-    size_t size = strlen(reinterpret_cast< const char * >(arg2)) + 1;
-    arg1->pszContentEncObjId = (LPSTR)reinterpret_cast< char* >(memcpy((new char[size]), reinterpret_cast< const char * >(arg2), sizeof(char)*(size)));
-  } else {
-    arg1->pszContentEncObjId = 0;
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    if (arg1->pszContentEncObjId) delete[] arg1->pszContentEncObjId;
+    if (arg2) {
+      size_t size = strlen(reinterpret_cast< const char * >(arg2)) + 1;
+      arg1->pszContentEncObjId = (LPSTR)reinterpret_cast< char* >(memcpy((new char[size]), reinterpret_cast< const char * >(arg2), sizeof(char)*(size)));
+    } else {
+      arg1->pszContentEncObjId = 0;
+    }
+    SWIG_PYTHON_THREAD_END_ALLOW;
   }
   resultobj = SWIG_Py_Void();
   if (alloc2 == SWIG_NEWOBJ) delete[] buf2;
@@ -5029,7 +5178,11 @@ SWIGINTERN PyObject *_wrap_CMS_DH_KEY_INFO_pszContentEncObjId_get(PyObject *self
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "CMS_DH_KEY_INFO_pszContentEncObjId_get" "', argument " "1"" of type '" "_CMS_DH_KEY_INFO *""'"); 
   }
   arg1 = reinterpret_cast< _CMS_DH_KEY_INFO * >(argp1);
-  result = (LPSTR) ((arg1)->pszContentEncObjId);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (LPSTR) ((arg1)->pszContentEncObjId);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
   resultobj = SWIG_FromCharPtr((const char *)result);
   return resultobj;
 fail:
@@ -5058,7 +5211,11 @@ SWIGINTERN PyObject *_wrap_CMS_DH_KEY_INFO_PubInfo_set(PyObject *self, PyObject 
     SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "CMS_DH_KEY_INFO_PubInfo_set" "', argument " "2"" of type '" "CRYPT_DATA_BLOB *""'"); 
   }
   arg2 = reinterpret_cast< CRYPT_DATA_BLOB * >(argp2);
-  if (arg1) (arg1)->PubInfo = *arg2;
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    if (arg1) (arg1)->PubInfo = *arg2;
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
   resultobj = SWIG_Py_Void();
   return resultobj;
 fail:
@@ -5079,7 +5236,11 @@ SWIGINTERN PyObject *_wrap_CMS_DH_KEY_INFO_PubInfo_get(PyObject *self, PyObject 
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "CMS_DH_KEY_INFO_PubInfo_get" "', argument " "1"" of type '" "_CMS_DH_KEY_INFO *""'"); 
   }
   arg1 = reinterpret_cast< _CMS_DH_KEY_INFO * >(argp1);
-  result = (CRYPT_DATA_BLOB *)& ((arg1)->PubInfo);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (CRYPT_DATA_BLOB *)& ((arg1)->PubInfo);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
   resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p__CRYPTOAPI_BLOB, 0 |  0 );
   return resultobj;
 fail:
@@ -5106,7 +5267,11 @@ SWIGINTERN PyObject *_wrap_CMS_DH_KEY_INFO_pReserved_set(PyObject *self, PyObjec
   if (!SWIG_IsOK(res2)) {
     SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "CMS_DH_KEY_INFO_pReserved_set" "', argument " "2"" of type '" "void *""'"); 
   }
-  if (arg1) (arg1)->pReserved = arg2;
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    if (arg1) (arg1)->pReserved = arg2;
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
   resultobj = SWIG_Py_Void();
   return resultobj;
 fail:
@@ -5127,7 +5292,11 @@ SWIGINTERN PyObject *_wrap_CMS_DH_KEY_INFO_pReserved_get(PyObject *self, PyObjec
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "CMS_DH_KEY_INFO_pReserved_get" "', argument " "1"" of type '" "_CMS_DH_KEY_INFO *""'"); 
   }
   arg1 = reinterpret_cast< _CMS_DH_KEY_INFO * >(argp1);
-  result = (void *) ((arg1)->pReserved);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (void *) ((arg1)->pReserved);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
   resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_void, 0 |  0 );
   return resultobj;
 fail:
@@ -5140,7 +5309,11 @@ SWIGINTERN int _wrap_new_CMS_DH_KEY_INFO(PyObject *self, PyObject *args) {
   _CMS_DH_KEY_INFO *result = 0 ;
   
   if (args && PyTuple_Check(args) && PyTuple_GET_SIZE(args) > 0) SWIG_exception_fail(SWIG_TypeError, "new_CMS_DH_KEY_INFO takes no arguments");
-  result = (_CMS_DH_KEY_INFO *)new _CMS_DH_KEY_INFO();
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (_CMS_DH_KEY_INFO *)new _CMS_DH_KEY_INFO();
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
   resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p__CMS_DH_KEY_INFO, SWIG_BUILTIN_INIT |  0 );
   return resultobj == Py_None ? -1 : 0;
 fail:
@@ -5160,7 +5333,11 @@ SWIGINTERN PyObject *_wrap_delete_CMS_DH_KEY_INFO(PyObject *self, PyObject *args
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "delete_CMS_DH_KEY_INFO" "', argument " "1"" of type '" "_CMS_DH_KEY_INFO *""'"); 
   }
   arg1 = reinterpret_cast< _CMS_DH_KEY_INFO * >(argp1);
-  delete arg1;
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    delete arg1;
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
   resultobj = SWIG_Py_Void();
   return resultobj;
 fail:
@@ -5187,7 +5364,11 @@ SWIGINTERN PyObject *_wrap_CRYPT_BIT_BLOB_cbData_set(PyObject *self, PyObject *a
 #else
   arg2 = PyInt_AsUnsignedLongMask(obj1);
 #endif
-  if (arg1) (arg1)->cbData = arg2;
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    if (arg1) (arg1)->cbData = arg2;
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
   resultobj = SWIG_Py_Void();
   return resultobj;
 fail:
@@ -5208,7 +5389,11 @@ SWIGINTERN PyObject *_wrap_CRYPT_BIT_BLOB_cbData_get(PyObject *self, PyObject *a
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "CRYPT_BIT_BLOB_cbData_get" "', argument " "1"" of type '" "_CRYPT_BIT_BLOB *""'"); 
   }
   arg1 = reinterpret_cast< _CRYPT_BIT_BLOB * >(argp1);
-  result = (DWORD) ((arg1)->cbData);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (DWORD) ((arg1)->cbData);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
   resultobj = SWIG_From_unsigned_SS_int(static_cast< unsigned int >(result));
   return resultobj;
 fail:
@@ -5237,7 +5422,11 @@ SWIGINTERN PyObject *_wrap_CRYPT_BIT_BLOB_pbData_set(PyObject *self, PyObject *a
     SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "CRYPT_BIT_BLOB_pbData_set" "', argument " "2"" of type '" "BYTE *""'"); 
   }
   arg2 = reinterpret_cast< BYTE * >(argp2);
-  if (arg1) (arg1)->pbData = arg2;
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    if (arg1) (arg1)->pbData = arg2;
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
   resultobj = SWIG_Py_Void();
   return resultobj;
 fail:
@@ -5258,7 +5447,11 @@ SWIGINTERN PyObject *_wrap_CRYPT_BIT_BLOB_pbData_get(PyObject *self, PyObject *a
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "CRYPT_BIT_BLOB_pbData_get" "', argument " "1"" of type '" "_CRYPT_BIT_BLOB *""'"); 
   }
   arg1 = reinterpret_cast< _CRYPT_BIT_BLOB * >(argp1);
-  result = (BYTE *) ((arg1)->pbData);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (BYTE *) ((arg1)->pbData);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
   resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_unsigned_char, 0 |  0 );
   return resultobj;
 fail:
@@ -5285,7 +5478,11 @@ SWIGINTERN PyObject *_wrap_CRYPT_BIT_BLOB_cUnusedBits_set(PyObject *self, PyObje
 #else
   arg2 = PyInt_AsUnsignedLongMask(obj1);
 #endif
-  if (arg1) (arg1)->cUnusedBits = arg2;
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    if (arg1) (arg1)->cUnusedBits = arg2;
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
   resultobj = SWIG_Py_Void();
   return resultobj;
 fail:
@@ -5306,7 +5503,11 @@ SWIGINTERN PyObject *_wrap_CRYPT_BIT_BLOB_cUnusedBits_get(PyObject *self, PyObje
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "CRYPT_BIT_BLOB_cUnusedBits_get" "', argument " "1"" of type '" "_CRYPT_BIT_BLOB *""'"); 
   }
   arg1 = reinterpret_cast< _CRYPT_BIT_BLOB * >(argp1);
-  result = (DWORD) ((arg1)->cUnusedBits);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (DWORD) ((arg1)->cUnusedBits);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
   resultobj = SWIG_From_unsigned_SS_int(static_cast< unsigned int >(result));
   return resultobj;
 fail:
@@ -5319,7 +5520,11 @@ SWIGINTERN int _wrap_new_CRYPT_BIT_BLOB(PyObject *self, PyObject *args) {
   _CRYPT_BIT_BLOB *result = 0 ;
   
   if (args && PyTuple_Check(args) && PyTuple_GET_SIZE(args) > 0) SWIG_exception_fail(SWIG_TypeError, "new_CRYPT_BIT_BLOB takes no arguments");
-  result = (_CRYPT_BIT_BLOB *)new _CRYPT_BIT_BLOB();
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (_CRYPT_BIT_BLOB *)new _CRYPT_BIT_BLOB();
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
   resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p__CRYPT_BIT_BLOB, SWIG_BUILTIN_INIT |  0 );
   return resultobj == Py_None ? -1 : 0;
 fail:
@@ -5339,7 +5544,11 @@ SWIGINTERN PyObject *_wrap_delete_CRYPT_BIT_BLOB(PyObject *self, PyObject *args)
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "delete_CRYPT_BIT_BLOB" "', argument " "1"" of type '" "_CRYPT_BIT_BLOB *""'"); 
   }
   arg1 = reinterpret_cast< _CRYPT_BIT_BLOB * >(argp1);
-  delete arg1;
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    delete arg1;
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
   resultobj = SWIG_Py_Void();
   return resultobj;
 fail:
@@ -5369,12 +5578,16 @@ SWIGINTERN PyObject *_wrap_CRYPT_ALGORITHM_IDENTIFIER_pszObjId_set(PyObject *sel
     SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "CRYPT_ALGORITHM_IDENTIFIER_pszObjId_set" "', argument " "2"" of type '" "LPSTR""'");
   }
   arg2 = reinterpret_cast< LPSTR >(buf2);
-  if (arg1->pszObjId) delete[] arg1->pszObjId;
-  if (arg2) {
-    size_t size = strlen(reinterpret_cast< const char * >(arg2)) + 1;
-    arg1->pszObjId = (LPSTR)reinterpret_cast< char* >(memcpy((new char[size]), reinterpret_cast< const char * >(arg2), sizeof(char)*(size)));
-  } else {
-    arg1->pszObjId = 0;
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    if (arg1->pszObjId) delete[] arg1->pszObjId;
+    if (arg2) {
+      size_t size = strlen(reinterpret_cast< const char * >(arg2)) + 1;
+      arg1->pszObjId = (LPSTR)reinterpret_cast< char* >(memcpy((new char[size]), reinterpret_cast< const char * >(arg2), sizeof(char)*(size)));
+    } else {
+      arg1->pszObjId = 0;
+    }
+    SWIG_PYTHON_THREAD_END_ALLOW;
   }
   resultobj = SWIG_Py_Void();
   if (alloc2 == SWIG_NEWOBJ) delete[] buf2;
@@ -5398,7 +5611,11 @@ SWIGINTERN PyObject *_wrap_CRYPT_ALGORITHM_IDENTIFIER_pszObjId_get(PyObject *sel
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "CRYPT_ALGORITHM_IDENTIFIER_pszObjId_get" "', argument " "1"" of type '" "_CRYPT_ALGORITHM_IDENTIFIER *""'"); 
   }
   arg1 = reinterpret_cast< _CRYPT_ALGORITHM_IDENTIFIER * >(argp1);
-  result = (LPSTR) ((arg1)->pszObjId);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (LPSTR) ((arg1)->pszObjId);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
   resultobj = SWIG_FromCharPtr((const char *)result);
   return resultobj;
 fail:
@@ -5427,7 +5644,11 @@ SWIGINTERN PyObject *_wrap_CRYPT_ALGORITHM_IDENTIFIER_Parameters_set(PyObject *s
     SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "CRYPT_ALGORITHM_IDENTIFIER_Parameters_set" "', argument " "2"" of type '" "CRYPT_OBJID_BLOB *""'"); 
   }
   arg2 = reinterpret_cast< CRYPT_OBJID_BLOB * >(argp2);
-  if (arg1) (arg1)->Parameters = *arg2;
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    if (arg1) (arg1)->Parameters = *arg2;
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
   resultobj = SWIG_Py_Void();
   return resultobj;
 fail:
@@ -5448,7 +5669,11 @@ SWIGINTERN PyObject *_wrap_CRYPT_ALGORITHM_IDENTIFIER_Parameters_get(PyObject *s
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "CRYPT_ALGORITHM_IDENTIFIER_Parameters_get" "', argument " "1"" of type '" "_CRYPT_ALGORITHM_IDENTIFIER *""'"); 
   }
   arg1 = reinterpret_cast< _CRYPT_ALGORITHM_IDENTIFIER * >(argp1);
-  result = (CRYPT_OBJID_BLOB *)& ((arg1)->Parameters);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (CRYPT_OBJID_BLOB *)& ((arg1)->Parameters);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
   resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p__CRYPTOAPI_BLOB, 0 |  0 );
   return resultobj;
 fail:
@@ -5461,7 +5686,11 @@ SWIGINTERN int _wrap_new_CRYPT_ALGORITHM_IDENTIFIER(PyObject *self, PyObject *ar
   _CRYPT_ALGORITHM_IDENTIFIER *result = 0 ;
   
   if (args && PyTuple_Check(args) && PyTuple_GET_SIZE(args) > 0) SWIG_exception_fail(SWIG_TypeError, "new_CRYPT_ALGORITHM_IDENTIFIER takes no arguments");
-  result = (_CRYPT_ALGORITHM_IDENTIFIER *)new _CRYPT_ALGORITHM_IDENTIFIER();
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (_CRYPT_ALGORITHM_IDENTIFIER *)new _CRYPT_ALGORITHM_IDENTIFIER();
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
   resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p__CRYPT_ALGORITHM_IDENTIFIER, SWIG_BUILTIN_INIT |  0 );
   return resultobj == Py_None ? -1 : 0;
 fail:
@@ -5481,7 +5710,11 @@ SWIGINTERN PyObject *_wrap_delete_CRYPT_ALGORITHM_IDENTIFIER(PyObject *self, PyO
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "delete_CRYPT_ALGORITHM_IDENTIFIER" "', argument " "1"" of type '" "_CRYPT_ALGORITHM_IDENTIFIER *""'"); 
   }
   arg1 = reinterpret_cast< _CRYPT_ALGORITHM_IDENTIFIER * >(argp1);
-  delete arg1;
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    delete arg1;
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
   resultobj = SWIG_Py_Void();
   return resultobj;
 fail:
@@ -5508,7 +5741,11 @@ SWIGINTERN PyObject *_wrap_CryptDesc_type_set(PyObject *self, PyObject *args) {
 #else
   arg2 = PyInt_AsUnsignedLongMask(obj1);
 #endif
-  if (arg1) (arg1)->type = arg2;
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    if (arg1) (arg1)->type = arg2;
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
   resultobj = SWIG_Py_Void();
   return resultobj;
 fail:
@@ -5529,7 +5766,11 @@ SWIGINTERN PyObject *_wrap_CryptDesc_type_get(PyObject *self, PyObject *args) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "CryptDesc_type_get" "', argument " "1"" of type '" "CryptDesc *""'"); 
   }
   arg1 = reinterpret_cast< CryptDesc * >(argp1);
-  result = (DWORD) ((arg1)->type);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (DWORD) ((arg1)->type);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
   resultobj = SWIG_From_unsigned_SS_int(static_cast< unsigned int >(result));
   return resultobj;
 fail:
@@ -5559,12 +5800,16 @@ SWIGINTERN PyObject *_wrap_CryptDesc_name_set(PyObject *self, PyObject *args) {
     SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "CryptDesc_name_set" "', argument " "2"" of type '" "char *""'");
   }
   arg2 = reinterpret_cast< char * >(buf2);
-  if (arg1->name) delete[] arg1->name;
-  if (arg2) {
-    size_t size = strlen(reinterpret_cast< const char * >(arg2)) + 1;
-    arg1->name = (char *)reinterpret_cast< char* >(memcpy((new char[size]), reinterpret_cast< const char * >(arg2), sizeof(char)*(size)));
-  } else {
-    arg1->name = 0;
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    if (arg1->name) delete[] arg1->name;
+    if (arg2) {
+      size_t size = strlen(reinterpret_cast< const char * >(arg2)) + 1;
+      arg1->name = (char *)reinterpret_cast< char* >(memcpy((new char[size]), reinterpret_cast< const char * >(arg2), sizeof(char)*(size)));
+    } else {
+      arg1->name = 0;
+    }
+    SWIG_PYTHON_THREAD_END_ALLOW;
   }
   resultobj = SWIG_Py_Void();
   if (alloc2 == SWIG_NEWOBJ) delete[] buf2;
@@ -5588,7 +5833,11 @@ SWIGINTERN PyObject *_wrap_CryptDesc_name_get(PyObject *self, PyObject *args) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "CryptDesc_name_get" "', argument " "1"" of type '" "CryptDesc *""'"); 
   }
   arg1 = reinterpret_cast< CryptDesc * >(argp1);
-  result = (char *) ((arg1)->name);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (char *) ((arg1)->name);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
   resultobj = SWIG_FromCharPtr((const char *)result);
   return resultobj;
 fail:
@@ -5608,7 +5857,11 @@ SWIGINTERN PyObject *_wrap_delete_CryptDesc(PyObject *self, PyObject *args) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "delete_CryptDesc" "', argument " "1"" of type '" "CryptDesc *""'"); 
   }
   arg1 = reinterpret_cast< CryptDesc * >(argp1);
-  delete arg1;
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    delete arg1;
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
   resultobj = SWIG_Py_Void();
   return resultobj;
 fail:
@@ -5621,7 +5874,11 @@ SWIGINTERN int _wrap_new_CryptDesc(PyObject *self, PyObject *args) {
   CryptDesc *result = 0 ;
   
   if (args && PyTuple_Check(args) && PyTuple_GET_SIZE(args) > 0) SWIG_exception_fail(SWIG_TypeError, "new_CryptDesc takes no arguments");
-  result = (CryptDesc *)new CryptDesc();
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (CryptDesc *)new CryptDesc();
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
   resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_CryptDesc, SWIG_BUILTIN_INIT |  0 );
   return resultobj == Py_None ? -1 : 0;
 fail:
@@ -5635,7 +5892,11 @@ SWIGINTERN int _wrap_new_CryptIter(PyObject *self, PyObject *args) {
   
   if (args && PyTuple_Check(args) && PyTuple_GET_SIZE(args) > 0) SWIG_exception_fail(SWIG_TypeError, "new_CryptIter takes no arguments");
   try {
-    result = (CryptIter *)new CryptIter();
+    {
+      SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+      result = (CryptIter *)new CryptIter();
+      SWIG_PYTHON_THREAD_END_ALLOW;
+    }
   }
   catch(CSPException &_e) {
     PyErr_SetString(PyExc_SystemError, (&_e)->msg);
@@ -5663,7 +5924,11 @@ SWIGINTERN PyObject *_wrap_CryptIter___iter__(PyObject *self, PyObject *args) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "CryptIter___iter__" "', argument " "1"" of type '" "CryptIter *""'"); 
   }
   arg1 = reinterpret_cast< CryptIter * >(argp1);
-  result = (CryptIter *)(arg1)->__iter__();
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (CryptIter *)(arg1)->__iter__();
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
   resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_CryptIter, SWIG_POINTER_OWN |  0 );
   return resultobj;
 fail:
@@ -5687,7 +5952,11 @@ SWIGINTERN PyObject *_wrap_CryptIter_next(PyObject *self, PyObject *args) {
   }
   arg1 = reinterpret_cast< CryptIter * >(argp1);
   try {
-    result = (CryptDesc *)(arg1)->next();
+    {
+      SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+      result = (CryptDesc *)(arg1)->next();
+      SWIG_PYTHON_THREAD_END_ALLOW;
+    }
   }
   catch(Stop_Iteration &_e) {
     PyErr_SetNone(PyExc_StopIteration);
@@ -5721,7 +5990,11 @@ SWIGINTERN PyObject *_wrap_delete_CryptIter(PyObject *self, PyObject *args) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "delete_CryptIter" "', argument " "1"" of type '" "CryptIter *""'"); 
   }
   arg1 = reinterpret_cast< CryptIter * >(argp1);
-  delete arg1;
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    delete arg1;
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
   resultobj = SWIG_Py_Void();
   return resultobj;
 fail:
@@ -5790,7 +6063,11 @@ SWIGINTERN int _wrap_new_Crypt__SWIG_0(PyObject *self, PyObject *args) {
   }
   arg5 = reinterpret_cast< char * >(buf5);
   try {
-    result = (Crypt *)new Crypt(arg1,arg2,arg3,arg4,arg5);
+    {
+      SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+      result = (Crypt *)new Crypt(arg1,arg2,arg3,arg4,arg5);
+      SWIG_PYTHON_THREAD_END_ALLOW;
+    }
   }
   catch(CSPException &_e) {
     PyErr_SetString(PyExc_SystemError, (&_e)->msg);
@@ -5864,7 +6141,11 @@ SWIGINTERN int _wrap_new_Crypt__SWIG_1(PyObject *self, PyObject *args) {
   arg4 = PyInt_AsUnsignedLongMask(obj3);
 #endif
   try {
-    result = (Crypt *)new Crypt(arg1,arg2,arg3,arg4);
+    {
+      SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+      result = (Crypt *)new Crypt(arg1,arg2,arg3,arg4);
+      SWIG_PYTHON_THREAD_END_ALLOW;
+    }
   }
   catch(CSPException &_e) {
     PyErr_SetString(PyExc_SystemError, (&_e)->msg);
@@ -5900,7 +6181,11 @@ SWIGINTERN int _wrap_new_Crypt__SWIG_2(PyObject *self, PyObject *args) {
   }
   arg1 = reinterpret_cast< Cert * >(argp1);
   try {
-    result = (Crypt *)new Crypt(arg1);
+    {
+      SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+      result = (Crypt *)new Crypt(arg1);
+      SWIG_PYTHON_THREAD_END_ALLOW;
+    }
   }
   catch(CSPNotFound &_e) {
     PyErr_SetString(PyExc_ValueError, (&_e)->msg);
@@ -6032,7 +6317,11 @@ SWIGINTERN PyObject *_wrap_delete_Crypt(PyObject *self, PyObject *args) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "delete_Crypt" "', argument " "1"" of type '" "Crypt *""'"); 
   }
   arg1 = reinterpret_cast< Crypt * >(argp1);
-  arg1->unref();
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    arg1->unref();
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
   resultobj = SWIG_Py_Void();
   return resultobj;
 fail:
@@ -6053,7 +6342,11 @@ SWIGINTERN PyObject *_wrap_Crypt_name(PyObject *self, PyObject *args) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Crypt_name" "', argument " "1"" of type '" "Crypt *""'"); 
   }
   arg1 = reinterpret_cast< Crypt * >(argp1);
-  result = (char *)(arg1)->name();
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (char *)(arg1)->name();
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
   resultobj = SWIG_FromCharPtr((const char *)result);
   delete[] result;
   return resultobj;
@@ -6075,7 +6368,11 @@ SWIGINTERN PyObject *_wrap_Crypt_uniq_name(PyObject *self, PyObject *args) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Crypt_uniq_name" "', argument " "1"" of type '" "Crypt *""'"); 
   }
   arg1 = reinterpret_cast< Crypt * >(argp1);
-  result = (char *)(arg1)->uniq_name();
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (char *)(arg1)->uniq_name();
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
   resultobj = SWIG_FromCharPtr((const char *)result);
   delete[] result;
   return resultobj;
@@ -6097,7 +6394,11 @@ SWIGINTERN PyObject *_wrap_Crypt_prov_name(PyObject *self, PyObject *args) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Crypt_prov_name" "', argument " "1"" of type '" "Crypt *""'"); 
   }
   arg1 = reinterpret_cast< Crypt * >(argp1);
-  result = (char *)(arg1)->prov_name();
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (char *)(arg1)->prov_name();
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
   resultobj = SWIG_FromCharPtr((const char *)result);
   delete[] result;
   return resultobj;
@@ -6119,7 +6420,11 @@ SWIGINTERN PyObject *_wrap_Crypt_prov_type(PyObject *self, PyObject *args) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Crypt_prov_type" "', argument " "1"" of type '" "Crypt *""'"); 
   }
   arg1 = reinterpret_cast< Crypt * >(argp1);
-  result = (DWORD)(arg1)->prov_type();
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (DWORD)(arg1)->prov_type();
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
   resultobj = SWIG_From_unsigned_SS_int(static_cast< unsigned int >(result));
   return resultobj;
 fail:
@@ -6155,7 +6460,11 @@ SWIGINTERN PyObject *_wrap_Crypt_create_key__SWIG_0(PyObject *self, PyObject *ar
   arg3 = PyInt_AsUnsignedLongMask(obj2);
 #endif
   try {
-    result = (Key *)(arg1)->create_key(arg2,arg3);
+    {
+      SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+      result = (Key *)(arg1)->create_key(arg2,arg3);
+      SWIG_PYTHON_THREAD_END_ALLOW;
+    }
   }
   catch(CSPException &_e) {
     PyErr_SetString(PyExc_SystemError, (&_e)->msg);
@@ -6192,7 +6501,11 @@ SWIGINTERN PyObject *_wrap_Crypt_create_key__SWIG_1(PyObject *self, PyObject *ar
   arg2 = PyInt_AsUnsignedLongMask(obj1);
 #endif
   try {
-    result = (Key *)(arg1)->create_key(arg2);
+    {
+      SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+      result = (Key *)(arg1)->create_key(arg2);
+      SWIG_PYTHON_THREAD_END_ALLOW;
+    }
   }
   catch(CSPException &_e) {
     PyErr_SetString(PyExc_SystemError, (&_e)->msg);
@@ -6301,7 +6614,11 @@ SWIGINTERN PyObject *_wrap_Crypt_get_key__SWIG_0(PyObject *self, PyObject *args)
   arg2 = PyInt_AsUnsignedLongMask(obj1);
 #endif
   try {
-    result = (Key *)(arg1)->get_key(arg2);
+    {
+      SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+      result = (Key *)(arg1)->get_key(arg2);
+      SWIG_PYTHON_THREAD_END_ALLOW;
+    }
   }
   catch(CSPException &_e) {
     PyErr_SetString(PyExc_SystemError, (&_e)->msg);
@@ -6336,7 +6653,11 @@ SWIGINTERN PyObject *_wrap_Crypt_get_key__SWIG_1(PyObject *self, PyObject *args)
   }
   arg1 = reinterpret_cast< Crypt * >(argp1);
   try {
-    result = (Key *)(arg1)->get_key();
+    {
+      SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+      result = (Key *)(arg1)->get_key();
+      SWIG_PYTHON_THREAD_END_ALLOW;
+    }
   }
   catch(CSPException &_e) {
     PyErr_SetString(PyExc_SystemError, (&_e)->msg);
@@ -6463,7 +6784,11 @@ SWIGINTERN PyObject *_wrap_Crypt_import_key__SWIG_0(PyObject *self, PyObject *ar
   }
   arg4 = reinterpret_cast< Key * >(argp4);
   try {
-    result = (Key *)(arg1)->import_key(arg2,arg3,arg4);
+    {
+      SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+      result = (Key *)(arg1)->import_key(arg2,arg3,arg4);
+      SWIG_PYTHON_THREAD_END_ALLOW;
+    }
   }
   catch(CSPException &_e) {
     PyErr_SetString(PyExc_SystemError, (&_e)->msg);
@@ -6524,7 +6849,11 @@ SWIGINTERN PyObject *_wrap_Crypt_import_key__SWIG_1(PyObject *self, PyObject *ar
     arg3 = (DWORD) len2;
   }
   try {
-    result = (Key *)(arg1)->import_key(arg2,arg3);
+    {
+      SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+      result = (Key *)(arg1)->import_key(arg2,arg3);
+      SWIG_PYTHON_THREAD_END_ALLOW;
+    }
   }
   catch(CSPException &_e) {
     PyErr_SetString(PyExc_SystemError, (&_e)->msg);
@@ -6638,7 +6967,11 @@ SWIGINTERN PyObject *_wrap_Crypt_set_password__SWIG_0(PyObject *self, PyObject *
   arg3 = PyInt_AsUnsignedLongMask(obj2);
 #endif
   try {
-    (arg1)->set_password(arg2,arg3);
+    {
+      SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+      (arg1)->set_password(arg2,arg3);
+      SWIG_PYTHON_THREAD_END_ALLOW;
+    }
   }
   catch(CSPException &_e) {
     PyErr_SetString(PyExc_SystemError, (&_e)->msg);
@@ -6678,7 +7011,11 @@ SWIGINTERN PyObject *_wrap_Crypt_set_password__SWIG_1(PyObject *self, PyObject *
   }
   arg2 = reinterpret_cast< char * >(buf2);
   try {
-    (arg1)->set_password(arg2);
+    {
+      SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+      (arg1)->set_password(arg2);
+      SWIG_PYTHON_THREAD_END_ALLOW;
+    }
   }
   catch(CSPException &_e) {
     PyErr_SetString(PyExc_SystemError, (&_e)->msg);
@@ -6782,7 +7119,11 @@ SWIGINTERN PyObject *_wrap_Crypt_change_password(PyObject *self, PyObject *args)
   }
   arg2 = reinterpret_cast< char * >(buf2);
   try {
-    (arg1)->change_password(arg2);
+    {
+      SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+      (arg1)->change_password(arg2);
+      SWIG_PYTHON_THREAD_END_ALLOW;
+    }
   }
   catch(CSPException &_e) {
     PyErr_SetString(PyExc_SystemError, (&_e)->msg);
@@ -6831,7 +7172,11 @@ SWIGINTERN PyObject *_wrap_Crypt_remove(PyObject *self, PyObject *args) {
   }
   arg3 = reinterpret_cast< char * >(buf3);
   try {
-    Crypt::remove(arg1,arg2,arg3);
+    {
+      SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+      Crypt::remove(arg1,arg2,arg3);
+      SWIG_PYTHON_THREAD_END_ALLOW;
+    }
   }
   catch(CSPException &_e) {
     PyErr_SetString(PyExc_SystemError, (&_e)->msg);
@@ -6861,7 +7206,11 @@ SWIGINTERN PyObject *_wrap_Crypt_enumerate(PyObject *self, PyObject *args) {
   
   if (args && PyTuple_Check(args) && PyTuple_GET_SIZE(args) > 0) SWIG_exception_fail(SWIG_TypeError, "Crypt_enumerate takes no arguments");
   try {
-    result = (CryptIter *)Crypt::enumerate();
+    {
+      SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+      result = (CryptIter *)Crypt::enumerate();
+      SWIG_PYTHON_THREAD_END_ALLOW;
+    }
   }
   catch(CSPException &_e) {
     PyErr_SetString(PyExc_SystemError, (&_e)->msg);
@@ -6900,7 +7249,11 @@ SWIGINTERN int _wrap_new_Key(PyObject *self, PyObject *args) {
   } 
   arg2 = static_cast< HCRYPTKEY >(val2);
   try {
-    result = (Key *)new Key(arg1,arg2);
+    {
+      SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+      result = (Key *)new Key(arg1,arg2);
+      SWIG_PYTHON_THREAD_END_ALLOW;
+    }
   }
   catch(CSPException &_e) {
     PyErr_SetString(PyExc_SystemError, (&_e)->msg);
@@ -6928,7 +7281,11 @@ SWIGINTERN PyObject *_wrap_delete_Key(PyObject *self, PyObject *args) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "delete_Key" "', argument " "1"" of type '" "Key *""'"); 
   }
   arg1 = reinterpret_cast< Key * >(argp1);
-  arg1->unref();
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    arg1->unref();
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
   resultobj = SWIG_Py_Void();
   return resultobj;
 fail:
@@ -6965,7 +7322,11 @@ SWIGINTERN PyObject *_wrap_Key_encode__SWIG_0(PyObject *self, PyObject *args) {
   }
   arg4 = reinterpret_cast< Key * >(argp4);
   try {
-    (arg1)->encode(arg2,arg3,arg4);
+    {
+      SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+      (arg1)->encode(arg2,arg3,arg4);
+      SWIG_PYTHON_THREAD_END_ALLOW;
+    }
   }
   catch(CSPException &_e) {
     PyErr_SetString(PyExc_SystemError, (&_e)->msg);
@@ -7017,7 +7378,11 @@ SWIGINTERN PyObject *_wrap_Key_encode__SWIG_1(PyObject *self, PyObject *args) {
   }
   arg1 = reinterpret_cast< Key * >(argp1);
   try {
-    (arg1)->encode(arg2,arg3);
+    {
+      SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+      (arg1)->encode(arg2,arg3);
+      SWIG_PYTHON_THREAD_END_ALLOW;
+    }
   }
   catch(CSPException &_e) {
     PyErr_SetString(PyExc_SystemError, (&_e)->msg);
@@ -7118,7 +7483,11 @@ SWIGINTERN PyObject *_wrap_Key_store_cert(PyObject *self, PyObject *args) {
   }
   arg2 = reinterpret_cast< Cert * >(argp2);
   try {
-    (arg1)->store_cert(arg2);
+    {
+      SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+      (arg1)->store_cert(arg2);
+      SWIG_PYTHON_THREAD_END_ALLOW;
+    }
   }
   catch(CSPException &_e) {
     PyErr_SetString(PyExc_SystemError, (&_e)->msg);
@@ -7153,7 +7522,11 @@ SWIGINTERN PyObject *_wrap_Key_extract_cert(PyObject *self, PyObject *args) {
   }
   arg1 = reinterpret_cast< Key * >(argp1);
   try {
-    (arg1)->extract_cert(arg2,arg3);
+    {
+      SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+      (arg1)->extract_cert(arg2,arg3);
+      SWIG_PYTHON_THREAD_END_ALLOW;
+    }
   }
   catch(CSPException &_e) {
     PyErr_SetString(PyExc_SystemError, (&_e)->msg);
@@ -7199,7 +7572,11 @@ SWIGINTERN PyObject *_wrap_Cert_duplicate(PyObject *self, PyObject *args) {
   }
   arg1 = reinterpret_cast< Cert * >(argp1);
   try {
-    result = (Cert *)(arg1)->duplicate();
+    {
+      SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+      result = (Cert *)(arg1)->duplicate();
+      SWIG_PYTHON_THREAD_END_ALLOW;
+    }
   }
   catch(CSPException &_e) {
     PyErr_SetString(PyExc_SystemError, (&_e)->msg);
@@ -7228,7 +7605,11 @@ SWIGINTERN PyObject *_wrap_Cert_remove_from_store(PyObject *self, PyObject *args
   }
   arg1 = reinterpret_cast< Cert * >(argp1);
   try {
-    (arg1)->remove_from_store();
+    {
+      SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+      (arg1)->remove_from_store();
+      SWIG_PYTHON_THREAD_END_ALLOW;
+    }
   }
   catch(CSPException &_e) {
     PyErr_SetString(PyExc_SystemError, (&_e)->msg);
@@ -7275,7 +7656,11 @@ SWIGINTERN int _wrap_new_Cert__SWIG_0(PyObject *self, PyObject *args) {
   }
   arg2 = reinterpret_cast< CertStore * >(argp2);
   try {
-    result = (Cert *)new Cert(arg1,arg2);
+    {
+      SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+      result = (Cert *)new Cert(arg1,arg2);
+      SWIG_PYTHON_THREAD_END_ALLOW;
+    }
   }
   catch(CSPException &_e) {
     PyErr_SetString(PyExc_SystemError, (&_e)->msg);
@@ -7314,7 +7699,11 @@ SWIGINTERN int _wrap_new_Cert__SWIG_1(PyObject *self, PyObject *args) {
     }
   }
   try {
-    result = (Cert *)new Cert(arg1);
+    {
+      SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+      result = (Cert *)new Cert(arg1);
+      SWIG_PYTHON_THREAD_END_ALLOW;
+    }
   }
   catch(CSPException &_e) {
     PyErr_SetString(PyExc_SystemError, (&_e)->msg);
@@ -7367,7 +7756,11 @@ SWIGINTERN int _wrap_new_Cert__SWIG_2(PyObject *self, PyObject *args) {
     arg2 = (DWORD) len1;
   }
   try {
-    result = (Cert *)new Cert(arg1,arg2);
+    {
+      SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+      result = (Cert *)new Cert(arg1,arg2);
+      SWIG_PYTHON_THREAD_END_ALLOW;
+    }
   }
   catch(CSPException &_e) {
     PyErr_SetString(PyExc_SystemError, (&_e)->msg);
@@ -7489,7 +7882,11 @@ SWIGINTERN PyObject *_wrap_Cert_self_sign(PyObject *self, PyObject *args) {
     arg3 = (DWORD) len2;
   }
   try {
-    result = (Cert *)Cert::self_sign(arg1,arg2,arg3);
+    {
+      SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+      result = (Cert *)Cert::self_sign(arg1,arg2,arg3);
+      SWIG_PYTHON_THREAD_END_ALLOW;
+    }
   }
   catch(CSPException &_e) {
     PyErr_SetString(PyExc_SystemError, (&_e)->msg);
@@ -7517,7 +7914,11 @@ SWIGINTERN PyObject *_wrap_delete_Cert(PyObject *self, PyObject *args) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "delete_Cert" "', argument " "1"" of type '" "Cert *""'"); 
   }
   arg1 = reinterpret_cast< Cert * >(argp1);
-  arg1->unref();
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    arg1->unref();
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
   resultobj = SWIG_Py_Void();
   return resultobj;
 fail:
@@ -7545,7 +7946,11 @@ SWIGINTERN PyObject *_wrap_Cert_extract(PyObject *self, PyObject *args) {
   }
   arg1 = reinterpret_cast< Cert * >(argp1);
   try {
-    (arg1)->extract(arg2,arg3);
+    {
+      SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+      (arg1)->extract(arg2,arg3);
+      SWIG_PYTHON_THREAD_END_ALLOW;
+    }
   }
   catch(CSPException &_e) {
     PyErr_SetString(PyExc_SystemError, (&_e)->msg);
@@ -7597,7 +8002,11 @@ SWIGINTERN PyObject *_wrap_Cert_thumbprint(PyObject *self, PyObject *args) {
   }
   arg1 = reinterpret_cast< Cert * >(argp1);
   try {
-    (arg1)->thumbprint(arg2,arg3);
+    {
+      SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+      (arg1)->thumbprint(arg2,arg3);
+      SWIG_PYTHON_THREAD_END_ALLOW;
+    }
   }
   catch(CSPException &_e) {
     PyErr_SetString(PyExc_SystemError, (&_e)->msg);
@@ -7649,7 +8058,11 @@ SWIGINTERN PyObject *_wrap_Cert_subject_id(PyObject *self, PyObject *args) {
   }
   arg1 = reinterpret_cast< Cert * >(argp1);
   try {
-    (arg1)->subject_id(arg2,arg3);
+    {
+      SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+      (arg1)->subject_id(arg2,arg3);
+      SWIG_PYTHON_THREAD_END_ALLOW;
+    }
   }
   catch(CSPException &_e) {
     PyErr_SetString(PyExc_SystemError, (&_e)->msg);
@@ -7709,7 +8122,11 @@ SWIGINTERN PyObject *_wrap_Cert_bind__SWIG_0(PyObject *self, PyObject *args) {
 #else
   arg3 = PyInt_AsUnsignedLongMask(obj2);
 #endif
-  (arg1)->bind(arg2,arg3);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    (arg1)->bind(arg2,arg3);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
   resultobj = SWIG_Py_Void();
   return resultobj;
 fail:
@@ -7738,7 +8155,11 @@ SWIGINTERN PyObject *_wrap_Cert_bind__SWIG_1(PyObject *self, PyObject *args) {
     SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "Cert_bind" "', argument " "2"" of type '" "Crypt *""'"); 
   }
   arg2 = reinterpret_cast< Crypt * >(argp2);
-  (arg1)->bind(arg2);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    (arg1)->bind(arg2);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
   resultobj = SWIG_Py_Void();
   return resultobj;
 fail:
@@ -7831,7 +8252,11 @@ SWIGINTERN PyObject *_wrap_Cert_set_pin(PyObject *self, PyObject *args) {
   }
   arg2 = reinterpret_cast< char * >(buf2);
   try {
-    (arg1)->set_pin(arg2);
+    {
+      SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+      (arg1)->set_pin(arg2);
+      SWIG_PYTHON_THREAD_END_ALLOW;
+    }
   }
   catch(CSPException &_e) {
     PyErr_SetString(PyExc_SystemError, (&_e)->msg);
@@ -7862,7 +8287,11 @@ SWIGINTERN PyObject *_wrap_Cert_eku(PyObject *self, PyObject *args) {
   }
   arg1 = reinterpret_cast< Cert * >(argp1);
   try {
-    result = (EKUIter *)(arg1)->eku();
+    {
+      SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+      result = (EKUIter *)(arg1)->eku();
+      SWIG_PYTHON_THREAD_END_ALLOW;
+    }
   }
   catch(CSPException &_e) {
     PyErr_SetString(PyExc_SystemError, (&_e)->msg);
@@ -7900,7 +8329,11 @@ SWIGINTERN PyObject *_wrap_CertIter_parent_set(PyObject *self, PyObject *args) {
     SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "CertIter_parent_set" "', argument " "2"" of type '" "CertStore *""'"); 
   }
   arg2 = reinterpret_cast< CertStore * >(argp2);
-  if (arg1) (arg1)->parent = arg2;
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    if (arg1) (arg1)->parent = arg2;
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
   resultobj = SWIG_Py_Void();
   return resultobj;
 fail:
@@ -7921,7 +8354,11 @@ SWIGINTERN PyObject *_wrap_CertIter_parent_get(PyObject *self, PyObject *args) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "CertIter_parent_get" "', argument " "1"" of type '" "CertIter *""'"); 
   }
   arg1 = reinterpret_cast< CertIter * >(argp1);
-  result = (CertStore *) ((arg1)->parent);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (CertStore *) ((arg1)->parent);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
   resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_CertStore, 0 |  0 );
   return resultobj;
 fail:
@@ -7950,7 +8387,11 @@ SWIGINTERN PyObject *_wrap_CertIter_iter_set(PyObject *self, PyObject *args) {
     SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "CertIter_iter_set" "', argument " "2"" of type '" "bool""'");
   } 
   arg2 = static_cast< bool >(val2);
-  if (arg1) (arg1)->iter = arg2;
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    if (arg1) (arg1)->iter = arg2;
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
   resultobj = SWIG_Py_Void();
   return resultobj;
 fail:
@@ -7971,7 +8412,11 @@ SWIGINTERN PyObject *_wrap_CertIter_iter_get(PyObject *self, PyObject *args) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "CertIter_iter_get" "', argument " "1"" of type '" "CertIter *""'"); 
   }
   arg1 = reinterpret_cast< CertIter * >(argp1);
-  result = (bool) ((arg1)->iter);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (bool) ((arg1)->iter);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
   resultobj = SWIG_From_bool(static_cast< bool >(result));
   return resultobj;
 fail:
@@ -8008,7 +8453,11 @@ SWIGINTERN PyObject *_wrap_CertIter_pcert_set(PyObject *self, PyObject *args) {
       if (SWIG_IsNewObj(res2)) delete temp;
     }
   }
-  if (arg1) (arg1)->pcert = arg2;
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    if (arg1) (arg1)->pcert = arg2;
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
   resultobj = SWIG_Py_Void();
   return resultobj;
 fail:
@@ -8029,7 +8478,11 @@ SWIGINTERN PyObject *_wrap_CertIter_pcert_get(PyObject *self, PyObject *args) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "CertIter_pcert_get" "', argument " "1"" of type '" "CertIter *""'"); 
   }
   arg1 = reinterpret_cast< CertIter * >(argp1);
-  result =  ((arg1)->pcert);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result =  ((arg1)->pcert);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
   resultobj = SWIG_NewPointerObj((new PCCERT_CONTEXT(static_cast< const PCCERT_CONTEXT& >(result))), SWIGTYPE_p_PCCERT_CONTEXT, SWIG_POINTER_OWN |  0 );
   return resultobj;
 fail:
@@ -8052,7 +8505,11 @@ SWIGINTERN int _wrap_new_CertIter(PyObject *self, PyObject *args) {
   }
   arg1 = reinterpret_cast< CertStore * >(argp1);
   try {
-    result = (CertIter *)new CertIter(arg1);
+    {
+      SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+      result = (CertIter *)new CertIter(arg1);
+      SWIG_PYTHON_THREAD_END_ALLOW;
+    }
   }
   catch(CSPException &_e) {
     PyErr_SetString(PyExc_SystemError, (&_e)->msg);
@@ -8080,7 +8537,11 @@ SWIGINTERN PyObject *_wrap_CertIter___iter__(PyObject *self, PyObject *args) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "CertIter___iter__" "', argument " "1"" of type '" "CertIter *""'"); 
   }
   arg1 = reinterpret_cast< CertIter * >(argp1);
-  result = (CertIter *)(arg1)->__iter__();
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (CertIter *)(arg1)->__iter__();
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
   resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_CertIter, SWIG_POINTER_OWN |  0 );
   return resultobj;
 fail:
@@ -8102,7 +8563,11 @@ SWIGINTERN PyObject *_wrap_delete_CertIter(PyObject *self, PyObject *args) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "delete_CertIter" "', argument " "1"" of type '" "CertIter *""'"); 
   }
   arg1 = reinterpret_cast< CertIter * >(argp1);
-  delete arg1;
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    delete arg1;
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
   resultobj = SWIG_Py_Void();
   return resultobj;
 fail:
@@ -8124,7 +8589,11 @@ SWIGINTERN PyObject *_wrap_CertIter_next(PyObject *self, PyObject *args) {
   }
   arg1 = reinterpret_cast< CertIter * >(argp1);
   try {
-    result = (Cert *)(arg1)->next();
+    {
+      SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+      result = (Cert *)(arg1)->next();
+      SWIG_PYTHON_THREAD_END_ALLOW;
+    }
   }
   catch(Stop_Iteration &_e) {
     PyErr_SetNone(PyExc_StopIteration);
@@ -8168,7 +8637,11 @@ SWIGINTERN PyObject *_wrap_CertFind_chb_set(PyObject *self, PyObject *args) {
     SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "CertFind_chb_set" "', argument " "2"" of type '" "CRYPT_HASH_BLOB *""'"); 
   }
   arg2 = reinterpret_cast< CRYPT_HASH_BLOB * >(argp2);
-  if (arg1) (arg1)->chb = *arg2;
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    if (arg1) (arg1)->chb = *arg2;
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
   resultobj = SWIG_Py_Void();
   return resultobj;
 fail:
@@ -8189,7 +8662,11 @@ SWIGINTERN PyObject *_wrap_CertFind_chb_get(PyObject *self, PyObject *args) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "CertFind_chb_get" "', argument " "1"" of type '" "CertFind *""'"); 
   }
   arg1 = reinterpret_cast< CertFind * >(argp1);
-  result = (CRYPT_HASH_BLOB *)& ((arg1)->chb);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (CRYPT_HASH_BLOB *)& ((arg1)->chb);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
   resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p__CRYPTOAPI_BLOB, 0 |  0 );
   return resultobj;
 fail:
@@ -8218,7 +8695,11 @@ SWIGINTERN PyObject *_wrap_CertFind_param_set(PyObject *self, PyObject *args) {
     SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "CertFind_param_set" "', argument " "2"" of type '" "CRYPT_HASH_BLOB *""'"); 
   }
   arg2 = reinterpret_cast< CRYPT_HASH_BLOB * >(argp2);
-  if (arg1) (arg1)->param = arg2;
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    if (arg1) (arg1)->param = arg2;
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
   resultobj = SWIG_Py_Void();
   return resultobj;
 fail:
@@ -8239,7 +8720,11 @@ SWIGINTERN PyObject *_wrap_CertFind_param_get(PyObject *self, PyObject *args) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "CertFind_param_get" "', argument " "1"" of type '" "CertFind *""'"); 
   }
   arg1 = reinterpret_cast< CertFind * >(argp1);
-  result = (CRYPT_HASH_BLOB *) ((arg1)->param);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (CRYPT_HASH_BLOB *) ((arg1)->param);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
   resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p__CRYPTOAPI_BLOB, 0 |  0 );
   return resultobj;
 fail:
@@ -8266,7 +8751,11 @@ SWIGINTERN PyObject *_wrap_CertFind_enctype_set(PyObject *self, PyObject *args) 
 #else
   arg2 = PyInt_AsUnsignedLongMask(obj1);
 #endif
-  if (arg1) (arg1)->enctype = arg2;
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    if (arg1) (arg1)->enctype = arg2;
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
   resultobj = SWIG_Py_Void();
   return resultobj;
 fail:
@@ -8287,7 +8776,11 @@ SWIGINTERN PyObject *_wrap_CertFind_enctype_get(PyObject *self, PyObject *args) 
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "CertFind_enctype_get" "', argument " "1"" of type '" "CertFind *""'"); 
   }
   arg1 = reinterpret_cast< CertFind * >(argp1);
-  result = (DWORD) ((arg1)->enctype);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (DWORD) ((arg1)->enctype);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
   resultobj = SWIG_From_unsigned_SS_int(static_cast< unsigned int >(result));
   return resultobj;
 fail:
@@ -8314,7 +8807,11 @@ SWIGINTERN PyObject *_wrap_CertFind_findtype_set(PyObject *self, PyObject *args)
 #else
   arg2 = PyInt_AsUnsignedLongMask(obj1);
 #endif
-  if (arg1) (arg1)->findtype = arg2;
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    if (arg1) (arg1)->findtype = arg2;
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
   resultobj = SWIG_Py_Void();
   return resultobj;
 fail:
@@ -8335,7 +8832,11 @@ SWIGINTERN PyObject *_wrap_CertFind_findtype_get(PyObject *self, PyObject *args)
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "CertFind_findtype_get" "', argument " "1"" of type '" "CertFind *""'"); 
   }
   arg1 = reinterpret_cast< CertFind * >(argp1);
-  result = (DWORD) ((arg1)->findtype);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (DWORD) ((arg1)->findtype);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
   resultobj = SWIG_From_unsigned_SS_int(static_cast< unsigned int >(result));
   return resultobj;
 fail:
@@ -8402,7 +8903,11 @@ SWIGINTERN int _wrap_new_CertFind__SWIG_0(PyObject *self, PyObject *args) {
     arg4 = (BYTE *) cstr4;
     arg5 = (DWORD) len4;
   }
-  result = (CertFind *)new CertFind(arg1,arg2,arg3,arg4,arg5);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (CertFind *)new CertFind(arg1,arg2,arg3,arg4,arg5);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
   resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_CertFind, SWIG_BUILTIN_INIT |  0 );
   return resultobj == Py_None ? -1 : 0;
 fail:
@@ -8422,7 +8927,11 @@ SWIGINTERN PyObject *_wrap_delete_CertFind(PyObject *self, PyObject *args) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "delete_CertFind" "', argument " "1"" of type '" "CertFind *""'"); 
   }
   arg1 = reinterpret_cast< CertFind * >(argp1);
-  delete arg1;
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    delete arg1;
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
   resultobj = SWIG_Py_Void();
   return resultobj;
 fail:
@@ -8482,7 +8991,11 @@ SWIGINTERN int _wrap_new_CertFind__SWIG_1(PyObject *self, PyObject *args) {
     arg3 = (BYTE *) cstr3;
     arg4 = (DWORD) len3;
   }
-  result = (CertFind *)new CertFind(arg1,arg2,arg3,arg4);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (CertFind *)new CertFind(arg1,arg2,arg3,arg4);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
   resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_CertFind, SWIG_BUILTIN_INIT |  0 );
   return resultobj == Py_None ? -1 : 0;
 fail:
@@ -8598,7 +9111,11 @@ SWIGINTERN PyObject *_wrap_CertFind_next(PyObject *self, PyObject *args) {
   }
   arg1 = reinterpret_cast< CertFind * >(argp1);
   try {
-    result = (Cert *)(arg1)->next();
+    {
+      SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+      result = (Cert *)(arg1)->next();
+      SWIG_PYTHON_THREAD_END_ALLOW;
+    }
   }
   catch(Stop_Iteration &_e) {
     PyErr_SetNone(PyExc_StopIteration);
@@ -8634,7 +9151,11 @@ SWIGINTERN PyObject *_wrap_CertFind___iter__(PyObject *self, PyObject *args) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "CertFind___iter__" "', argument " "1"" of type '" "CertFind *""'"); 
   }
   arg1 = reinterpret_cast< CertFind * >(argp1);
-  result = (CertFind *)(arg1)->__iter__();
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (CertFind *)(arg1)->__iter__();
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
   resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_CertFind, SWIG_POINTER_OWN |  0 );
   return resultobj;
 fail:
@@ -8659,7 +9180,11 @@ SWIGINTERN int _wrap_new_CertStore__SWIG_0(PyObject *self, PyObject *args) {
   }
   arg1 = reinterpret_cast< CryptMsg * >(argp1);
   try {
-    result = (CertStore *)new CertStore(arg1);
+    {
+      SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+      result = (CertStore *)new CertStore(arg1);
+      SWIG_PYTHON_THREAD_END_ALLOW;
+    }
   }
   catch(CSPException &_e) {
     PyErr_SetString(PyExc_SystemError, (&_e)->msg);
@@ -8681,7 +9206,11 @@ SWIGINTERN int _wrap_new_CertStore__SWIG_1(PyObject *self, PyObject *args) {
   
   if (args && PyTuple_Check(args) && PyTuple_GET_SIZE(args) > 0) SWIG_exception_fail(SWIG_TypeError, "new_CertStore takes no arguments");
   try {
-    result = (CertStore *)new CertStore();
+    {
+      SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+      result = (CertStore *)new CertStore();
+      SWIG_PYTHON_THREAD_END_ALLOW;
+    }
   }
   catch(CSPException &_e) {
     PyErr_SetString(PyExc_SystemError, (&_e)->msg);
@@ -8743,7 +9272,11 @@ SWIGINTERN int _wrap_new_CertStore__SWIG_2(PyObject *self, PyObject *args) {
     arg3 = (DWORD) len2;
   }
   try {
-    result = (CertStore *)new CertStore(arg1,arg2,arg3);
+    {
+      SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+      result = (CertStore *)new CertStore(arg1,arg2,arg3);
+      SWIG_PYTHON_THREAD_END_ALLOW;
+    }
   }
   catch(CSPException &_e) {
     PyErr_SetString(PyExc_SystemError, (&_e)->msg);
@@ -8827,7 +9360,11 @@ SWIGINTERN PyObject *_wrap_delete_CertStore(PyObject *self, PyObject *args) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "delete_CertStore" "', argument " "1"" of type '" "CertStore *""'"); 
   }
   arg1 = reinterpret_cast< CertStore * >(argp1);
-  arg1->unref();
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    arg1->unref();
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
   resultobj = SWIG_Py_Void();
   return resultobj;
 fail:
@@ -8849,7 +9386,11 @@ SWIGINTERN PyObject *_wrap_CertStore___iter__(PyObject *self, PyObject *args) {
   }
   arg1 = reinterpret_cast< CertStore * >(argp1);
   try {
-    result = (CertIter *)(arg1)->__iter__();
+    {
+      SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+      result = (CertIter *)(arg1)->__iter__();
+      SWIG_PYTHON_THREAD_END_ALLOW;
+    }
   }
   catch(CSPException &_e) {
     PyErr_SetString(PyExc_SystemError, (&_e)->msg);
@@ -8911,7 +9452,11 @@ SWIGINTERN PyObject *_wrap_CertStore_find_by_thumb(PyObject *self, PyObject *arg
     arg3 = (DWORD) len2;
   }
   try {
-    result = (CertFind *)(arg1)->find_by_thumb(arg2,arg3);
+    {
+      SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+      result = (CertFind *)(arg1)->find_by_thumb(arg2,arg3);
+      SWIG_PYTHON_THREAD_END_ALLOW;
+    }
   }
   catch(CSPException &_e) {
     PyErr_SetString(PyExc_SystemError, (&_e)->msg);
@@ -8971,7 +9516,11 @@ SWIGINTERN PyObject *_wrap_CertStore_find_by_name(PyObject *self, PyObject *args
     arg3 = (DWORD) len2;
   }
   try {
-    result = (CertFind *)(arg1)->find_by_name(arg2,arg3);
+    {
+      SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+      result = (CertFind *)(arg1)->find_by_name(arg2,arg3);
+      SWIG_PYTHON_THREAD_END_ALLOW;
+    }
   }
   catch(CSPException &_e) {
     PyErr_SetString(PyExc_SystemError, (&_e)->msg);
@@ -9009,7 +9558,11 @@ SWIGINTERN PyObject *_wrap_CertStore_get_cert_by_info(PyObject *self, PyObject *
   }
   arg2 = reinterpret_cast< CertInfo * >(argp2);
   try {
-    result = (Cert *)(arg1)->get_cert_by_info(arg2);
+    {
+      SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+      result = (Cert *)(arg1)->get_cert_by_info(arg2);
+      SWIG_PYTHON_THREAD_END_ALLOW;
+    }
   }
   catch(CSPException &_e) {
     PyErr_SetString(PyExc_SystemError, (&_e)->msg);
@@ -9053,7 +9606,11 @@ SWIGINTERN PyObject *_wrap_CertStore_add_cert(PyObject *self, PyObject *args) {
   }
   arg2 = reinterpret_cast< Cert * >(argp2);
   try {
-    result = (Cert *)(arg1)->add_cert(arg2);
+    {
+      SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+      result = (Cert *)(arg1)->add_cert(arg2);
+      SWIG_PYTHON_THREAD_END_ALLOW;
+    }
   }
   catch(CSPException &_e) {
     PyErr_SetString(PyExc_SystemError, (&_e)->msg);
@@ -9083,7 +9640,11 @@ SWIGINTERN int _wrap_new_EKUIter(PyObject *self, PyObject *args) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "new_EKUIter" "', argument " "1"" of type '" "Cert *""'"); 
   }
   arg1 = reinterpret_cast< Cert * >(argp1);
-  result = (EKUIter *)new EKUIter(arg1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (EKUIter *)new EKUIter(arg1);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
   resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_EKUIter, SWIG_BUILTIN_INIT |  0 );
   return resultobj == Py_None ? -1 : 0;
 fail:
@@ -9103,7 +9664,11 @@ SWIGINTERN PyObject *_wrap_delete_EKUIter(PyObject *self, PyObject *args) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "delete_EKUIter" "', argument " "1"" of type '" "EKUIter *""'"); 
   }
   arg1 = reinterpret_cast< EKUIter * >(argp1);
-  delete arg1;
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    delete arg1;
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
   resultobj = SWIG_Py_Void();
   return resultobj;
 fail:
@@ -9124,7 +9689,11 @@ SWIGINTERN PyObject *_wrap_EKUIter___iter__(PyObject *self, PyObject *args) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "EKUIter___iter__" "', argument " "1"" of type '" "EKUIter *""'"); 
   }
   arg1 = reinterpret_cast< EKUIter * >(argp1);
-  result = (EKUIter *)(arg1)->__iter__();
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (EKUIter *)(arg1)->__iter__();
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
   resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_EKUIter, SWIG_POINTER_OWN |  0 );
   return resultobj;
 fail:
@@ -9154,7 +9723,11 @@ SWIGINTERN PyObject *_wrap_EKUIter_next(PyObject *self, PyObject *args) {
   }
   arg1 = reinterpret_cast< EKUIter * >(argp1);
   try {
-    (arg1)->next(arg2,arg3);
+    {
+      SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+      (arg1)->next(arg2,arg3);
+      SWIG_PYTHON_THREAD_END_ALLOW;
+    }
   }
   catch(CSPException &_e) {
     PyErr_SetString(PyExc_SystemError, (&_e)->msg);
@@ -9208,7 +9781,11 @@ SWIGINTERN int _wrap_new_CertInfo__SWIG_0(PyObject *self, PyObject *args) {
   }
   arg1 = reinterpret_cast< Cert * >(argp1);
   try {
-    result = (CertInfo *)new CertInfo(arg1);
+    {
+      SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+      result = (CertInfo *)new CertInfo(arg1);
+      SWIG_PYTHON_THREAD_END_ALLOW;
+    }
   }
   catch(CSPException &_e) {
     PyErr_SetString(PyExc_SystemError, (&_e)->msg);
@@ -9246,7 +9823,11 @@ SWIGINTERN int _wrap_new_CertInfo__SWIG_1(PyObject *self, PyObject *args) {
   arg2 = PyInt_AsUnsignedLongMask(obj2);
 #endif
   try {
-    result = (CertInfo *)new CertInfo(arg1,arg2);
+    {
+      SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+      result = (CertInfo *)new CertInfo(arg1,arg2);
+      SWIG_PYTHON_THREAD_END_ALLOW;
+    }
   }
   catch(CSPException &_e) {
     PyErr_SetString(PyExc_SystemError, (&_e)->msg);
@@ -9324,7 +9905,11 @@ SWIGINTERN PyObject *_wrap_delete_CertInfo(PyObject *self, PyObject *args) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "delete_CertInfo" "', argument " "1"" of type '" "CertInfo *""'"); 
   }
   arg1 = reinterpret_cast< CertInfo * >(argp1);
-  arg1->unref();
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    arg1->unref();
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
   resultobj = SWIG_Py_Void();
   return resultobj;
 fail:
@@ -9345,7 +9930,11 @@ SWIGINTERN PyObject *_wrap_CertInfo_version(PyObject *self, PyObject *args) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "CertInfo_version" "', argument " "1"" of type '" "CertInfo *""'"); 
   }
   arg1 = reinterpret_cast< CertInfo * >(argp1);
-  result = (DWORD)(arg1)->version();
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (DWORD)(arg1)->version();
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
   resultobj = SWIG_From_unsigned_SS_int(static_cast< unsigned int >(result));
   return resultobj;
 fail:
@@ -9382,7 +9971,11 @@ SWIGINTERN PyObject *_wrap_CertInfo_issuer__SWIG_0(PyObject *self, PyObject *arg
   } 
   arg4 = static_cast< bool >(val4);
   try {
-    (arg1)->issuer(arg2,arg3,arg4);
+    {
+      SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+      (arg1)->issuer(arg2,arg3,arg4);
+      SWIG_PYTHON_THREAD_END_ALLOW;
+    }
   }
   catch(CSPException &_e) {
     PyErr_SetString(PyExc_SystemError, (&_e)->msg);
@@ -9434,7 +10027,11 @@ SWIGINTERN PyObject *_wrap_CertInfo_issuer__SWIG_1(PyObject *self, PyObject *arg
   }
   arg1 = reinterpret_cast< CertInfo * >(argp1);
   try {
-    (arg1)->issuer(arg2,arg3);
+    {
+      SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+      (arg1)->issuer(arg2,arg3);
+      SWIG_PYTHON_THREAD_END_ALLOW;
+    }
   }
   catch(CSPException &_e) {
     PyErr_SetString(PyExc_SystemError, (&_e)->msg);
@@ -9543,7 +10140,11 @@ SWIGINTERN PyObject *_wrap_CertInfo_name__SWIG_0(PyObject *self, PyObject *args)
   } 
   arg4 = static_cast< bool >(val4);
   try {
-    (arg1)->name(arg2,arg3,arg4);
+    {
+      SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+      (arg1)->name(arg2,arg3,arg4);
+      SWIG_PYTHON_THREAD_END_ALLOW;
+    }
   }
   catch(CSPException &_e) {
     PyErr_SetString(PyExc_SystemError, (&_e)->msg);
@@ -9595,7 +10196,11 @@ SWIGINTERN PyObject *_wrap_CertInfo_name__SWIG_1(PyObject *self, PyObject *args)
   }
   arg1 = reinterpret_cast< CertInfo * >(argp1);
   try {
-    (arg1)->name(arg2,arg3);
+    {
+      SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+      (arg1)->name(arg2,arg3);
+      SWIG_PYTHON_THREAD_END_ALLOW;
+    }
   }
   catch(CSPException &_e) {
     PyErr_SetString(PyExc_SystemError, (&_e)->msg);
@@ -9695,7 +10300,11 @@ SWIGINTERN PyObject *_wrap_CertInfo_not_before(PyObject *self, PyObject *args) {
   }
   arg1 = reinterpret_cast< CertInfo * >(argp1);
   try {
-    (arg1)->not_before(arg2,arg3);
+    {
+      SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+      (arg1)->not_before(arg2,arg3);
+      SWIG_PYTHON_THREAD_END_ALLOW;
+    }
   }
   catch(CSPException &_e) {
     PyErr_SetString(PyExc_SystemError, (&_e)->msg);
@@ -9747,7 +10356,11 @@ SWIGINTERN PyObject *_wrap_CertInfo_not_after(PyObject *self, PyObject *args) {
   }
   arg1 = reinterpret_cast< CertInfo * >(argp1);
   try {
-    (arg1)->not_after(arg2,arg3);
+    {
+      SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+      (arg1)->not_after(arg2,arg3);
+      SWIG_PYTHON_THREAD_END_ALLOW;
+    }
   }
   catch(CSPException &_e) {
     PyErr_SetString(PyExc_SystemError, (&_e)->msg);
@@ -9793,7 +10406,11 @@ SWIGINTERN PyObject *_wrap_CertInfo_usage(PyObject *self, PyObject *args) {
   }
   arg1 = reinterpret_cast< CertInfo * >(argp1);
   try {
-    result = (BYTE)(arg1)->usage();
+    {
+      SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+      result = (BYTE)(arg1)->usage();
+      SWIG_PYTHON_THREAD_END_ALLOW;
+    }
   }
   catch(CSPException &_e) {
     PyErr_SetString(PyExc_SystemError, (&_e)->msg);
@@ -9821,7 +10438,11 @@ SWIGINTERN PyObject *_wrap_CertInfo_sign_algorithm(PyObject *self, PyObject *arg
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "CertInfo_sign_algorithm" "', argument " "1"" of type '" "CertInfo *""'"); 
   }
   arg1 = reinterpret_cast< CertInfo * >(argp1);
-  result = (char *)(arg1)->sign_algorithm();
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (char *)(arg1)->sign_algorithm();
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
   resultobj = SWIG_FromCharPtr((const char *)result);
   return resultobj;
 fail:
@@ -9849,7 +10470,11 @@ SWIGINTERN PyObject *_wrap_CertInfo_serial(PyObject *self, PyObject *args) {
   }
   arg1 = reinterpret_cast< CertInfo * >(argp1);
   try {
-    (arg1)->serial(arg2,arg3);
+    {
+      SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+      (arg1)->serial(arg2,arg3);
+      SWIG_PYTHON_THREAD_END_ALLOW;
+    }
   }
   catch(CSPException &_e) {
     PyErr_SetString(PyExc_SystemError, (&_e)->msg);
@@ -9895,7 +10520,11 @@ SWIGINTERN PyObject *_wrap_CertInfo_extensions(PyObject *self, PyObject *args) {
   }
   arg1 = reinterpret_cast< CertInfo * >(argp1);
   try {
-    result = (ExtIter *)(arg1)->extensions();
+    {
+      SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+      result = (ExtIter *)(arg1)->extensions();
+      SWIG_PYTHON_THREAD_END_ALLOW;
+    }
   }
   catch(CSPException &_e) {
     PyErr_SetString(PyExc_SystemError, (&_e)->msg);
@@ -9925,7 +10554,11 @@ SWIGINTERN int _wrap_new_ExtIter(PyObject *self, PyObject *args) {
   }
   arg1 = reinterpret_cast< CertInfo * >(argp1);
   try {
-    result = (ExtIter *)new ExtIter(arg1);
+    {
+      SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+      result = (ExtIter *)new ExtIter(arg1);
+      SWIG_PYTHON_THREAD_END_ALLOW;
+    }
   }
   catch(CSPException &_e) {
     PyErr_SetString(PyExc_SystemError, (&_e)->msg);
@@ -9953,7 +10586,11 @@ SWIGINTERN PyObject *_wrap_ExtIter___iter__(PyObject *self, PyObject *args) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "ExtIter___iter__" "', argument " "1"" of type '" "ExtIter *""'"); 
   }
   arg1 = reinterpret_cast< ExtIter * >(argp1);
-  result = (ExtIter *)(arg1)->__iter__();
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (ExtIter *)(arg1)->__iter__();
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
   resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_ExtIter, SWIG_POINTER_OWN |  0 );
   return resultobj;
 fail:
@@ -9975,7 +10612,11 @@ SWIGINTERN PyObject *_wrap_delete_ExtIter(PyObject *self, PyObject *args) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "delete_ExtIter" "', argument " "1"" of type '" "ExtIter *""'"); 
   }
   arg1 = reinterpret_cast< ExtIter * >(argp1);
-  delete arg1;
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    delete arg1;
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
   resultobj = SWIG_Py_Void();
   return resultobj;
 fail:
@@ -9997,7 +10638,11 @@ SWIGINTERN PyObject *_wrap_ExtIter_next(PyObject *self, PyObject *args) {
   }
   arg1 = reinterpret_cast< ExtIter * >(argp1);
   try {
-    result = (CertExtension *)(arg1)->next();
+    {
+      SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+      result = (CertExtension *)(arg1)->next();
+      SWIG_PYTHON_THREAD_END_ALLOW;
+    }
   }
   catch(Stop_Iteration &_e) {
     PyErr_SetNone(PyExc_StopIteration);
@@ -10065,7 +10710,11 @@ SWIGINTERN int _wrap_new_CryptMsg__SWIG_0(PyObject *self, PyObject *args) {
   }
   arg3 = reinterpret_cast< Crypt * >(argp3);
   try {
-    result = (CryptMsg *)new CryptMsg(arg1,arg2,arg3);
+    {
+      SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+      result = (CryptMsg *)new CryptMsg(arg1,arg2,arg3);
+      SWIG_PYTHON_THREAD_END_ALLOW;
+    }
   }
   catch(CSPException &_e) {
     PyErr_SetString(PyExc_SystemError, (&_e)->msg);
@@ -10118,7 +10767,11 @@ SWIGINTERN int _wrap_new_CryptMsg__SWIG_1(PyObject *self, PyObject *args) {
     arg2 = (DWORD) len1;
   }
   try {
-    result = (CryptMsg *)new CryptMsg(arg1,arg2);
+    {
+      SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+      result = (CryptMsg *)new CryptMsg(arg1,arg2);
+      SWIG_PYTHON_THREAD_END_ALLOW;
+    }
   }
   catch(CSPException &_e) {
     PyErr_SetString(PyExc_SystemError, (&_e)->msg);
@@ -10149,7 +10802,11 @@ SWIGINTERN int _wrap_new_CryptMsg__SWIG_2(PyObject *self, PyObject *args) {
   }
   arg1 = reinterpret_cast< Crypt * >(argp1);
   try {
-    result = (CryptMsg *)new CryptMsg(arg1);
+    {
+      SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+      result = (CryptMsg *)new CryptMsg(arg1);
+      SWIG_PYTHON_THREAD_END_ALLOW;
+    }
   }
   catch(CSPException &_e) {
     PyErr_SetString(PyExc_SystemError, (&_e)->msg);
@@ -10171,7 +10828,11 @@ SWIGINTERN int _wrap_new_CryptMsg__SWIG_3(PyObject *self, PyObject *args) {
   
   if (args && PyTuple_Check(args) && PyTuple_GET_SIZE(args) > 0) SWIG_exception_fail(SWIG_TypeError, "new_CryptMsg takes no arguments");
   try {
-    result = (CryptMsg *)new CryptMsg();
+    {
+      SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+      result = (CryptMsg *)new CryptMsg();
+      SWIG_PYTHON_THREAD_END_ALLOW;
+    }
   }
   catch(CSPException &_e) {
     PyErr_SetString(PyExc_SystemError, (&_e)->msg);
@@ -10279,7 +10940,11 @@ SWIGINTERN PyObject *_wrap_CryptMsg_decrypt_by_cert(PyObject *self, PyObject *ar
   }
   arg2 = reinterpret_cast< Cert * >(argp2);
   try {
-    (arg1)->decrypt_by_cert(arg2);
+    {
+      SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+      (arg1)->decrypt_by_cert(arg2);
+      SWIG_PYTHON_THREAD_END_ALLOW;
+    }
   }
   catch(CSPException &_e) {
     PyErr_SetString(PyExc_SystemError, (&_e)->msg);
@@ -10311,7 +10976,11 @@ SWIGINTERN PyObject *_wrap_delete_CryptMsg(PyObject *self, PyObject *args) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "delete_CryptMsg" "', argument " "1"" of type '" "CryptMsg *""'"); 
   }
   arg1 = reinterpret_cast< CryptMsg * >(argp1);
-  arg1->unref();
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    arg1->unref();
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
   resultobj = SWIG_Py_Void();
   return resultobj;
 fail:
@@ -10333,7 +11002,11 @@ SWIGINTERN PyObject *_wrap_CryptMsg_num_signers(PyObject *self, PyObject *args) 
   }
   arg1 = reinterpret_cast< CryptMsg * >(argp1);
   try {
-    result = (int)(arg1)->num_signers();
+    {
+      SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+      result = (int)(arg1)->num_signers();
+      SWIG_PYTHON_THREAD_END_ALLOW;
+    }
   }
   catch(CSPException &_e) {
     PyErr_SetString(PyExc_SystemError, (&_e)->msg);
@@ -10368,7 +11041,11 @@ SWIGINTERN PyObject *_wrap_CryptMsg_get_data(PyObject *self, PyObject *args) {
   }
   arg1 = reinterpret_cast< CryptMsg * >(argp1);
   try {
-    (arg1)->get_data(arg2,arg3);
+    {
+      SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+      (arg1)->get_data(arg2,arg3);
+      SWIG_PYTHON_THREAD_END_ALLOW;
+    }
   }
   catch(CSPException &_e) {
     PyErr_SetString(PyExc_SystemError, (&_e)->msg);
@@ -10423,7 +11100,11 @@ SWIGINTERN PyObject *_wrap_CryptMsg_verify_cert(PyObject *self, PyObject *args) 
   }
   arg2 = reinterpret_cast< Cert * >(argp2);
   try {
-    result = (bool)(arg1)->verify_cert(arg2);
+    {
+      SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+      result = (bool)(arg1)->verify_cert(arg2);
+      SWIG_PYTHON_THREAD_END_ALLOW;
+    }
   }
   catch(CSPException &_e) {
     PyErr_SetString(PyExc_SystemError, (&_e)->msg);
@@ -10452,7 +11133,11 @@ SWIGINTERN PyObject *_wrap_CryptMsg_get_type(PyObject *self, PyObject *args) {
   }
   arg1 = reinterpret_cast< CryptMsg * >(argp1);
   try {
-    result = (DWORD)(arg1)->get_type();
+    {
+      SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+      result = (DWORD)(arg1)->get_type();
+      SWIG_PYTHON_THREAD_END_ALLOW;
+    }
   }
   catch(CSPException &_e) {
     PyErr_SetString(PyExc_SystemError, (&_e)->msg);
@@ -10489,7 +11174,11 @@ SWIGINTERN PyObject *_wrap_CryptMsg_add_recipient(PyObject *self, PyObject *args
   }
   arg2 = reinterpret_cast< Cert * >(argp2);
   try {
-    (arg1)->add_recipient(arg2);
+    {
+      SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+      (arg1)->add_recipient(arg2);
+      SWIG_PYTHON_THREAD_END_ALLOW;
+    }
   }
   catch(CSPException &_e) {
     PyErr_SetString(PyExc_SystemError, (&_e)->msg);
@@ -10555,7 +11244,11 @@ SWIGINTERN PyObject *_wrap_CryptMsg_encrypt_data(PyObject *self, PyObject *args)
     arg3 = (DWORD) len2;
   }
   try {
-    (arg1)->encrypt_data(arg2,arg3,arg4,arg5);
+    {
+      SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+      (arg1)->encrypt_data(arg2,arg3,arg4,arg5);
+      SWIG_PYTHON_THREAD_END_ALLOW;
+    }
   }
   catch(CSPException &_e) {
     PyErr_SetString(PyExc_SystemError, (&_e)->msg);
@@ -10616,7 +11309,11 @@ SWIGINTERN PyObject *_wrap_CryptMsg_decrypt(PyObject *self, PyObject *args) {
   }
   arg4 = reinterpret_cast< CertStore * >(argp4);
   try {
-    (arg1)->decrypt(arg2,arg3,arg4);
+    {
+      SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+      (arg1)->decrypt(arg2,arg3,arg4);
+      SWIG_PYTHON_THREAD_END_ALLOW;
+    }
   }
   catch(CSPException &_e) {
     PyErr_SetString(PyExc_SystemError, (&_e)->msg);
@@ -10722,7 +11419,11 @@ SWIGINTERN PyObject *_wrap_CryptMsg_sign_data__SWIG_0(PyObject *self, PyObject *
   } 
   arg7 = static_cast< bool >(val7);
   try {
-    (arg1)->sign_data(arg2,arg3,arg4,arg5,arg6,arg7);
+    {
+      SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+      (arg1)->sign_data(arg2,arg3,arg4,arg5,arg6,arg7);
+      SWIG_PYTHON_THREAD_END_ALLOW;
+    }
   }
   catch(CSPException &_e) {
     PyErr_SetString(PyExc_SystemError, (&_e)->msg);
@@ -10814,7 +11515,11 @@ SWIGINTERN PyObject *_wrap_CryptMsg_sign_data__SWIG_1(PyObject *self, PyObject *
   }
   arg6 = reinterpret_cast< Cert * >(argp6);
   try {
-    (arg1)->sign_data(arg2,arg3,arg4,arg5,arg6);
+    {
+      SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+      (arg1)->sign_data(arg2,arg3,arg4,arg5,arg6);
+      SWIG_PYTHON_THREAD_END_ALLOW;
+    }
   }
   catch(CSPException &_e) {
     PyErr_SetString(PyExc_SystemError, (&_e)->msg);
@@ -10943,7 +11648,11 @@ SWIGINTERN PyObject *_wrap_CryptMsg_verify(PyObject *self, PyObject *args) {
   arg2 = PyInt_AsUnsignedLongMask(obj1);
 #endif
   try {
-    result = (bool)(arg1)->verify(arg2);
+    {
+      SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+      result = (bool)(arg1)->verify(arg2);
+      SWIG_PYTHON_THREAD_END_ALLOW;
+    }
   }
   catch(CSPException &_e) {
     PyErr_SetString(PyExc_SystemError, (&_e)->msg);
@@ -10977,7 +11686,11 @@ SWIGINTERN PyObject *_wrap_CERT_INFO_dwVersion_set(PyObject *self, PyObject *arg
 #else
   arg2 = PyInt_AsUnsignedLongMask(obj1);
 #endif
-  if (arg1) (arg1)->dwVersion = arg2;
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    if (arg1) (arg1)->dwVersion = arg2;
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
   resultobj = SWIG_Py_Void();
   return resultobj;
 fail:
@@ -10998,7 +11711,11 @@ SWIGINTERN PyObject *_wrap_CERT_INFO_dwVersion_get(PyObject *self, PyObject *arg
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "CERT_INFO_dwVersion_get" "', argument " "1"" of type '" "_CERT_INFO *""'"); 
   }
   arg1 = reinterpret_cast< _CERT_INFO * >(argp1);
-  result = (DWORD) ((arg1)->dwVersion);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (DWORD) ((arg1)->dwVersion);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
   resultobj = SWIG_From_unsigned_SS_int(static_cast< unsigned int >(result));
   return resultobj;
 fail:
@@ -11035,7 +11752,11 @@ SWIGINTERN PyObject *_wrap_CERT_INFO_SerialNumber_set(PyObject *self, PyObject *
       if (SWIG_IsNewObj(res2)) delete temp;
     }
   }
-  if (arg1) (arg1)->SerialNumber = arg2;
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    if (arg1) (arg1)->SerialNumber = arg2;
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
   resultobj = SWIG_Py_Void();
   return resultobj;
 fail:
@@ -11056,7 +11777,11 @@ SWIGINTERN PyObject *_wrap_CERT_INFO_SerialNumber_get(PyObject *self, PyObject *
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "CERT_INFO_SerialNumber_get" "', argument " "1"" of type '" "_CERT_INFO *""'"); 
   }
   arg1 = reinterpret_cast< _CERT_INFO * >(argp1);
-  result =  ((arg1)->SerialNumber);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result =  ((arg1)->SerialNumber);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
   resultobj = SWIG_NewPointerObj((new CRYPT_INTEGER_BLOB(static_cast< const CRYPT_INTEGER_BLOB& >(result))), SWIGTYPE_p_CRYPT_INTEGER_BLOB, SWIG_POINTER_OWN |  0 );
   return resultobj;
 fail:
@@ -11085,7 +11810,11 @@ SWIGINTERN PyObject *_wrap_CERT_INFO_SignatureAlgorithm_set(PyObject *self, PyOb
     SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "CERT_INFO_SignatureAlgorithm_set" "', argument " "2"" of type '" "CRYPT_ALGORITHM_IDENTIFIER *""'"); 
   }
   arg2 = reinterpret_cast< CRYPT_ALGORITHM_IDENTIFIER * >(argp2);
-  if (arg1) (arg1)->SignatureAlgorithm = *arg2;
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    if (arg1) (arg1)->SignatureAlgorithm = *arg2;
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
   resultobj = SWIG_Py_Void();
   return resultobj;
 fail:
@@ -11106,7 +11835,11 @@ SWIGINTERN PyObject *_wrap_CERT_INFO_SignatureAlgorithm_get(PyObject *self, PyOb
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "CERT_INFO_SignatureAlgorithm_get" "', argument " "1"" of type '" "_CERT_INFO *""'"); 
   }
   arg1 = reinterpret_cast< _CERT_INFO * >(argp1);
-  result = (CRYPT_ALGORITHM_IDENTIFIER *)& ((arg1)->SignatureAlgorithm);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (CRYPT_ALGORITHM_IDENTIFIER *)& ((arg1)->SignatureAlgorithm);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
   resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p__CRYPT_ALGORITHM_IDENTIFIER, 0 |  0 );
   return resultobj;
 fail:
@@ -11135,7 +11868,11 @@ SWIGINTERN PyObject *_wrap_CERT_INFO_Issuer_set(PyObject *self, PyObject *args) 
     SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "CERT_INFO_Issuer_set" "', argument " "2"" of type '" "CERT_NAME_BLOB *""'"); 
   }
   arg2 = reinterpret_cast< CERT_NAME_BLOB * >(argp2);
-  if (arg1) (arg1)->Issuer = *arg2;
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    if (arg1) (arg1)->Issuer = *arg2;
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
   resultobj = SWIG_Py_Void();
   return resultobj;
 fail:
@@ -11156,7 +11893,11 @@ SWIGINTERN PyObject *_wrap_CERT_INFO_Issuer_get(PyObject *self, PyObject *args) 
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "CERT_INFO_Issuer_get" "', argument " "1"" of type '" "_CERT_INFO *""'"); 
   }
   arg1 = reinterpret_cast< _CERT_INFO * >(argp1);
-  result = (CERT_NAME_BLOB *)& ((arg1)->Issuer);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (CERT_NAME_BLOB *)& ((arg1)->Issuer);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
   resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p__CRYPTOAPI_BLOB, 0 |  0 );
   return resultobj;
 fail:
@@ -11193,7 +11934,11 @@ SWIGINTERN PyObject *_wrap_CERT_INFO_NotBefore_set(PyObject *self, PyObject *arg
       if (SWIG_IsNewObj(res2)) delete temp;
     }
   }
-  if (arg1) (arg1)->NotBefore = arg2;
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    if (arg1) (arg1)->NotBefore = arg2;
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
   resultobj = SWIG_Py_Void();
   return resultobj;
 fail:
@@ -11214,7 +11959,11 @@ SWIGINTERN PyObject *_wrap_CERT_INFO_NotBefore_get(PyObject *self, PyObject *arg
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "CERT_INFO_NotBefore_get" "', argument " "1"" of type '" "_CERT_INFO *""'"); 
   }
   arg1 = reinterpret_cast< _CERT_INFO * >(argp1);
-  result =  ((arg1)->NotBefore);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result =  ((arg1)->NotBefore);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
   resultobj = SWIG_NewPointerObj((new FILETIME(static_cast< const FILETIME& >(result))), SWIGTYPE_p_FILETIME, SWIG_POINTER_OWN |  0 );
   return resultobj;
 fail:
@@ -11251,7 +12000,11 @@ SWIGINTERN PyObject *_wrap_CERT_INFO_NotAfter_set(PyObject *self, PyObject *args
       if (SWIG_IsNewObj(res2)) delete temp;
     }
   }
-  if (arg1) (arg1)->NotAfter = arg2;
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    if (arg1) (arg1)->NotAfter = arg2;
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
   resultobj = SWIG_Py_Void();
   return resultobj;
 fail:
@@ -11272,7 +12025,11 @@ SWIGINTERN PyObject *_wrap_CERT_INFO_NotAfter_get(PyObject *self, PyObject *args
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "CERT_INFO_NotAfter_get" "', argument " "1"" of type '" "_CERT_INFO *""'"); 
   }
   arg1 = reinterpret_cast< _CERT_INFO * >(argp1);
-  result =  ((arg1)->NotAfter);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result =  ((arg1)->NotAfter);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
   resultobj = SWIG_NewPointerObj((new FILETIME(static_cast< const FILETIME& >(result))), SWIGTYPE_p_FILETIME, SWIG_POINTER_OWN |  0 );
   return resultobj;
 fail:
@@ -11301,7 +12058,11 @@ SWIGINTERN PyObject *_wrap_CERT_INFO_Subject_set(PyObject *self, PyObject *args)
     SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "CERT_INFO_Subject_set" "', argument " "2"" of type '" "CERT_NAME_BLOB *""'"); 
   }
   arg2 = reinterpret_cast< CERT_NAME_BLOB * >(argp2);
-  if (arg1) (arg1)->Subject = *arg2;
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    if (arg1) (arg1)->Subject = *arg2;
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
   resultobj = SWIG_Py_Void();
   return resultobj;
 fail:
@@ -11322,7 +12083,11 @@ SWIGINTERN PyObject *_wrap_CERT_INFO_Subject_get(PyObject *self, PyObject *args)
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "CERT_INFO_Subject_get" "', argument " "1"" of type '" "_CERT_INFO *""'"); 
   }
   arg1 = reinterpret_cast< _CERT_INFO * >(argp1);
-  result = (CERT_NAME_BLOB *)& ((arg1)->Subject);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (CERT_NAME_BLOB *)& ((arg1)->Subject);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
   resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p__CRYPTOAPI_BLOB, 0 |  0 );
   return resultobj;
 fail:
@@ -11359,7 +12124,11 @@ SWIGINTERN PyObject *_wrap_CERT_INFO_SubjectPublicKeyInfo_set(PyObject *self, Py
       if (SWIG_IsNewObj(res2)) delete temp;
     }
   }
-  if (arg1) (arg1)->SubjectPublicKeyInfo = arg2;
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    if (arg1) (arg1)->SubjectPublicKeyInfo = arg2;
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
   resultobj = SWIG_Py_Void();
   return resultobj;
 fail:
@@ -11380,7 +12149,11 @@ SWIGINTERN PyObject *_wrap_CERT_INFO_SubjectPublicKeyInfo_get(PyObject *self, Py
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "CERT_INFO_SubjectPublicKeyInfo_get" "', argument " "1"" of type '" "_CERT_INFO *""'"); 
   }
   arg1 = reinterpret_cast< _CERT_INFO * >(argp1);
-  result =  ((arg1)->SubjectPublicKeyInfo);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result =  ((arg1)->SubjectPublicKeyInfo);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
   resultobj = SWIG_NewPointerObj((new CERT_PUBLIC_KEY_INFO(static_cast< const CERT_PUBLIC_KEY_INFO& >(result))), SWIGTYPE_p_CERT_PUBLIC_KEY_INFO, SWIG_POINTER_OWN |  0 );
   return resultobj;
 fail:
@@ -11409,7 +12182,11 @@ SWIGINTERN PyObject *_wrap_CERT_INFO_IssuerUniqueId_set(PyObject *self, PyObject
     SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "CERT_INFO_IssuerUniqueId_set" "', argument " "2"" of type '" "CRYPT_BIT_BLOB *""'"); 
   }
   arg2 = reinterpret_cast< CRYPT_BIT_BLOB * >(argp2);
-  if (arg1) (arg1)->IssuerUniqueId = *arg2;
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    if (arg1) (arg1)->IssuerUniqueId = *arg2;
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
   resultobj = SWIG_Py_Void();
   return resultobj;
 fail:
@@ -11430,7 +12207,11 @@ SWIGINTERN PyObject *_wrap_CERT_INFO_IssuerUniqueId_get(PyObject *self, PyObject
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "CERT_INFO_IssuerUniqueId_get" "', argument " "1"" of type '" "_CERT_INFO *""'"); 
   }
   arg1 = reinterpret_cast< _CERT_INFO * >(argp1);
-  result = (CRYPT_BIT_BLOB *)& ((arg1)->IssuerUniqueId);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (CRYPT_BIT_BLOB *)& ((arg1)->IssuerUniqueId);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
   resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p__CRYPT_BIT_BLOB, 0 |  0 );
   return resultobj;
 fail:
@@ -11459,7 +12240,11 @@ SWIGINTERN PyObject *_wrap_CERT_INFO_SubjectUniqueId_set(PyObject *self, PyObjec
     SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "CERT_INFO_SubjectUniqueId_set" "', argument " "2"" of type '" "CRYPT_BIT_BLOB *""'"); 
   }
   arg2 = reinterpret_cast< CRYPT_BIT_BLOB * >(argp2);
-  if (arg1) (arg1)->SubjectUniqueId = *arg2;
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    if (arg1) (arg1)->SubjectUniqueId = *arg2;
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
   resultobj = SWIG_Py_Void();
   return resultobj;
 fail:
@@ -11480,7 +12265,11 @@ SWIGINTERN PyObject *_wrap_CERT_INFO_SubjectUniqueId_get(PyObject *self, PyObjec
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "CERT_INFO_SubjectUniqueId_get" "', argument " "1"" of type '" "_CERT_INFO *""'"); 
   }
   arg1 = reinterpret_cast< _CERT_INFO * >(argp1);
-  result = (CRYPT_BIT_BLOB *)& ((arg1)->SubjectUniqueId);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (CRYPT_BIT_BLOB *)& ((arg1)->SubjectUniqueId);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
   resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p__CRYPT_BIT_BLOB, 0 |  0 );
   return resultobj;
 fail:
@@ -11507,7 +12296,11 @@ SWIGINTERN PyObject *_wrap_CERT_INFO_cExtension_set(PyObject *self, PyObject *ar
 #else
   arg2 = PyInt_AsUnsignedLongMask(obj1);
 #endif
-  if (arg1) (arg1)->cExtension = arg2;
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    if (arg1) (arg1)->cExtension = arg2;
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
   resultobj = SWIG_Py_Void();
   return resultobj;
 fail:
@@ -11528,7 +12321,11 @@ SWIGINTERN PyObject *_wrap_CERT_INFO_cExtension_get(PyObject *self, PyObject *ar
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "CERT_INFO_cExtension_get" "', argument " "1"" of type '" "_CERT_INFO *""'"); 
   }
   arg1 = reinterpret_cast< _CERT_INFO * >(argp1);
-  result = (DWORD) ((arg1)->cExtension);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (DWORD) ((arg1)->cExtension);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
   resultobj = SWIG_From_unsigned_SS_int(static_cast< unsigned int >(result));
   return resultobj;
 fail:
@@ -11565,7 +12362,11 @@ SWIGINTERN PyObject *_wrap_CERT_INFO_rgExtension_set(PyObject *self, PyObject *a
       if (SWIG_IsNewObj(res2)) delete temp;
     }
   }
-  if (arg1) (arg1)->rgExtension = arg2;
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    if (arg1) (arg1)->rgExtension = arg2;
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
   resultobj = SWIG_Py_Void();
   return resultobj;
 fail:
@@ -11586,7 +12387,11 @@ SWIGINTERN PyObject *_wrap_CERT_INFO_rgExtension_get(PyObject *self, PyObject *a
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "CERT_INFO_rgExtension_get" "', argument " "1"" of type '" "_CERT_INFO *""'"); 
   }
   arg1 = reinterpret_cast< _CERT_INFO * >(argp1);
-  result =  ((arg1)->rgExtension);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result =  ((arg1)->rgExtension);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
   resultobj = SWIG_NewPointerObj((new PCERT_EXTENSION(static_cast< const PCERT_EXTENSION& >(result))), SWIGTYPE_p_PCERT_EXTENSION, SWIG_POINTER_OWN |  0 );
   return resultobj;
 fail:
@@ -11606,7 +12411,11 @@ SWIGINTERN PyObject *_wrap_delete_CERT_INFO(PyObject *self, PyObject *args) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "delete_CERT_INFO" "', argument " "1"" of type '" "_CERT_INFO *""'"); 
   }
   arg1 = reinterpret_cast< _CERT_INFO * >(argp1);
-  delete__CERT_INFO(arg1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    delete__CERT_INFO(arg1);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
   resultobj = SWIG_Py_Void();
   return resultobj;
 fail:
@@ -11619,7 +12428,11 @@ SWIGINTERN int _wrap_new_CERT_INFO(PyObject *self, PyObject *args) {
   _CERT_INFO *result = 0 ;
   
   if (args && PyTuple_Check(args) && PyTuple_GET_SIZE(args) > 0) SWIG_exception_fail(SWIG_TypeError, "new_CERT_INFO takes no arguments");
-  result = (_CERT_INFO *)new _CERT_INFO();
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (_CERT_INFO *)new _CERT_INFO();
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
   resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p__CERT_INFO, SWIG_BUILTIN_INIT |  0 );
   return resultobj == Py_None ? -1 : 0;
 fail:
@@ -11651,7 +12464,11 @@ SWIGINTERN int _wrap_new_CertExtension(PyObject *self, PyObject *args) {
   }
   arg2 = reinterpret_cast< CertInfo * >(argp2);
   try {
-    result = (CertExtension *)new CertExtension(arg1,arg2);
+    {
+      SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+      result = (CertExtension *)new CertExtension(arg1,arg2);
+      SWIG_PYTHON_THREAD_END_ALLOW;
+    }
   }
   catch(CSPException &_e) {
     PyErr_SetString(PyExc_SystemError, (&_e)->msg);
@@ -11678,7 +12495,11 @@ SWIGINTERN PyObject *_wrap_delete_CertExtension(PyObject *self, PyObject *args) 
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "delete_CertExtension" "', argument " "1"" of type '" "CertExtension *""'"); 
   }
   arg1 = reinterpret_cast< CertExtension * >(argp1);
-  delete arg1;
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    delete arg1;
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
   resultobj = SWIG_Py_Void();
   return resultobj;
 fail:
@@ -11705,7 +12526,11 @@ SWIGINTERN PyObject *_wrap_CertExtension_oid(PyObject *self, PyObject *args) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "CertExtension_oid" "', argument " "1"" of type '" "CertExtension *""'"); 
   }
   arg1 = reinterpret_cast< CertExtension * >(argp1);
-  (arg1)->oid(arg2,arg3);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    (arg1)->oid(arg2,arg3);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
   resultobj = SWIG_Py_Void();
   if (*arg2) {
     if (*arg3 > INT_MAX) {
@@ -11745,7 +12570,11 @@ SWIGINTERN int _wrap_new_Signature__SWIG_0(PyObject *self, PyObject *args) {
   }
   arg1 = reinterpret_cast< Crypt * >(argp1);
   try {
-    result = (Signature *)new Signature(arg1);
+    {
+      SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+      result = (Signature *)new Signature(arg1);
+      SWIG_PYTHON_THREAD_END_ALLOW;
+    }
   }
   catch(CSPException &_e) {
     PyErr_SetString(PyExc_SystemError, (&_e)->msg);
@@ -11767,7 +12596,11 @@ SWIGINTERN int _wrap_new_Signature__SWIG_1(PyObject *self, PyObject *args) {
   
   if (args && PyTuple_Check(args) && PyTuple_GET_SIZE(args) > 0) SWIG_exception_fail(SWIG_TypeError, "new_Signature takes no arguments");
   try {
-    result = (Signature *)new Signature();
+    {
+      SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+      result = (Signature *)new Signature();
+      SWIG_PYTHON_THREAD_END_ALLOW;
+    }
   }
   catch(CSPException &_e) {
     PyErr_SetString(PyExc_SystemError, (&_e)->msg);
@@ -11829,7 +12662,11 @@ SWIGINTERN int _wrap_new_Signature__SWIG_2(PyObject *self, PyObject *args) {
   }
   arg3 = reinterpret_cast< Crypt * >(argp3);
   try {
-    result = (Signature *)new Signature(arg1,arg2,arg3);
+    {
+      SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+      result = (Signature *)new Signature(arg1,arg2,arg3);
+      SWIG_PYTHON_THREAD_END_ALLOW;
+    }
   }
   catch(CSPException &_e) {
     PyErr_SetString(PyExc_SystemError, (&_e)->msg);
@@ -11882,7 +12719,11 @@ SWIGINTERN int _wrap_new_Signature__SWIG_3(PyObject *self, PyObject *args) {
     arg2 = (DWORD) len1;
   }
   try {
-    result = (Signature *)new Signature(arg1,arg2);
+    {
+      SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+      result = (Signature *)new Signature(arg1,arg2);
+      SWIG_PYTHON_THREAD_END_ALLOW;
+    }
   }
   catch(CSPException &_e) {
     PyErr_SetString(PyExc_SystemError, (&_e)->msg);
@@ -12022,7 +12863,11 @@ SWIGINTERN PyObject *_wrap_Signature_verify_data(PyObject *self, PyObject *args)
   } 
   arg4 = static_cast< int >(val4);
   try {
-    result = (bool)(arg1)->verify_data(arg2,arg3,arg4);
+    {
+      SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+      result = (bool)(arg1)->verify_data(arg2,arg3,arg4);
+      SWIG_PYTHON_THREAD_END_ALLOW;
+    }
   }
   catch(CSPException &_e) {
     PyErr_SetString(PyExc_SystemError, (&_e)->msg);
@@ -12106,7 +12951,11 @@ SWIGINTERN PyObject *_wrap_Signature_sign_data__SWIG_0(PyObject *self, PyObject 
   } 
   arg7 = static_cast< bool >(val7);
   try {
-    (arg1)->sign_data(arg2,arg3,arg4,arg5,arg6,arg7);
+    {
+      SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+      (arg1)->sign_data(arg2,arg3,arg4,arg5,arg6,arg7);
+      SWIG_PYTHON_THREAD_END_ALLOW;
+    }
   }
   catch(CSPException &_e) {
     PyErr_SetString(PyExc_SystemError, (&_e)->msg);
@@ -12198,7 +13047,11 @@ SWIGINTERN PyObject *_wrap_Signature_sign_data__SWIG_1(PyObject *self, PyObject 
   }
   arg6 = reinterpret_cast< Cert * >(argp6);
   try {
-    (arg1)->sign_data(arg2,arg3,arg4,arg5,arg6);
+    {
+      SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+      (arg1)->sign_data(arg2,arg3,arg4,arg5,arg6);
+      SWIG_PYTHON_THREAD_END_ALLOW;
+    }
   }
   catch(CSPException &_e) {
     PyErr_SetString(PyExc_SystemError, (&_e)->msg);
@@ -12318,7 +13171,11 @@ SWIGINTERN PyObject *_wrap_delete_Signature(PyObject *self, PyObject *args) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "delete_Signature" "', argument " "1"" of type '" "Signature *""'"); 
   }
   arg1 = reinterpret_cast< Signature * >(argp1);
-  arg1->unref();
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    arg1->unref();
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
   resultobj = SWIG_Py_Void();
   return resultobj;
 fail:
@@ -12341,7 +13198,11 @@ SWIGINTERN int _wrap_new_CertRequest(PyObject *self, PyObject *args) {
   }
   arg1 = reinterpret_cast< Crypt * >(argp1);
   try {
-    result = (CertRequest *)new CertRequest(arg1);
+    {
+      SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+      result = (CertRequest *)new CertRequest(arg1);
+      SWIG_PYTHON_THREAD_END_ALLOW;
+    }
   }
   catch(CSPException &_e) {
     PyErr_SetString(PyExc_SystemError, (&_e)->msg);
@@ -12400,7 +13261,11 @@ SWIGINTERN PyObject *_wrap_CertRequest_set_subject(PyObject *self, PyObject *arg
     arg3 = (DWORD) len2;
   }
   try {
-    (arg1)->set_subject(arg2,arg3);
+    {
+      SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+      (arg1)->set_subject(arg2,arg3);
+      SWIG_PYTHON_THREAD_END_ALLOW;
+    }
   }
   catch(CSPException &_e) {
     PyErr_SetString(PyExc_SystemError, (&_e)->msg);
@@ -12435,7 +13300,11 @@ SWIGINTERN PyObject *_wrap_CertRequest_get_data(PyObject *self, PyObject *args) 
   }
   arg1 = reinterpret_cast< CertRequest * >(argp1);
   try {
-    (arg1)->get_data(arg2,arg3);
+    {
+      SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+      (arg1)->get_data(arg2,arg3);
+      SWIG_PYTHON_THREAD_END_ALLOW;
+    }
   }
   catch(CSPException &_e) {
     PyErr_SetString(PyExc_SystemError, (&_e)->msg);
@@ -12479,7 +13348,11 @@ SWIGINTERN PyObject *_wrap_delete_CertRequest(PyObject *self, PyObject *args) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "delete_CertRequest" "', argument " "1"" of type '" "CertRequest *""'"); 
   }
   arg1 = reinterpret_cast< CertRequest * >(argp1);
-  delete arg1;
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    delete arg1;
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
   resultobj = SWIG_Py_Void();
   return resultobj;
 fail:
@@ -12532,7 +13405,11 @@ SWIGINTERN PyObject *_wrap_CertRequest_add_attribute(PyObject *self, PyObject *a
     arg3 = (DWORD) len2;
   }
   try {
-    result = (int)(arg1)->add_attribute(arg2,arg3);
+    {
+      SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+      result = (int)(arg1)->add_attribute(arg2,arg3);
+      SWIG_PYTHON_THREAD_END_ALLOW;
+    }
   }
   catch(CSPException &_e) {
     PyErr_SetString(PyExc_SystemError, (&_e)->msg);
@@ -12600,7 +13477,11 @@ SWIGINTERN PyObject *_wrap_CertRequest_add_attribute_value(PyObject *self, PyObj
     arg4 = (DWORD) len3;
   }
   try {
-    (arg1)->add_attribute_value(arg2,arg3,arg4);
+    {
+      SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+      (arg1)->add_attribute_value(arg2,arg3,arg4);
+      SWIG_PYTHON_THREAD_END_ALLOW;
+    }
   }
   catch(CSPException &_e) {
     PyErr_SetString(PyExc_SystemError, (&_e)->msg);
@@ -12670,7 +13551,11 @@ SWIGINTERN int _wrap_new_Hash__SWIG_0(PyObject *self, PyObject *args) {
   }
   arg4 = reinterpret_cast< Key * >(argp4);
   try {
-    result = (Hash *)new Hash(arg1,arg2,arg3,arg4);
+    {
+      SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+      result = (Hash *)new Hash(arg1,arg2,arg3,arg4);
+      SWIG_PYTHON_THREAD_END_ALLOW;
+    }
   }
   catch(CSPException &_e) {
     PyErr_SetString(PyExc_SystemError, (&_e)->msg);
@@ -12732,7 +13617,11 @@ SWIGINTERN int _wrap_new_Hash__SWIG_1(PyObject *self, PyObject *args) {
     arg3 = (DWORD) len2;
   }
   try {
-    result = (Hash *)new Hash(arg1,arg2,arg3);
+    {
+      SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+      result = (Hash *)new Hash(arg1,arg2,arg3);
+      SWIG_PYTHON_THREAD_END_ALLOW;
+    }
   }
   catch(CSPException &_e) {
     PyErr_SetString(PyExc_SystemError, (&_e)->msg);
@@ -12772,7 +13661,11 @@ SWIGINTERN int _wrap_new_Hash__SWIG_2(PyObject *self, PyObject *args) {
   }
   arg2 = reinterpret_cast< Key * >(argp2);
   try {
-    result = (Hash *)new Hash(arg1,arg2);
+    {
+      SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+      result = (Hash *)new Hash(arg1,arg2);
+      SWIG_PYTHON_THREAD_END_ALLOW;
+    }
   }
   catch(CSPException &_e) {
     PyErr_SetString(PyExc_SystemError, (&_e)->msg);
@@ -12803,7 +13696,11 @@ SWIGINTERN int _wrap_new_Hash__SWIG_3(PyObject *self, PyObject *args) {
   }
   arg1 = reinterpret_cast< Crypt * >(argp1);
   try {
-    result = (Hash *)new Hash(arg1);
+    {
+      SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+      result = (Hash *)new Hash(arg1);
+      SWIG_PYTHON_THREAD_END_ALLOW;
+    }
   }
   catch(CSPException &_e) {
     PyErr_SetString(PyExc_SystemError, (&_e)->msg);
@@ -12922,7 +13819,11 @@ SWIGINTERN PyObject *_wrap_delete_Hash(PyObject *self, PyObject *args) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "delete_Hash" "', argument " "1"" of type '" "Hash *""'"); 
   }
   arg1 = reinterpret_cast< Hash * >(argp1);
-  arg1->unref();
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    arg1->unref();
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
   resultobj = SWIG_Py_Void();
   return resultobj;
 fail:
@@ -12950,7 +13851,11 @@ SWIGINTERN PyObject *_wrap_Hash_digest(PyObject *self, PyObject *args) {
   }
   arg1 = reinterpret_cast< Hash * >(argp1);
   try {
-    (arg1)->digest(arg2,arg3);
+    {
+      SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+      (arg1)->digest(arg2,arg3);
+      SWIG_PYTHON_THREAD_END_ALLOW;
+    }
   }
   catch(CSPException &_e) {
     PyErr_SetString(PyExc_SystemError, (&_e)->msg);
@@ -13026,7 +13931,11 @@ SWIGINTERN PyObject *_wrap_Hash_update(PyObject *self, PyObject *args) {
     arg3 = (DWORD) len2;
   }
   try {
-    (arg1)->update(arg2,arg3);
+    {
+      SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+      (arg1)->update(arg2,arg3);
+      SWIG_PYTHON_THREAD_END_ALLOW;
+    }
   }
   catch(CSPException &_e) {
     PyErr_SetString(PyExc_SystemError, (&_e)->msg);
@@ -13068,7 +13977,11 @@ SWIGINTERN PyObject *_wrap_Hash_sign__SWIG_0(PyObject *self, PyObject *args) {
   arg4 = PyInt_AsUnsignedLongMask(obj1);
 #endif
   try {
-    (arg1)->sign(arg2,arg3,arg4);
+    {
+      SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+      (arg1)->sign(arg2,arg3,arg4);
+      SWIG_PYTHON_THREAD_END_ALLOW;
+    }
   }
   catch(CSPException &_e) {
     PyErr_SetString(PyExc_SystemError, (&_e)->msg);
@@ -13120,7 +14033,11 @@ SWIGINTERN PyObject *_wrap_Hash_sign__SWIG_1(PyObject *self, PyObject *args) {
   }
   arg1 = reinterpret_cast< Hash * >(argp1);
   try {
-    (arg1)->sign(arg2,arg3);
+    {
+      SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+      (arg1)->sign(arg2,arg3);
+      SWIG_PYTHON_THREAD_END_ALLOW;
+    }
   }
   catch(CSPException &_e) {
     PyErr_SetString(PyExc_SystemError, (&_e)->msg);
@@ -13258,7 +14175,11 @@ SWIGINTERN PyObject *_wrap_Hash_verify(PyObject *self, PyObject *args) {
     arg4 = (DWORD) len3;
   }
   try {
-    result = (bool)(arg1)->verify(arg2,arg3,arg4);
+    {
+      SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+      result = (bool)(arg1)->verify(arg2,arg3,arg4);
+      SWIG_PYTHON_THREAD_END_ALLOW;
+    }
   }
   catch(CSPException &_e) {
     PyErr_SetString(PyExc_SystemError, (&_e)->msg);
@@ -13287,7 +14208,11 @@ SWIGINTERN PyObject *_wrap_Hash_derive_key(PyObject *self, PyObject *args) {
   }
   arg1 = reinterpret_cast< Hash * >(argp1);
   try {
-    result = (Key *)(arg1)->derive_key();
+    {
+      SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+      result = (Key *)(arg1)->derive_key();
+      SWIG_PYTHON_THREAD_END_ALLOW;
+    }
   }
   catch(CSPException &_e) {
     PyErr_SetString(PyExc_SystemError, (&_e)->msg);
@@ -21598,6 +22523,9 @@ SWIG_init(void) {
   PyModule_AddObject(m, "Hash", (PyObject*) builtin_pytype);
   SwigPyBuiltin_AddPublicSymbol(public_interface, "Hash");
   d = md;
+  
+  /* Initialize threading */
+  SWIG_PYTHON_INITIALIZE_THREADS;
 #if PY_VERSION_HEX >= 0x03000000
   return m;
 #else
