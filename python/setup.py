@@ -68,7 +68,7 @@ class SWIGCommand(Command):
         """Generate wrappers"""
         for arch, size in [('ia32', 4), ('amd64', 8)]:
             swig_cmd = [
-                'swig',
+                'swig3.0',
                 '-python',
                 '-py3',
                 '-builtin',
