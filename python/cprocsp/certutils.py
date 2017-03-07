@@ -14,6 +14,14 @@ else:
     unicode = unicode
 
 
+def monkeyPatchStr(self):
+    binData = bytes(ord(x) for x in self)
+    return unicode(binData, 'utf-8', 'replace')
+
+
+char.UTF8String.__str__ = monkeyPatchStr  # XXX: fix double conversion to utf8 in pyasn1
+
+
 def autopem(cert):
     if cert[:3] == b'---':
         s = ''.join(l for l in cert.splitlines() if not l.startswith('----'))
@@ -196,9 +204,9 @@ class Attributes(object):
             for dn in rdn:
                 oid = unicode(dn[0])
                 a = decoder.decode(dn[1])[0]
-                if isinstance(a[0], char.UTF8String):
-                    # XXX evil hack!!!
-                    s = unicode(bytes(dn[1])[4:], 'utf-8')
+                if oid == '2.5.4.16':
+                    # XXX: hack for StreetAddress attribute
+                    s = ' '.join(unicode(a[i]) for i in range(len(a)))
                 else:
                     s = unicode(a)
                 item.append((oid, s))
