@@ -7,7 +7,6 @@ import sys
 import os
 from platform import architecture
 from base64 import b64encode
-import os
 from binascii import hexlify
 
 from . import test_container, test_cn, case_path, test_provider
@@ -671,8 +670,9 @@ def test_hash_digest_empty():
     )
     data = b''
     hash1 = csp.Hash(ctx, data)
-    digest_str = hash1.digest().encode("base64").rstrip()
-    assert digest_str == 'mB5fPKMMhBSHgw+E+0M+E6wRAVabnBNYSsSDI0zWVsA='
+    digest_str = hexlify(hash1.digest())
+    print(digest_str)
+    assert digest_str == b'981e5f3ca30c841487830f84fb433e13ac1101569b9c13584ac483234cd656c0'
 
 
 def test_hash_digest_string():
@@ -684,9 +684,9 @@ def test_hash_digest_string():
     )
     data = b'The quick brown fox jumps over the lazy dog'
     hash1 = csp.Hash(ctx, data)
-    digest_str = hexlify(hash1.digest()).upper()
+    digest_str = hexlify(hash1.digest())
     print(digest_str)
-    assert digest_str == '9004294A361A508C586FE53D1F1B02746765E71B765472786E4770D565830A76'
+    assert digest_str == b'9004294a361a508c586fe53d1f1b02746765e71b765472786e4770d565830a76'
 
 
 def test_sign_hash():
@@ -735,4 +735,4 @@ def test_hash_hmac():
     data = b'The quick brown fox jumps over the lazy dog'
     hash1 = csp.Hash(ctx, data, key)
     digest_str = hexlify(hash1.digest())
-    assert digest_str == '7b61bdd0c74c9eb391c640ccff001ff0ac533bcdff2e0f063e453c2eb8d7508d'
+    assert digest_str == b'7b61bdd0c74c9eb391c640ccff001ff0ac533bcdff2e0f063e453c2eb8d7508d'

@@ -66,7 +66,7 @@ def _mkcontext(cont, provider, flags=None):
 
     cont = _from_hex(cont)
 
-    if platform.system() == 'Linux' and provider != PROV_HSM and not cont.startswith('\\\\'):
+    if platform.system() == 'Linux' and provider != PROV_HSM and not cont.startswith(b'\\\\'):
         cont = b'\\\\.\\HDIMAGE\\' + cont
 
     if flags is None:
