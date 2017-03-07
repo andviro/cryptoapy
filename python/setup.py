@@ -28,9 +28,12 @@ class TestCommand(Command):
 
     """Custom distutils command to run the test suite."""
 
-    user_options = []
+    user_options = [
+        ('nose-args=', None, 'nosetests command-line arguments')
+    ]
 
     def initialize_options(self):
+        self.nose_args = None
         self._dir = os.getcwd()
 
     def finalize_options(self):
@@ -41,7 +44,12 @@ class TestCommand(Command):
         if not nose:
             print('W: nose package not found')
             return True
-        return nose.core.run(argv=["", '-v', os.path.join(self._dir, 'tests')])
+        argv = ["", '-v']
+        if self.nose_args is not None:
+            argv.extend(self.nose_args.split())
+        else:
+            argv.append(os.path.join(self._dir, 'tests'))
+        return nose.core.run(argv=argv)
 
 
 class SWIGCommand(Command):
@@ -60,7 +68,7 @@ class SWIGCommand(Command):
         """Generate wrappers"""
         for arch, size in [('ia32', 4), ('amd64', 8)]:
             swig_cmd = [
-                'swig',
+                'swig3.0',
                 '-python',
                 '-py3',
                 '-builtin',
@@ -121,7 +129,7 @@ csp = Extension('cprocsp._csp',
 
 setup(
     name='cryptoapy',
-    version='0.4.50',
+    version='0.4.52',
     author='Andrew Rodionoff',
     author_email='andviro@gmail.com',
     license='LGPL',
