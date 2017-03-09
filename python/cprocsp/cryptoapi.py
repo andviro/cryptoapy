@@ -208,7 +208,7 @@ def create_request(cont, params, local=True, provider=None, insert_zeroes=False)
     return req.get_data()
 
 
-def bind_cert_to_key(cont, cert, local=True, provider=None):
+def bind_cert_to_key(cont, cert, local=True, provider=None, store=False):
     """Привязка сертификата к закрытому ключу в контейнере
 
     :cont: Имя контейнера
@@ -216,6 +216,7 @@ def bind_cert_to_key(cont, cert, local=True, provider=None):
     :local: Если True, работа идет с локальным хранилищем
     :provider: Если не None, флаг local игнорируется и криптопровайдер
         выбирается принудительно
+    :store: Сертификат сохраняется в локальном хранилище, а в контейнере провайдера (по умолчанию -- False)
     :returns: отпечаток сертификата в виде строки
 
     """
@@ -225,8 +226,12 @@ def bind_cert_to_key(cont, cert, local=True, provider=None):
     cert = autopem(cert)
     newc = csp.Cert(cert)
     newc.bind(ctx)
-    cs = csp.CertStore(ctx, b"MY")
-    cs.add_cert(newc)
+    if store:
+        key = ctx.get_key()
+        key.store_cert(newc)
+    else:
+        cs = csp.CertStore(ctx, b"MY")
+        cs.add_cert(newc)
     return hexlify(newc.thumbprint())
 
 
