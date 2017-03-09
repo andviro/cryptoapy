@@ -142,9 +142,9 @@ def test_get_certificate():
 
 def test_get_certificate_cont_provider():
     cert_by_thumb = cryptoapi.get_certificate(
-        get_test_thumb(), cont=test_container, provider=cryptoapi.PROV_KC1_GR3410_2001)
+        get_test_thumb(), cont=test_container, provider=test_provider)
     cert_by_name = cryptoapi.get_certificate(
-        name=test_cn, cont=test_container, provider=cryptoapi.PROV_KC1_GR3410_2001)
+        name=test_cn, cont=test_container, provider=test_provider)
     assert cert_by_thumb == cert_by_name
 
 
