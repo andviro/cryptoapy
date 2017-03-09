@@ -268,17 +268,23 @@ def sign(thumb, data, include_data, cont=None, provider=None):
     :thumb: отпечаток сертификата, которым будем подписывать
     :data: бинарные данные, байтовая строка
     :include_data: булев флаг, если True -- данные прицепляются вместе с подписью
-    :cont: контейнер для поиска сертификата (по умолчанию -- системный)
+    :cont: контейнер для поиска сертификата (если указан -- thumb игнорируется)
     :provider: провайдер для поиска сертификата (по умолчанию дефолтный для контейнера)
     :returns: данные и/или подпись в виде байтовой строки
 
     """
-    ctx = _mkcontext(cont, provider)
-    cs = csp.CertStore(ctx, b"MY")
-    store_lst = list(cs.find_by_thumb(unhexlify(thumb)))
-    assert len(store_lst), 'Unable to find signing cert in system store'
-    signcert = store_lst[0]
     mess = csp.CryptMsg()
+    if cont is None:
+        ctx = _mkcontext(cont, provider)
+        cs = csp.CertStore(ctx, b"MY")
+        store_lst = list(cs.find_by_thumb(unhexlify(thumb)))
+        assert len(store_lst), 'Unable to find signing cert in system store'
+        signcert = store_lst[0]
+    else:
+        ctx = _mkcontext(cont, provider, csp.CRYPT_SILENT)
+        key = ctx.get_key()
+        signcert = csp.Cert(key.extract_cert())
+        signcert.bind(ctx)
     sign_data = mess.sign_data(data, signcert, not(include_data))
     return sign_data
 
