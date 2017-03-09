@@ -226,28 +226,31 @@ def bind_cert_to_key(cont, cert, local=True, provider=None, store=False):
     cert = autopem(cert)
     newc = csp.Cert(cert)
     newc.bind(ctx)
+    cs = csp.CertStore(ctx, b"MY")
+    cs.add_cert(newc)
     if store:
         key = ctx.get_key()
         key.store_cert(newc)
-    else:
-        cs = csp.CertStore(ctx, b"MY")
-        cs.add_cert(newc)
     return hexlify(newc.thumbprint())
 
 
 def get_certificate(thumb=None, name=None, cont=None, provider=None):
-    """Поиск сертификатов по отпечатку
+    """Поиск сертификатов по отпечатку или имени
 
     :thumb: отпечаток, возвращенный функцией `bind_cert_to_key`
     :name: имя субъекта для поиска (передается вместо параметра :thumb:)
-    :cont: контейнер для поиска сертификата (по умолчанию -- системный)
+    :cont: контейнер для поиска сертификата (если указан, thumb и name игнорируются)
     :provider: провайдер для поиска сертификата (по умолчанию дефолтный для контейнера)
     :returns: сертификат в байтовой строке
 
     """
+    ctx = _mkcontext(cont, provider, 0)
+    if cont is not None:
+        key = ctx.get_key()
+        return key.extract_cert()
+
     assert thumb or name and not (
         thumb and name), 'Only one thumb or name allowed'
-    ctx = _mkcontext(cont, provider)
     cs = csp.CertStore(ctx, b"MY")
     if thumb is not None:
         res = list(cs.find_by_thumb(unhexlify(thumb)))
