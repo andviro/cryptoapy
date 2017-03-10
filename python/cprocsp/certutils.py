@@ -7,19 +7,22 @@ from . import decoder
 from pyasn1_modules import rfc2459, rfc2315
 from base64 import b64decode
 import sys
-if sys.version_info >= (3,):
-    unicode = str
-    long = int
-else:
-    unicode = unicode
 
 
 def monkeyPatchStr(self):
-    binData = bytes(ord(x) for x in self)
+    # XXX: unicode handling in pyasn1 is broken as of now
+    binData = bytes(bytearray(ord(x) for x in self))
     return unicode(binData, 'utf-8', 'replace')
 
 
-char.UTF8String.__str__ = monkeyPatchStr  # XXX: fix double conversion to utf8 in pyasn1
+if sys.version_info >= (3,):
+    unicode = str
+    long = int
+    setattr(char.UTF8String, '__str__', monkeyPatchStr)
+
+else:
+    unicode = unicode
+    setattr(char.UTF8String, '__unicode__', monkeyPatchStr)
 
 
 def autopem(cert):
@@ -206,7 +209,7 @@ class Attributes(object):
                 a = decoder.decode(dn[1])[0]
                 if oid == '2.5.4.16':
                     # XXX: hack for StreetAddress attribute
-                    s = ' '.join(unicode(a[i]) for i in range(len(a)))
+                    s = ''.join(unicode(a[i]) for i in range(len(a)))
                 else:
                     s = unicode(a)
                 item.append((oid, s))

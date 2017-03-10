@@ -23,8 +23,8 @@ def test_address_oid():
     info = cryptoapi.cert_info(cert)
     assert 'Subject' in info
     subj = dict(info['Subject'])
-    print(subj['2.5.4.16'])
-    assert subj['2.5.4.16'] == '107139, Орликов переулок, дом 3А'
+    print(repr(subj['2.5.4.16']), type(subj['2.5.4.16']))
+    assert subj['2.5.4.16'] == u'107139, Орликов переулок, дом 3А'
 
 
 def test_encode_attributes():
