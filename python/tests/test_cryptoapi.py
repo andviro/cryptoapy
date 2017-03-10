@@ -289,16 +289,19 @@ def test_hash_sign_verify():
 
 def test_hash_sign_verify_cont_provider():
     data = os.urandom(1024)
-    thumb = get_test_thumb()
+    bad_data = os.urandom(1024)
 
-    h = cryptoapi.SignedHash(thumb, data, cont=test_container,
+    h = cryptoapi.SignedHash(None, data, cont=test_container,
                              provider=test_provider)
     sig = h.sign()
 
-    cert = cryptoapi.get_certificate(thumb, cont=test_container,
+    cert = cryptoapi.get_certificate(None, cont=test_container,
                                      provider=test_provider)
+    assert cert
     good = cryptoapi.Hash(data)
     assert good.verify(cert, sig)
+    bad = cryptoapi.Hash(bad_data)
+    assert not bad.verify(cert, sig)
 
 
 def test_hmac():
