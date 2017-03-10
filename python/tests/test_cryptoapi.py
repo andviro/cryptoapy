@@ -165,14 +165,14 @@ def test_signing():
 def test_signing_cont_provider():
     thumb = get_test_thumb()
     cert = cryptoapi.get_certificate(thumb, cont=test_container,
-                                     provider=cryptoapi.PROV_KC1_GR3410_2001)
+                                     provider=test_provider)
 
     signed_data = cryptoapi.sign(thumb, msg, True, cont=test_container,
-                                 provider=cryptoapi.PROV_KC1_GR3410_2001)
+                                 provider=test_provider)
     assert signed_data
 
     signed_and_encrypted = cryptoapi.sign_and_encrypt(
-        thumb, [cert], msg, cont=test_container, provider=cryptoapi.PROV_KC1_GR3410_2001)
+        thumb, [cert], msg, cont=test_container, provider=test_provider)
     assert signed_and_encrypted
     return signed_data
 
@@ -198,9 +198,9 @@ def _test_verifying():
 def test_check_signature():
     sig = _test_verifying()
     assert cryptoapi.check_signature(
-        None, sig, msg, cont=test_container, provider=cryptoapi.PROV_KC1_GR3410_2001)
+        None, sig, msg, cont=test_container, provider=test_provider)
     assert not cryptoapi.check_signature(
-        None, sig, msg[:-1], cont=test_container, provider=cryptoapi.PROV_KC1_GR3410_2001)
+        None, sig, msg[:-1], cont=test_container, provider=test_provider)
 
 
 def test_encrypt_decrypt():
@@ -231,13 +231,13 @@ def test_encrypt_decrypt():
 def test_encrypt_decrypt_cont_provider():
     thumb = get_test_thumb()
     cert = cryptoapi.get_certificate(thumb, cont=test_container,
-                                     provider=cryptoapi.PROV_KC1_GR3410_2001)
+                                     provider=test_provider)
     certs = [cert]
     encrypted_data = cryptoapi.encrypt(certs, msg)
     assert encrypted_data
 
     decrypted_data = cryptoapi.decrypt(
-        encrypted_data, thumb, cont=test_container, provider=cryptoapi.PROV_KC1_GR3410_2001)
+        encrypted_data, thumb, cont=test_container, provider=test_provider)
     assert msg == decrypted_data
 
 
@@ -293,11 +293,11 @@ def test_hash_sign_verify_cont_provider():
     thumb = get_test_thumb()
 
     h = cryptoapi.SignedHash(thumb, data, cont=test_container,
-                             provider=cryptoapi.PROV_KC1_GR3410_2001)
+                             provider=test_provider)
     sig = h.sign()
 
     cert = cryptoapi.get_certificate(thumb, cont=test_container,
-                                     provider=cryptoapi.PROV_KC1_GR3410_2001)
+                                     provider=test_provider)
     good = cryptoapi.Hash(data)
     assert good.verify(cert, sig)
 
