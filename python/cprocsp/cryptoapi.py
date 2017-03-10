@@ -329,25 +329,27 @@ def check_signature(cert, sig, data, cont=None, provider=None):
     :cert: сертификат в байтовой строке или `None`
     :data: бинарные данные в байтовой строке
     :sig: данные подписи в байтовой строке
-    :cont: контейнер для поиска сертификата (по умолчанию -- системный)
+    :cont: контейнер для поиска сертификата
     :provider: провайдер для поиска сертификата (по умолчанию дефолтный для контейнера)
     :returns: True или False
 
-    Если :cert: передан как None, осуществляется проверка всех подписантов в
-    подписи, с использованием сертификатов, которые содержатся в самой подписи.
-    Иначе проверяется только подписант, соответствующий переданному сертификату.
+    Если и :cert: и :cont: переданы как None, подпись считается верной, если хотя бы один
+    из сертификатов в ней есть в системном хранилище и проходит проверку.
 
     """
     sign = csp.Signature(sig)
-
-    if cert is not None:
-        cert = autopem(cert)
-        cert = csp.Cert(cert)
+    if cert or cont:
+        if cert:
+            cert = autopem(cert)
+        else:
+            ctx = _mkcontext(cont, provider, 0)
+            key = ctx.get_key()
+            cert = key.extract_cert()
         cs = csp.CertStore()
+        cert = csp.Cert(cert)
         cs.add_cert(cert)
     else:
-        ctx = _mkcontext(cont, provider)
-        cs = csp.CertStore(ctx, b"MY")
+        cs = csp.CertStore(None, b"MY")
 
     for i in range(sign.num_signers()):
         isign = csp.CertInfo(sign, i)
