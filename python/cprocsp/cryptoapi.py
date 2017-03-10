@@ -302,15 +302,21 @@ def sign_and_encrypt(thumb, certs, data, cont=None, provider=None):
 
     """
     certs = [autopem(c) for c in certs]
-    ctx = _mkcontext(cont, provider)
-    cs = csp.CertStore(ctx, b"MY")
-    store_lst = list(cs.find_by_thumb(unhexlify(thumb)))
-    assert len(store_lst), 'Unable to find signing cert in system store'
-    signcert = store_lst[0]
     mess = csp.CryptMsg()
     for c in certs:
         cert = csp.Cert(c)
         mess.add_recipient(cert)
+    if cont is None:
+        ctx = _mkcontext(cont, provider)
+        cs = csp.CertStore(ctx, b"MY")
+        store_lst = list(cs.find_by_thumb(unhexlify(thumb)))
+        assert len(store_lst), 'Unable to find signing cert in system store'
+        signcert = store_lst[0]
+    else:
+        ctx = _mkcontext(cont, provider, csp.CRYPT_SILENT)
+        key = ctx.get_key()
+        signcert = csp.Cert(key.extract_cert())
+        signcert.bind(ctx)
     sign_data = mess.sign_data(data, signcert)
     encrypted = mess.encrypt_data(sign_data)
     return encrypted
