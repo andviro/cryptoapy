@@ -23,8 +23,8 @@ def test_address_oid():
     info = cryptoapi.cert_info(cert)
     assert 'Subject' in info
     subj = dict(info['Subject'])
-    print(subj['2.5.4.16'])
-    assert subj['2.5.4.16'] == '107139, Орликов переулок, дом 3А'
+    print(repr(subj['2.5.4.16']), type(subj['2.5.4.16']))
+    assert subj['2.5.4.16'] == u'107139, Орликов переулок, дом 3А'
 
 
 def test_encode_attributes():
@@ -142,9 +142,9 @@ def test_get_certificate():
 
 def test_get_certificate_cont_provider():
     cert_by_thumb = cryptoapi.get_certificate(
-        get_test_thumb(), cont=test_container, provider=cryptoapi.PROV_KC1_GR3410_2001)
+        get_test_thumb(), cont=test_container, provider=test_provider)
     cert_by_name = cryptoapi.get_certificate(
-        name=test_cn, cont=test_container, provider=cryptoapi.PROV_KC1_GR3410_2001)
+        name=test_cn, cont=test_container, provider=test_provider)
     assert cert_by_thumb == cert_by_name
 
 
@@ -165,14 +165,14 @@ def test_signing():
 def test_signing_cont_provider():
     thumb = get_test_thumb()
     cert = cryptoapi.get_certificate(thumb, cont=test_container,
-                                     provider=cryptoapi.PROV_KC1_GR3410_2001)
+                                     provider=test_provider)
 
     signed_data = cryptoapi.sign(thumb, msg, True, cont=test_container,
-                                 provider=cryptoapi.PROV_KC1_GR3410_2001)
+                                 provider=test_provider)
     assert signed_data
 
     signed_and_encrypted = cryptoapi.sign_and_encrypt(
-        thumb, [cert], msg, cont=test_container, provider=cryptoapi.PROV_KC1_GR3410_2001)
+        thumb, [cert], msg, cont=test_container, provider=test_provider)
     assert signed_and_encrypted
     return signed_data
 
@@ -198,9 +198,9 @@ def _test_verifying():
 def test_check_signature():
     sig = _test_verifying()
     assert cryptoapi.check_signature(
-        None, sig, msg, cont=test_container, provider=cryptoapi.PROV_KC1_GR3410_2001)
+        None, sig, msg, cont=test_container, provider=test_provider)
     assert not cryptoapi.check_signature(
-        None, sig, msg[:-1], cont=test_container, provider=cryptoapi.PROV_KC1_GR3410_2001)
+        None, sig, msg[:-1], cont=test_container, provider=test_provider)
 
 
 def test_encrypt_decrypt():
@@ -229,15 +229,14 @@ def test_encrypt_decrypt():
 
 
 def test_encrypt_decrypt_cont_provider():
-    thumb = get_test_thumb()
-    cert = cryptoapi.get_certificate(thumb, cont=test_container,
-                                     provider=cryptoapi.PROV_KC1_GR3410_2001)
+    cert = cryptoapi.get_certificate(None, cont=test_container,
+                                     provider=test_provider)
     certs = [cert]
     encrypted_data = cryptoapi.encrypt(certs, msg)
     assert encrypted_data
 
     decrypted_data = cryptoapi.decrypt(
-        encrypted_data, thumb, cont=test_container, provider=cryptoapi.PROV_KC1_GR3410_2001)
+        encrypted_data, None, cont=test_container, provider=test_provider)
     assert msg == decrypted_data
 
 
@@ -290,16 +289,19 @@ def test_hash_sign_verify():
 
 def test_hash_sign_verify_cont_provider():
     data = os.urandom(1024)
-    thumb = get_test_thumb()
+    bad_data = os.urandom(1024)
 
-    h = cryptoapi.SignedHash(thumb, data, cont=test_container,
-                             provider=cryptoapi.PROV_KC1_GR3410_2001)
+    h = cryptoapi.SignedHash(None, data, cont=test_container,
+                             provider=test_provider)
     sig = h.sign()
 
-    cert = cryptoapi.get_certificate(thumb, cont=test_container,
-                                     provider=cryptoapi.PROV_KC1_GR3410_2001)
+    cert = cryptoapi.get_certificate(None, cont=test_container,
+                                     provider=test_provider)
+    assert cert
     good = cryptoapi.Hash(data)
     assert good.verify(cert, sig)
+    bad = cryptoapi.Hash(bad_data)
+    assert not bad.verify(cert, sig)
 
 
 def test_hmac():
