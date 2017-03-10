@@ -229,15 +229,14 @@ def test_encrypt_decrypt():
 
 
 def test_encrypt_decrypt_cont_provider():
-    thumb = get_test_thumb()
-    cert = cryptoapi.get_certificate(thumb, cont=test_container,
+    cert = cryptoapi.get_certificate(None, cont=test_container,
                                      provider=test_provider)
     certs = [cert]
     encrypted_data = cryptoapi.encrypt(certs, msg)
     assert encrypted_data
 
     decrypted_data = cryptoapi.decrypt(
-        encrypted_data, thumb, cont=test_container, provider=test_provider)
+        encrypted_data, None, cont=test_container, provider=test_provider)
     assert msg == decrypted_data
 
 

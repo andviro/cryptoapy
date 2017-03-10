@@ -382,7 +382,8 @@ def encrypt(certs, data):
 def decrypt(data, thumb, cont=None, provider=None):
     """Дешифрование данных из сообщения
 
-    :thumb: отпечаток сертификата для расшифровки
+    :thumb: отпечаток сертификата для расшифровки.
+        Если равен None, используется сертификат, сохраненный в контейнере.
     :data: данные в байтовой строке
     :cont: контейнер для поиска сертификата (по умолчанию -- системный)
     :provider: провайдер для поиска сертификата (по умолчанию дефолтный для контейнера)
@@ -390,13 +391,19 @@ def decrypt(data, thumb, cont=None, provider=None):
 
     """
 
-    ctx = _mkcontext(cont, provider)
-    cs = csp.CertStore(ctx, b"MY")
-    certs = list(cs.find_by_thumb(unhexlify(thumb)))
-    assert len(certs), 'Certificate for thumbprint not found'
+    ctx = _mkcontext(cont, provider, 0)
+    if thumb is not None:
+        cs = csp.CertStore(ctx, b"MY")
+        certs = list(cs.find_by_thumb(unhexlify(thumb)))
+        assert len(certs), 'Certificate for thumbprint not found'
+        cert = certs[0]
+    else:
+        key = ctx.get_key()
+        cert = csp.Cert(key.extract_cert())
+        cert.bind(ctx)
     bin_data = data
     msg = csp.CryptMsg(bin_data)
-    msg.decrypt_by_cert(certs[0])
+    msg.decrypt_by_cert(cert)
     return msg.get_data()
 
 
