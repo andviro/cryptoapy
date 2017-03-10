@@ -620,17 +620,20 @@ class SignedHash(Hash):
     def __init__(self, thumb, data=None, cont=None, provider=None):
         '''
         Инициализация хэша. Помимо параметров базового класса, получает `thumb`
-        -- отпечаток
+        -- отпечаток сертификата для проверки подписи. Если None -- сертификат берется из контейнера.
 
         :cont: контейнер для поиска сертификата (по умолчанию -- системный)
         :provider: провайдер для поиска сертификата (по умолчанию дефолтный для контейнера)
 
         '''
-        ctx = _mkcontext(cont, provider)
-        cs = csp.CertStore(ctx, b"MY")
-        store_lst = list(cs.find_by_thumb(unhexlify(thumb)))
-        assert len(store_lst), 'Unable to find signing cert in system store'
-        self._ctx = csp.Crypt(store_lst[0])
+        ctx = _mkcontext(cont, provider, csp.CRYPT_SILENT)
+        if thumb is not None:
+            cs = csp.CertStore(ctx, b"MY")
+            store_lst = list(cs.find_by_thumb(unhexlify(thumb)))
+            assert len(store_lst), 'Unable to find signing cert in system store'
+            self._ctx = csp.Crypt(store_lst[0])
+        else:
+            self._ctx = ctx
         self._init_hash(data)
 
     def sign(self):
