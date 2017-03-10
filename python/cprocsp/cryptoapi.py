@@ -180,8 +180,8 @@ def create_request(cont, params, local=True, provider=None, insert_zeroes=False)
     if provider is None:
         provider = PROV_HSM if not local else None
     cont = _from_hex(cont)
-    ctx = csp.Crypt(cont, csp.PROV_GOST_2001_DH, 0, provider)
-    req = csp.CertRequest(ctx, )
+    ctx = csp.Crypt(cont, csp.PROV_GOST_2001_DH, csp.CRYPT_SILENT, provider)
+    req = csp.CertRequest(ctx)
     set_q_defaults(params, insert_zeroes)
     req.set_subject(Attributes(params.get('Attributes', [])).encode())
     validFrom, validTo = params.get('ValidFrom'), params.get('ValidTo')
@@ -222,7 +222,7 @@ def bind_cert_to_key(cont, cert, local=True, provider=None, store=False):
     """
     if provider is None:
         provider = PROV_HSM if not local else None
-    ctx = _mkcontext(cont, provider, 0)
+    ctx = _mkcontext(cont, provider, csp.CRYPT_SILENT)
     cert = autopem(cert)
     newc = csp.Cert(cert)
     newc.bind(ctx)
@@ -244,7 +244,7 @@ def get_certificate(thumb=None, name=None, cont=None, provider=None):
     :returns: сертификат в байтовой строке
 
     """
-    ctx = _mkcontext(cont, provider, 0)
+    ctx = _mkcontext(cont, provider, csp.CRYPT_SILENT)
     if cont is not None:
         key = ctx.get_key()
         return key.extract_cert()
@@ -342,7 +342,7 @@ def check_signature(cert, sig, data, cont=None, provider=None):
         if cert:
             cert = autopem(cert)
         else:
-            ctx = _mkcontext(cont, provider, 0)
+            ctx = _mkcontext(cont, provider, csp.CRYPT_SILENT)
             key = ctx.get_key()
             cert = key.extract_cert()
         cs = csp.CertStore()
@@ -391,7 +391,7 @@ def decrypt(data, thumb, cont=None, provider=None):
 
     """
 
-    ctx = _mkcontext(cont, provider, 0)
+    ctx = _mkcontext(cont, provider, csp.CRYPT_SILENT)
     if thumb is not None:
         cs = csp.CertStore(ctx, b"MY")
         certs = list(cs.find_by_thumb(unhexlify(thumb)))
