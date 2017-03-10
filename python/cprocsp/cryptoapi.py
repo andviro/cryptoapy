@@ -180,8 +180,8 @@ def create_request(cont, params, local=True, provider=None, insert_zeroes=False)
     if provider is None:
         provider = PROV_HSM if not local else None
     cont = _from_hex(cont)
-    ctx = csp.Crypt(cont, csp.PROV_GOST_2001_DH, 0, provider)
-    req = csp.CertRequest(ctx, )
+    ctx = csp.Crypt(cont, csp.PROV_GOST_2001_DH, csp.CRYPT_SILENT, provider)
+    req = csp.CertRequest(ctx)
     set_q_defaults(params, insert_zeroes)
     req.set_subject(Attributes(params.get('Attributes', [])).encode())
     validFrom, validTo = params.get('ValidFrom'), params.get('ValidTo')
@@ -208,7 +208,7 @@ def create_request(cont, params, local=True, provider=None, insert_zeroes=False)
     return req.get_data()
 
 
-def bind_cert_to_key(cont, cert, local=True, provider=None):
+def bind_cert_to_key(cont, cert, local=True, provider=None, store=False):
     """Привязка сертификата к закрытому ключу в контейнере
 
     :cont: Имя контейнера
@@ -216,33 +216,41 @@ def bind_cert_to_key(cont, cert, local=True, provider=None):
     :local: Если True, работа идет с локальным хранилищем
     :provider: Если не None, флаг local игнорируется и криптопровайдер
         выбирается принудительно
+    :store: Сертификат сохраняется в локальном хранилище, а в контейнере провайдера (по умолчанию -- False)
     :returns: отпечаток сертификата в виде строки
 
     """
     if provider is None:
         provider = PROV_HSM if not local else None
-    ctx = _mkcontext(cont, provider, 0)
+    ctx = _mkcontext(cont, provider, csp.CRYPT_SILENT)
     cert = autopem(cert)
     newc = csp.Cert(cert)
     newc.bind(ctx)
     cs = csp.CertStore(ctx, b"MY")
     cs.add_cert(newc)
+    if store:
+        key = ctx.get_key()
+        key.store_cert(newc)
     return hexlify(newc.thumbprint())
 
 
 def get_certificate(thumb=None, name=None, cont=None, provider=None):
-    """Поиск сертификатов по отпечатку
+    """Поиск сертификатов по отпечатку или имени
 
     :thumb: отпечаток, возвращенный функцией `bind_cert_to_key`
     :name: имя субъекта для поиска (передается вместо параметра :thumb:)
-    :cont: контейнер для поиска сертификата (по умолчанию -- системный)
+    :cont: контейнер для поиска сертификата (если указан, thumb и name игнорируются)
     :provider: провайдер для поиска сертификата (по умолчанию дефолтный для контейнера)
     :returns: сертификат в байтовой строке
 
     """
+    ctx = _mkcontext(cont, provider, csp.CRYPT_SILENT)
+    if cont is not None:
+        key = ctx.get_key()
+        return key.extract_cert()
+
     assert thumb or name and not (
         thumb and name), 'Only one thumb or name allowed'
-    ctx = _mkcontext(cont, provider)
     cs = csp.CertStore(ctx, b"MY")
     if thumb is not None:
         res = list(cs.find_by_thumb(unhexlify(thumb)))
@@ -260,17 +268,23 @@ def sign(thumb, data, include_data, cont=None, provider=None):
     :thumb: отпечаток сертификата, которым будем подписывать
     :data: бинарные данные, байтовая строка
     :include_data: булев флаг, если True -- данные прицепляются вместе с подписью
-    :cont: контейнер для поиска сертификата (по умолчанию -- системный)
+    :cont: контейнер для поиска сертификата (если указан -- thumb игнорируется)
     :provider: провайдер для поиска сертификата (по умолчанию дефолтный для контейнера)
     :returns: данные и/или подпись в виде байтовой строки
 
     """
-    ctx = _mkcontext(cont, provider)
-    cs = csp.CertStore(ctx, b"MY")
-    store_lst = list(cs.find_by_thumb(unhexlify(thumb)))
-    assert len(store_lst), 'Unable to find signing cert in system store'
-    signcert = store_lst[0]
     mess = csp.CryptMsg()
+    if cont is None:
+        ctx = _mkcontext(cont, provider)
+        cs = csp.CertStore(ctx, b"MY")
+        store_lst = list(cs.find_by_thumb(unhexlify(thumb)))
+        assert len(store_lst), 'Unable to find signing cert in system store'
+        signcert = store_lst[0]
+    else:
+        ctx = _mkcontext(cont, provider, csp.CRYPT_SILENT)
+        key = ctx.get_key()
+        signcert = csp.Cert(key.extract_cert())
+        signcert.bind(ctx)
     sign_data = mess.sign_data(data, signcert, not(include_data))
     return sign_data
 
@@ -288,15 +302,21 @@ def sign_and_encrypt(thumb, certs, data, cont=None, provider=None):
 
     """
     certs = [autopem(c) for c in certs]
-    ctx = _mkcontext(cont, provider)
-    cs = csp.CertStore(ctx, b"MY")
-    store_lst = list(cs.find_by_thumb(unhexlify(thumb)))
-    assert len(store_lst), 'Unable to find signing cert in system store'
-    signcert = store_lst[0]
     mess = csp.CryptMsg()
     for c in certs:
         cert = csp.Cert(c)
         mess.add_recipient(cert)
+    if cont is None:
+        ctx = _mkcontext(cont, provider)
+        cs = csp.CertStore(ctx, b"MY")
+        store_lst = list(cs.find_by_thumb(unhexlify(thumb)))
+        assert len(store_lst), 'Unable to find signing cert in system store'
+        signcert = store_lst[0]
+    else:
+        ctx = _mkcontext(cont, provider, csp.CRYPT_SILENT)
+        key = ctx.get_key()
+        signcert = csp.Cert(key.extract_cert())
+        signcert.bind(ctx)
     sign_data = mess.sign_data(data, signcert)
     encrypted = mess.encrypt_data(sign_data)
     return encrypted
@@ -309,25 +329,27 @@ def check_signature(cert, sig, data, cont=None, provider=None):
     :cert: сертификат в байтовой строке или `None`
     :data: бинарные данные в байтовой строке
     :sig: данные подписи в байтовой строке
-    :cont: контейнер для поиска сертификата (по умолчанию -- системный)
+    :cont: контейнер для поиска сертификата
     :provider: провайдер для поиска сертификата (по умолчанию дефолтный для контейнера)
     :returns: True или False
 
-    Если :cert: передан как None, осуществляется проверка всех подписантов в
-    подписи, с использованием сертификатов, которые содержатся в самой подписи.
-    Иначе проверяется только подписант, соответствующий переданному сертификату.
+    Если и :cert: и :cont: переданы как None, подпись считается верной, если хотя бы один
+    из сертификатов в ней есть в системном хранилище и проходит проверку.
 
     """
     sign = csp.Signature(sig)
-
-    if cert is not None:
-        cert = autopem(cert)
-        cert = csp.Cert(cert)
+    if cert or cont:
+        if cert:
+            cert = autopem(cert)
+        else:
+            ctx = _mkcontext(cont, provider, csp.CRYPT_SILENT)
+            key = ctx.get_key()
+            cert = key.extract_cert()
         cs = csp.CertStore()
+        cert = csp.Cert(cert)
         cs.add_cert(cert)
     else:
-        ctx = _mkcontext(cont, provider)
-        cs = csp.CertStore(ctx, b"MY")
+        cs = csp.CertStore(None, b"MY")
 
     for i in range(sign.num_signers()):
         isign = csp.CertInfo(sign, i)
@@ -360,7 +382,8 @@ def encrypt(certs, data):
 def decrypt(data, thumb, cont=None, provider=None):
     """Дешифрование данных из сообщения
 
-    :thumb: отпечаток сертификата для расшифровки
+    :thumb: отпечаток сертификата для расшифровки.
+        Если равен None, используется сертификат, сохраненный в контейнере.
     :data: данные в байтовой строке
     :cont: контейнер для поиска сертификата (по умолчанию -- системный)
     :provider: провайдер для поиска сертификата (по умолчанию дефолтный для контейнера)
@@ -368,13 +391,19 @@ def decrypt(data, thumb, cont=None, provider=None):
 
     """
 
-    ctx = _mkcontext(cont, provider)
-    cs = csp.CertStore(ctx, b"MY")
-    certs = list(cs.find_by_thumb(unhexlify(thumb)))
-    assert len(certs), 'Certificate for thumbprint not found'
+    ctx = _mkcontext(cont, provider, csp.CRYPT_SILENT)
+    if thumb is not None:
+        cs = csp.CertStore(ctx, b"MY")
+        certs = list(cs.find_by_thumb(unhexlify(thumb)))
+        assert len(certs), 'Certificate for thumbprint not found'
+        cert = certs[0]
+    else:
+        key = ctx.get_key()
+        cert = csp.Cert(key.extract_cert())
+        cert.bind(ctx)
     bin_data = data
     msg = csp.CryptMsg(bin_data)
-    msg.decrypt_by_cert(certs[0])
+    msg.decrypt_by_cert(cert)
     return msg.get_data()
 
 
@@ -591,17 +620,20 @@ class SignedHash(Hash):
     def __init__(self, thumb, data=None, cont=None, provider=None):
         '''
         Инициализация хэша. Помимо параметров базового класса, получает `thumb`
-        -- отпечаток
+        -- отпечаток сертификата для проверки подписи. Если None -- сертификат берется из контейнера.
 
         :cont: контейнер для поиска сертификата (по умолчанию -- системный)
         :provider: провайдер для поиска сертификата (по умолчанию дефолтный для контейнера)
 
         '''
-        ctx = _mkcontext(cont, provider)
-        cs = csp.CertStore(ctx, b"MY")
-        store_lst = list(cs.find_by_thumb(unhexlify(thumb)))
-        assert len(store_lst), 'Unable to find signing cert in system store'
-        self._ctx = csp.Crypt(store_lst[0])
+        ctx = _mkcontext(cont, provider, csp.CRYPT_SILENT)
+        if thumb is not None:
+            cs = csp.CertStore(ctx, b"MY")
+            store_lst = list(cs.find_by_thumb(unhexlify(thumb)))
+            assert len(store_lst), 'Unable to find signing cert in system store'
+            self._ctx = csp.Crypt(store_lst[0])
+        else:
+            self._ctx = ctx
         self._init_hash(data)
 
     def sign(self):
