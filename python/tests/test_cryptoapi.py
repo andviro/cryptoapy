@@ -17,6 +17,7 @@ if sys.version_info >= (3,):
 else:
     unicode = unicode
 
+TEST_ALL = os.environ.get('TEST_ALL', None)
 
 def test_address_oid():
     cert = open(case_path('fss.cer'), 'rb').read()
@@ -322,3 +323,10 @@ def test_pkcs7_info_from_file():
     print(info)
     assert info
     assert info['ContentType'] == 'envelopedData'
+
+def test_gen_remove_key():
+    if TEST_ALL is None:
+        return
+
+    assert cryptoapi.gen_key('test_container_temp'), 'Could not generate key'
+    assert cryptoapi.remove_key('test_container_temp'), 'Could not remove key'
