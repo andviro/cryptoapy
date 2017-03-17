@@ -261,6 +261,18 @@ def get_certificate(thumb=None, name=None, cont=None, provider=None):
     return cert.extract()
 
 
+def get_key(cont=None, provider=None):
+    """Получение открытого ключа из контейнера
+
+    :cont: контейнер для поиска сертификата (по умолчанию -- системный)
+    :provider: провайдер для поиска сертификата (по умолчанию дефолтный для контейнера)
+    :returns: данные открытого ключа в байтовой строке
+
+    """
+    ctx = _mkcontext(cont, provider, csp.CRYPT_SILENT)
+    return ctx.public_key()
+
+
 @retry
 def sign(thumb, data, include_data, cont=None, provider=None):
     """Подписывание данных сертификатом

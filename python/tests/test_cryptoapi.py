@@ -240,6 +240,11 @@ def test_encrypt_decrypt_cont_provider():
     assert msg == decrypted_data
 
 
+def test_get_key():
+    key = cryptoapi.get_key(cont=test_container, provider=test_provider)
+    assert len(key) == 66, 'Invalid public key blob size'
+
+
 def test_pkcs7_info():
     pkcs_msg = test_signing()
     info = cryptoapi.pkcs7_info(pkcs_msg)

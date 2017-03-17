@@ -6842,6 +6842,169 @@ fail:
 }
 
 
+SWIGINTERN PyObject *_wrap_Crypt_public_key__SWIG_0(PyObject *self, PyObject *args) {
+  PyObject *resultobj = 0;
+  Crypt *arg1 = (Crypt *) 0 ;
+  BYTE **arg2 = (BYTE **) 0 ;
+  DWORD *arg3 = (DWORD *) 0 ;
+  DWORD arg4 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  BYTE *carray2 = 0 ;
+  DWORD size2 = 0 ;
+  PyObject *res2 = NULL ;
+  PyObject * obj1 = 0 ;
+  
+  arg2 = &carray2;
+  arg3 = &size2;
+  if (!PyArg_ParseTuple(args,(char *)"O:Crypt_public_key",&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_Crypt, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Crypt_public_key" "', argument " "1"" of type '" "Crypt *""'"); 
+  }
+  arg1 = reinterpret_cast< Crypt * >(argp1);
+#if PY_VERSION_HEX >= 0x03000000
+  arg4 = PyLong_AsUnsignedLong(obj1);
+#else
+  arg4 = PyInt_AsUnsignedLongMask(obj1);
+#endif
+  try {
+    (arg1)->public_key(arg2,arg3,arg4);
+  }
+  catch(CSPException &_e) {
+    PyErr_SetString(PyExc_SystemError, (&_e)->msg);
+    SWIG_fail;
+    
+  }
+  
+  resultobj = SWIG_Py_Void();
+  if (*arg2) {
+    if (*arg3 > INT_MAX) {
+      swig_type_info* pchar_descriptor = SWIG_pchar_descriptor();
+      res2 = pchar_descriptor ? 
+      SWIG_InternalNewPointerObj(const_cast< BYTE * >(*arg2), pchar_descriptor, 0) : SWIG_Py_Void();
+    } else {
+#if PY_VERSION_HEX >= 0x03000000
+      res2 = PyBytes_FromStringAndSize((char *)*arg2, static_cast< int >(*arg3));
+#else
+      res2 = PyString_FromStringAndSize((char *)*arg2, static_cast< int >(*arg3));
+#endif
+    }
+    resultobj = SWIG_Python_AppendOutput(resultobj, res2);
+    free(*arg2);
+  } else {
+    resultobj = SWIG_Python_AppendOutput(resultobj, SWIG_Py_Void());
+  }
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Crypt_public_key__SWIG_1(PyObject *self, PyObject *args) {
+  PyObject *resultobj = 0;
+  Crypt *arg1 = (Crypt *) 0 ;
+  BYTE **arg2 = (BYTE **) 0 ;
+  DWORD *arg3 = (DWORD *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  BYTE *carray2 = 0 ;
+  DWORD size2 = 0 ;
+  PyObject *res2 = NULL ;
+  
+  arg2 = &carray2;
+  arg3 = &size2;
+  if (args && PyTuple_Check(args) && PyTuple_GET_SIZE(args) > 0) SWIG_exception_fail(SWIG_TypeError, "Crypt_public_key takes no arguments");
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_Crypt, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Crypt_public_key" "', argument " "1"" of type '" "Crypt *""'"); 
+  }
+  arg1 = reinterpret_cast< Crypt * >(argp1);
+  try {
+    (arg1)->public_key(arg2,arg3);
+  }
+  catch(CSPException &_e) {
+    PyErr_SetString(PyExc_SystemError, (&_e)->msg);
+    SWIG_fail;
+    
+  }
+  
+  resultobj = SWIG_Py_Void();
+  if (*arg2) {
+    if (*arg3 > INT_MAX) {
+      swig_type_info* pchar_descriptor = SWIG_pchar_descriptor();
+      res2 = pchar_descriptor ? 
+      SWIG_InternalNewPointerObj(const_cast< BYTE * >(*arg2), pchar_descriptor, 0) : SWIG_Py_Void();
+    } else {
+#if PY_VERSION_HEX >= 0x03000000
+      res2 = PyBytes_FromStringAndSize((char *)*arg2, static_cast< int >(*arg3));
+#else
+      res2 = PyString_FromStringAndSize((char *)*arg2, static_cast< int >(*arg3));
+#endif
+    }
+    resultobj = SWIG_Python_AppendOutput(resultobj, res2);
+    free(*arg2);
+  } else {
+    resultobj = SWIG_Python_AppendOutput(resultobj, SWIG_Py_Void());
+  }
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Crypt_public_key(PyObject *self, PyObject *args) {
+  Py_ssize_t argc;
+  PyObject *argv[3] = {
+    0
+  };
+  Py_ssize_t ii;
+  
+  if (!PyTuple_Check(args)) SWIG_fail;
+  argc = args ? PyObject_Length(args) : 0;
+  argv[0] = self;
+  for (ii = 0; (ii < 1) && (ii < argc); ii++) {
+    argv[ii + 1] = PyTuple_GET_ITEM(args,ii);
+  }
+  argc++;
+  if (argc == 1) {
+    int _v;
+    void *vptr = 0;
+    int res = SWIG_ConvertPtr(argv[0], &vptr, SWIGTYPE_p_Crypt, 0);
+    _v = SWIG_CheckState(res);
+    if (_v) {
+      return _wrap_Crypt_public_key__SWIG_1(self, args);
+    }
+  }
+  if (argc == 2) {
+    int _v;
+    void *vptr = 0;
+    int res = SWIG_ConvertPtr(argv[0], &vptr, SWIGTYPE_p_Crypt, 0);
+    _v = SWIG_CheckState(res);
+    if (_v) {
+      {
+#if PY_VERSION_HEX >= 0x03000000
+        _v = PyLong_Check(argv[1]) ? 1 : 0;
+#else
+        int res = SWIG_AsVal_unsigned_SS_int(argv[1], NULL);
+        _v = SWIG_CheckState(res);
+#endif
+      }
+      if (_v) {
+        return _wrap_Crypt_public_key__SWIG_0(self, args);
+      }
+    }
+  }
+  
+fail:
+  SWIG_SetErrorMsg(PyExc_NotImplementedError,"Wrong number or type of arguments for overloaded function 'Crypt_public_key'.\n"
+    "  Possible C/C++ prototypes are:\n"
+    "    Crypt::public_key(BYTE **,DWORD *,DWORD)\n"
+    "    Crypt::public_key(BYTE **,DWORD *)\n");
+  return 0;
+}
+
+
 SWIGINTERN PyObject *_wrap_Crypt_remove(PyObject *self, PyObject *args) {
   PyObject *resultobj = 0;
   char *arg1 = (char *) 0 ;
@@ -15744,6 +15907,15 @@ SWIGINTERN PyMethodDef SwigPyBuiltin__Crypt_methods[] = {
 		"----------\n"
 		"pin: char *\n"
 		"\n"
+		"" },
+  { "public_key", (PyCFunction) _wrap_Crypt_public_key, METH_VARARGS, (char*) "\n"
+		"public_key(keyspec=1)\n"
+		"\n"
+		"Parameters\n"
+		"----------\n"
+		"keyspec: DWORD\n"
+		"\n"
+		"public_key()\n"
 		"" },
   { "remove", (PyCFunction) _wrap_Crypt_remove, METH_STATIC|METH_VARARGS, (char*) "\n"
 		"remove(container, type, name)\n"
