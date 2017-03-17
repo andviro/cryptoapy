@@ -248,3 +248,26 @@ CryptDesc *CryptIter::next() throw (Stop_Iteration, CSPException) {
     }
     throw Stop_Iteration();
 }
+
+void Crypt::public_key(BYTE **s, DWORD *slen, DWORD keyspec) throw(CSPException) {
+    LOG("Crypt.public_key(%x)\n", keyspec);
+
+    CERT_PUBLIC_KEY_INFO *pbPublicKeyInfo = NULL;
+    DWORD cbPublicKeyInfo = 0;
+
+    bool res = CryptExportPublicKeyInfo( hprov, keyspec, MY_ENC_TYPE, NULL, &cbPublicKeyInfo );
+    if (!res) {
+        throw CSPException("Crypt: Couldn't determine exported key info length");
+    }
+    pbPublicKeyInfo = (CERT_PUBLIC_KEY_INFO*) malloc( cbPublicKeyInfo );
+    res = CryptExportPublicKeyInfo( hprov, keyspec, MY_ENC_TYPE, pbPublicKeyInfo, &cbPublicKeyInfo );
+    if (!res) {
+        free(pbPublicKeyInfo);
+        throw CSPException("Crypt: Couldn't export public key info");
+    }
+    *slen = pbPublicKeyInfo->PublicKey.cbData;
+    *s = (BYTE *) malloc(*slen);
+    memcpy(*s, pbPublicKeyInfo->PublicKey.pbData, *slen);
+    free(pbPublicKeyInfo);
+};
+
