@@ -98,7 +98,7 @@ def gen_key(cont, local=True, silent=False, provider=None):
         ctx = csp.Crypt(cont, csp.PROV_GOST_2001_DH, silent_flag, provider)
     except (ValueError, SystemError):
 
-        if platform.system() == 'Linux' and provider != PROV_HSM and not cont.startswith('\\\\'):
+        if platform.system() == 'Linux' and provider != PROV_HSM and not cont.startswith(b'\\\\'):
             cont = b'\\\\.\\HDIMAGE\\' + cont
 
         ctx = csp.Crypt(cont, csp.PROV_GOST_2001_DH, csp.CRYPT_NEWKEYSET |
