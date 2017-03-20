@@ -19,6 +19,7 @@ else:
 
 TEST_ALL = os.environ.get('TEST_ALL', None)
 
+
 def test_address_oid():
     cert = open(case_path('fss.cer'), 'rb').read()
     info = cryptoapi.cert_info(cert)
@@ -26,6 +27,23 @@ def test_address_oid():
     subj = dict(info['Subject'])
     print(repr(subj['2.5.4.16']), type(subj['2.5.4.16']))
     assert subj['2.5.4.16'] == u'107139, Орликов переулок, дом 3А'
+
+
+def test_bmp_strings_in_cert():
+    cert = open(case_path('fns.cer'), 'rb').read()
+    info = cryptoapi.cert_info(cert)
+    print(repr(info['Subject']))
+    assert info['Subject'] == [
+        ('1.2.643.100.1', '1047797083861'),
+        ('1.2.643.3.131.1.1', '007733535730'),
+        ('1.2.840.113549.1.9.1', 'mi51@m9965.nalog.ru'),
+        ('2.5.4.6', 'RU'),
+        ('2.5.4.8', 'Москва'),
+        ('2.5.4.7', 'Москва'),
+        ('2.5.4.10', 'МИ ФНС России по ЦОД'),
+        ('2.5.4.3', 'МИ ФНС России по ЦОД'),
+        ('2.5.4.9', 'Походный проезд домовладение 3')
+    ]
 
 
 def test_encode_attributes():
@@ -62,7 +80,8 @@ def test_encode_attributes():
 
 
 def test_encrypt_for_certs():
-    certs = [open(case_path(x), 'rb').read() for x in ('res1.cer', 'res2.cer', 'res3.cer')]
+    certs = [open(case_path(x), 'rb').read()
+             for x in ('res1.cer', 'res2.cer', 'res3.cer')]
     our_cert = cryptoapi.get_certificate(name=test_cn)
     certs.append(our_cert)
     data = open(case_path('res.bin'), 'rb').read()
@@ -111,10 +130,12 @@ def test_request_valid_time():
                                 'keyEncipherment', 'digitalSignature'],
                       EKU=[csp.szOID_PKIX_KP_EMAIL_PROTECTION,
                            csp.szOID_PKIX_KP_CLIENT_AUTH])
-    request1 = cryptoapi.create_request(test_container, req_params, local=test_local)
+    request1 = cryptoapi.create_request(
+        test_container, req_params, local=test_local)
     del req_params['ValidFrom']
     del req_params['ValidTo']
-    request2 = cryptoapi.create_request(test_container, req_params, local=test_local)
+    request2 = cryptoapi.create_request(
+        test_container, req_params, local=test_local)
     assert b"\x06\x0A\x2A\x85\x03\x02\x04\x01\x01\x01\x01\x02" in request1
     assert b"\x06\x0A\x2A\x85\x03\x02\x04\x01\x01\x01\x01\x02" not in request2
 
@@ -127,7 +148,8 @@ def test_request_fields_encoding():
                                 'keyEncipherment', 'digitalSignature'],
                       EKU=[csp.szOID_PKIX_KP_EMAIL_PROTECTION,
                            csp.szOID_PKIX_KP_CLIENT_AUTH])
-    request = cryptoapi.create_request(test_container, req_params, local=test_local)
+    request = cryptoapi.create_request(
+        test_container, req_params, local=test_local)
     assert b"\x30\x18\x06\x05\x2A\x85\x03\x64\x05\x12\x0F\x31\x31\x31\x31\x31\x31\x31\x31\x31\x31\x31\x31\x31\x31\x31" in request
 
 
@@ -182,7 +204,8 @@ def _test_verifying():
     thumb = get_test_thumb()
     cert = cryptoapi.get_certificate(thumb)
     cs = csp.CertStore(None, b'My')
-    wrong_certs = list(x.extract() for x in cs if hexlify(x.thumbprint()) != thumb)
+    wrong_certs = list(x.extract()
+                       for x in cs if hexlify(x.thumbprint()) != thumb)
 
     sig = cryptoapi.sign(thumb, msg, False)
     assert sig
@@ -212,7 +235,8 @@ def test_encrypt_decrypt():
     for x in ('res1.cer',):
         certs.append(open(case_path(x), 'rb').read())
     certs.append(cert)
-    wrong_thumbs = list(t for t in (hexlify(c.thumbprint()) for c in cs) if t != thumb)
+    wrong_thumbs = list(t for t in (hexlify(c.thumbprint())
+                                    for c in cs) if t != thumb)
 
     encrypted_data = cryptoapi.encrypt(certs, msg)
     open('encrypted_data.bin', 'wb').write(encrypted_data)
@@ -323,6 +347,7 @@ def test_pkcs7_info_from_file():
     print(info)
     assert info
     assert info['ContentType'] == 'envelopedData'
+
 
 def test_gen_remove_key():
     if TEST_ALL is None:

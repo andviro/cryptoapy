@@ -12,17 +12,21 @@ import sys
 def monkeyPatchStr(self):
     # XXX: unicode handling in pyasn1 is broken as of now
     binData = bytes(bytearray(ord(x) for x in self))
-    return unicode(binData, 'utf-8', 'replace')
+    return unicode(binData, self.encoding, 'replace')
 
 
 if sys.version_info >= (3,):
     unicode = str
     long = int
     setattr(char.UTF8String, '__str__', monkeyPatchStr)
+    setattr(char.BMPString, '__str__', monkeyPatchStr)
+    setattr(char.UniversalString, '__str__', monkeyPatchStr)
 
 else:
     unicode = unicode
     setattr(char.UTF8String, '__unicode__', monkeyPatchStr)
+    setattr(char.BMPString, '__unicode__', monkeyPatchStr)
+    setattr(char.UniversalString, '__unicode__', monkeyPatchStr)
 
 
 def autopem(cert):
