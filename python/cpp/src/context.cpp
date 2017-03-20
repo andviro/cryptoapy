@@ -117,7 +117,7 @@ void Crypt::change_password(char *pin) throw (CSPException) {
 
 Crypt::Crypt (BYTE *STRING, DWORD LENGTH, DWORD type, DWORD flags, char *name) throw(CSPException, CSPNotFound)
 {
-    LOG("Crypt::Crypt(%s, %u, %x, %s)\n", container, type, flags, name);
+    LOG("Crypt::Crypt(%p, %u, %x, %s)\n", STRING, type, flags, name);
     cont_name = NULL;
     parent = NULL;
     if (STRING) {
@@ -209,9 +209,18 @@ Key *Crypt::import_key(BYTE *STRING, DWORD LENGTH, Key *decrypt) throw(CSPExcept
     return new Key(this, hkey);
 }
 
-void Crypt::remove(char *container, DWORD type, char *name) throw(CSPException, CSPNotFound) {
+void Crypt::remove(BYTE *STRING, DWORD LENGTH, DWORD type, char *name) throw(CSPException, CSPNotFound) {
     HCRYPTPROV dummy;
-    if (!CryptAcquireContext(&dummy, container, name, type, CRYPT_DELETEKEYSET)) {
+    char *cont_name = NULL;
+    if (STRING) {
+        cont_name = new char[LENGTH + 1];
+        strncpy(cont_name, (const char *)STRING, LENGTH);
+        cont_name[LENGTH] = 0;
+    }
+    if (!CryptAcquireContext(&dummy, cont_name, name, type, CRYPT_DELETEKEYSET)) {
+        if (cont_name) {
+            free(cont_name);
+        }
         DWORD err = GetLastError();
         switch (err) {
         case NTE_KEYSET_NOT_DEF:
@@ -221,6 +230,9 @@ void Crypt::remove(char *container, DWORD type, char *name) throw(CSPException, 
         default:
             throw CSPException("Crypt.remove: Couldn't delete container", err);
         }
+    }
+    if (cont_name) {
+        free(cont_name);
     }
 }
 
@@ -248,3 +260,26 @@ CryptDesc *CryptIter::next() throw (Stop_Iteration, CSPException) {
     }
     throw Stop_Iteration();
 }
+
+void Crypt::public_key(BYTE **s, DWORD *slen, DWORD keyspec) throw(CSPException) {
+    LOG("Crypt.public_key(%x)\n", keyspec);
+
+    CERT_PUBLIC_KEY_INFO *pbPublicKeyInfo = NULL;
+    DWORD cbPublicKeyInfo = 0;
+
+    bool res = CryptExportPublicKeyInfo( hprov, keyspec, MY_ENC_TYPE, NULL, &cbPublicKeyInfo );
+    if (!res) {
+        throw CSPException("Crypt: Couldn't determine exported key info length");
+    }
+    pbPublicKeyInfo = (CERT_PUBLIC_KEY_INFO*) malloc( cbPublicKeyInfo );
+    res = CryptExportPublicKeyInfo( hprov, keyspec, MY_ENC_TYPE, pbPublicKeyInfo, &cbPublicKeyInfo );
+    if (!res) {
+        free(pbPublicKeyInfo);
+        throw CSPException("Crypt: Couldn't export public key info");
+    }
+    *slen = pbPublicKeyInfo->PublicKey.cbData;
+    *s = (BYTE *) malloc(*slen);
+    memcpy(*s, pbPublicKeyInfo->PublicKey.pbData, *slen);
+    free(pbPublicKeyInfo);
+};
+

@@ -98,7 +98,7 @@ def gen_key(cont, local=True, silent=False, provider=None):
         ctx = csp.Crypt(cont, csp.PROV_GOST_2001_DH, silent_flag, provider)
     except (ValueError, SystemError):
 
-        if platform.system() == 'Linux' and provider != PROV_HSM and not cont.startswith('\\\\'):
+        if platform.system() == 'Linux' and provider != PROV_HSM and not cont.startswith(b'\\\\'):
             cont = b'\\\\.\\HDIMAGE\\' + cont
 
         ctx = csp.Crypt(cont, csp.PROV_GOST_2001_DH, csp.CRYPT_NEWKEYSET |
@@ -259,6 +259,18 @@ def get_certificate(thumb=None, name=None, cont=None, provider=None):
     assert len(res), 'Cert not found'
     cert = res[0]
     return cert.extract()
+
+
+def get_key(cont=None, provider=None):
+    """Получение открытого ключа из контейнера
+
+    :cont: контейнер для поиска сертификата (по умолчанию -- системный)
+    :provider: провайдер для поиска сертификата (по умолчанию дефолтный для контейнера)
+    :returns: данные открытого ключа в байтовой строке
+
+    """
+    ctx = _mkcontext(cont, provider, csp.CRYPT_SILENT)
+    return ctx.public_key()
 
 
 @retry

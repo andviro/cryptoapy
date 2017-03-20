@@ -59,8 +59,9 @@ public:
 
     void set_password(char *pin, DWORD keyspec=AT_KEYEXCHANGE) throw(CSPException);
     void change_password(char *pin) throw (CSPException);
+    void public_key(BYTE **s, DWORD *slen, DWORD keyspec=AT_KEYEXCHANGE) throw(CSPException);
 
-    static void remove(char *container, DWORD type, char *name) throw(CSPException, CSPNotFound);
+    static void remove(BYTE *STRING, DWORD LENGTH, DWORD type, char *name) throw(CSPException, CSPNotFound);
 
     static CryptIter *enumerate() throw(CSPException);
 
