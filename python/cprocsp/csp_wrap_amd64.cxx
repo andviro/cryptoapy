@@ -7007,37 +7007,58 @@ fail:
 
 SWIGINTERN PyObject *_wrap_Crypt_remove(PyObject *self, PyObject *args) {
   PyObject *resultobj = 0;
-  char *arg1 = (char *) 0 ;
+  BYTE *arg1 = (BYTE *) 0 ;
   DWORD arg2 ;
-  char *arg3 = (char *) 0 ;
-  int res1 ;
-  char *buf1 = 0 ;
-  int alloc1 = 0 ;
-  int res3 ;
-  char *buf3 = 0 ;
-  int alloc3 = 0 ;
+  DWORD arg3 ;
+  char *arg4 = (char *) 0 ;
+  char *cstr1 = NULL ;
+  Py_ssize_t len1 = 0 ;
+  int res1 = 1 ;
+  int res4 ;
+  char *buf4 = 0 ;
+  int alloc4 = 0 ;
   PyObject * obj0 = 0 ;
   PyObject * obj1 = 0 ;
   PyObject * obj2 = 0 ;
   
   if (!PyArg_ParseTuple(args,(char *)"OOO:Crypt_remove",&obj0,&obj1,&obj2)) SWIG_fail;
-  res1 = SWIG_AsCharPtrAndSize(obj0, &buf1, NULL, &alloc1);
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Crypt_remove" "', argument " "1"" of type '" "char *""'");
-  }
-  arg1 = reinterpret_cast< char * >(buf1);
-#if PY_VERSION_HEX >= 0x03000000
-  arg2 = PyLong_AsUnsignedLong(obj1);
-#else
-  arg2 = PyInt_AsUnsignedLongMask(obj1);
+#if py_version_hex>=0x03000000
+  if (PyBytes_Check(obj0))
+#else  
+  if (PyString_Check(obj0))
 #endif
-  res3 = SWIG_AsCharPtrAndSize(obj2, &buf3, NULL, &alloc3);
-  if (!SWIG_IsOK(res3)) {
-    SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "Crypt_remove" "', argument " "3"" of type '" "char *""'");
+  {
+#if PY_VERSION_HEX>=0x03000000
+    res1 = PyBytes_AsStringAndSize(obj0, &cstr1, &len1);
+#else
+    res1 = PyString_AsStringAndSize(obj0, &cstr1, &len1);
+#endif
+    if (!cstr1) {
+      res1 = 1;
+    }
+    /*%#if PY_VERSION_HEX>=0x03000000*/
+    /*Py_XDECREF(obj0);*/
+    /*%#endif*/
+  } 
+  
+  if(res1){
+    SWIG_exception_fail(SWIG_ArgError(SWIG_TypeError), "in method '" "Crypt_remove" "', argument " "1"" of type '" "BYTE *""'");
+  } else {
+    arg1 = (BYTE *) cstr1;
+    arg2 = (DWORD) len1;
   }
-  arg3 = reinterpret_cast< char * >(buf3);
+#if PY_VERSION_HEX >= 0x03000000
+  arg3 = PyLong_AsUnsignedLong(obj1);
+#else
+  arg3 = PyInt_AsUnsignedLongMask(obj1);
+#endif
+  res4 = SWIG_AsCharPtrAndSize(obj2, &buf4, NULL, &alloc4);
+  if (!SWIG_IsOK(res4)) {
+    SWIG_exception_fail(SWIG_ArgError(res4), "in method '" "Crypt_remove" "', argument " "4"" of type '" "char *""'");
+  }
+  arg4 = reinterpret_cast< char * >(buf4);
   try {
-    Crypt::remove(arg1,arg2,arg3);
+    Crypt::remove(arg1,arg2,arg3,arg4);
   }
   catch(CSPException &_e) {
     PyErr_SetString(PyExc_SystemError, (&_e)->msg);
@@ -7051,12 +7072,10 @@ SWIGINTERN PyObject *_wrap_Crypt_remove(PyObject *self, PyObject *args) {
   }
   
   resultobj = SWIG_Py_Void();
-  if (alloc1 == SWIG_NEWOBJ) delete[] buf1;
-  if (alloc3 == SWIG_NEWOBJ) delete[] buf3;
+  if (alloc4 == SWIG_NEWOBJ) delete[] buf4;
   return resultobj;
 fail:
-  if (alloc1 == SWIG_NEWOBJ) delete[] buf1;
-  if (alloc3 == SWIG_NEWOBJ) delete[] buf3;
+  if (alloc4 == SWIG_NEWOBJ) delete[] buf4;
   return NULL;
 }
 
@@ -13512,11 +13531,11 @@ fail:
 static PyMethodDef SwigMethods[] = {
 	 { (char *)"SWIG_PyInstanceMethod_New", (PyCFunction)SWIG_PyInstanceMethod_New, METH_O, NULL},
 	 { (char *)"Crypt_remove", _wrap_Crypt_remove, METH_VARARGS, (char *)"\n"
-		"Crypt_remove(container, type, name)\n"
+		"Crypt_remove(STRING, type, name)\n"
 		"\n"
 		"Parameters\n"
 		"----------\n"
-		"container: char *\n"
+		"STRING: BYTE *\n"
 		"type: DWORD\n"
 		"name: char *\n"
 		"\n"
@@ -15918,11 +15937,11 @@ SWIGINTERN PyMethodDef SwigPyBuiltin__Crypt_methods[] = {
 		"public_key()\n"
 		"" },
   { "remove", (PyCFunction) _wrap_Crypt_remove, METH_STATIC|METH_VARARGS, (char*) "\n"
-		"remove(container, type, name)\n"
+		"remove(STRING, type, name)\n"
 		"\n"
 		"Parameters\n"
 		"----------\n"
-		"container: char *\n"
+		"STRING: BYTE *\n"
 		"type: DWORD\n"
 		"name: char *\n"
 		"\n"
