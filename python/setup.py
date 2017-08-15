@@ -72,6 +72,7 @@ class SWIGCommand(Command):
                 '-python',
                 '-py3',
                 '-builtin',
+                '-threads',
                 '-c++',
                 '-o',
                 'cprocsp/csp_wrap_{0}.cxx'.format(arch),
@@ -128,7 +129,7 @@ csp = Extension('cprocsp._csp',
 
 setup(
     name='cryptoapy',
-    version='0.4.57',
+    version='0.4.58',
     author='Andrew Rodionoff',
     author_email='andviro@gmail.com',
     license='LGPL',
