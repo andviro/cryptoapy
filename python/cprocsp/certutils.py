@@ -17,8 +17,8 @@ else:
 
 
 def autopem(cert):
-    if cert[:3] == b'---':
-        s = ''.join(l for l in cert.splitlines() if not l.startswith('----'))
+    if cert[:4] == b'----':
+        s = b''.join(l for l in cert.splitlines() if not l.startswith(b'----'))
         return b64decode(s)
     else:
         return cert
