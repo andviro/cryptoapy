@@ -60,6 +60,7 @@ public:
     void set_password(char *pin, DWORD keyspec=AT_KEYEXCHANGE) throw(CSPException);
     void change_password(char *pin) throw (CSPException);
     void public_key(BYTE **s, DWORD *slen, DWORD keyspec=AT_KEYEXCHANGE) throw(CSPException);
+    Key *import_public_key_info(Cert *pcert) throw(CSPException);
 
     static void remove(BYTE *STRING, DWORD LENGTH, DWORD type, char *name) throw(CSPException, CSPNotFound);
 

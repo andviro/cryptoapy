@@ -189,6 +189,20 @@ Key *Crypt::get_key(DWORD keyspec) throw(CSPException, CSPNotFound)
     return new Key(this, hkey);
 }
 
+Key *Crypt::import_public_key_info(Cert *pcert) throw(CSPException)
+{
+    HCRYPTKEY hkey = 0;
+
+    LOG("Crypt::import_public_key_info(%x)\n", pcert);
+    
+    if (!CryptImportPublicKeyInfoEx(hprov, MY_ENC_TYPE, &(pcert->pcert->pCertInfo->SubjectPublicKeyInfo), 0, 0, NULL, &hkey)) {
+        DWORD err = GetLastError();
+        throw CSPException("Crypt.import_public_key_info: Couldn't acquire user public key", err);
+    }
+    LOG("Crypt::import_public_key_info: acquired key %u\n", hkey);
+    return new Key(this, hkey);
+}
+
 Key *Crypt::create_key(DWORD flags, DWORD keyspec) throw(CSPException)
 {
     HCRYPTKEY hkey = 0;

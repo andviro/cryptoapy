@@ -390,6 +390,11 @@ def encrypt(certs, data):
     return encrypted
 
 
+def encrypt_ehpem(cert):
+    cert = csp.Cert(autopem(cert))
+    ctx = csp.Crypt(b'', csp.PROV_GOST_2001_DH, csp.CRYPT_VERIFYCONTEXT, None)
+
+
 @retry
 def decrypt(data, thumb, cont=None, provider=None):
     """Дешифрование данных из сообщения
