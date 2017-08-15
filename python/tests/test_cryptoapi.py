@@ -191,6 +191,8 @@ def test_bind_to_container():
     cert = cryptoapi.get_certificate(get_test_thumb())
     assert cert
     assert cryptoapi.bind_cert_to_key(test_container, cert, local=test_local, store=True)
+    c = cryptoapi.get_certificate(cont=test_container)
+    assert c == cert
 
 
 msg = b'Ahahahahahahahahahahahahahahaahahahahhahahahahah!!!!!!111111'
