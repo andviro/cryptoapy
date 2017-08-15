@@ -1,32 +1,19 @@
 # coding: utf-8
 from __future__ import unicode_literals, print_function
 from . import csp
-from pyasn1.type import univ, useful, char, tag, constraint
+from pyasn1.type import univ, useful, char, tag, constraint, namedtype
 from pyasn1.codec.der import encoder
 from . import decoder
 from pyasn1_modules import rfc2459, rfc2315
 from base64 import b64decode
 import sys
 
-
-def monkeyPatchStr(self):
-    # XXX: unicode handling in pyasn1 is broken as of now
-    binData = bytes(bytearray(ord(x) for x in self))
-    return unicode(binData, self.encoding, 'replace')
-
-
 if sys.version_info >= (3,):
     unicode = str
     long = int
-    setattr(char.UTF8String, '__str__', monkeyPatchStr)
-    setattr(char.BMPString, '__str__', monkeyPatchStr)
-    setattr(char.UniversalString, '__str__', monkeyPatchStr)
 
 else:
     unicode = unicode
-    setattr(char.UTF8String, '__unicode__', monkeyPatchStr)
-    setattr(char.BMPString, '__unicode__', monkeyPatchStr)
-    setattr(char.UniversalString, '__unicode__', monkeyPatchStr)
 
 
 def autopem(cert):
@@ -95,7 +82,7 @@ class CertValidity(CertAttribute):
         val = univ.Sequence()
         for i, x in enumerate((not_before, not_after)):
             val.setComponentByPosition(i, useful.UTCTime(x.strftime('%y%m%d%H%M%SZ')))
-        super(CertValidity, self).__init__('1.2.643.2.4.1.1.1.1.2', [val])
+        super(CertValidity, self).__init__('1.2.643.2.4.1.1.1.1.2', val)
 
 
 class CertExtensions(CertAttribute):
@@ -107,7 +94,7 @@ class CertExtensions(CertAttribute):
         val = univ.SequenceOf()
         for i, ext in enumerate(exts):
             val.setComponentByPosition(i, ext.asn)
-        super(CertExtensions, self).__init__(csp.szOID_CERT_EXTENSIONS, [val])
+        super(CertExtensions, self).__init__(csp.szOID_CERT_EXTENSIONS, val)
 
 
 class CertExtension(object):
@@ -156,8 +143,10 @@ class KeyUsage(CertExtension):
 
 
 def _stupidAddress(s):
-    res = univ.Sequence()
-    res.setComponentByPosition(0, char.UTF8String(s))
+    res = univ.Sequence(componentType=namedtype.NamedTypes(
+        namedtype.NamedType('ub-postal-string',
+                            char.UTF8String())))
+    res.setComponentByName('ub-postal-string', char.UTF8String(s))
     return res
 
 
@@ -375,6 +364,7 @@ class PKCS7Msg(object):
         :data: @todo
 
         """
+        decoder.Decoder.supportIndefLength = True
         self.asn = decoder.decode(data, asn1Spec=rfc2315.ContentInfo())[0]
         self.contentType = {
             '1.2.840.113549.1.7.1': rfc2315.Data,
