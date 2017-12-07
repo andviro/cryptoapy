@@ -110,7 +110,7 @@ void CryptMsg::encrypt_data(BYTE *STRING, DWORD LENGTH, BYTE **s, DWORD *slen) t
 
     // Инициализация структуры с нулем.
     memset(&EncryptAlgorithm, 0, sizeof(CRYPT_ALGORITHM_IDENTIFIER));
-    //EncryptAlgorithm.pszObjId = OID_CipherVar_Default;
+//     EncryptAlgorithm.pszObjId = OID_CipherVar_Default;
     EncryptAlgorithm.pszObjId = (LPSTR)ENCRYPT_OID;
 
     // Инициализация структуры CRYPT_ENCRYPT_MESSAGE_PARA.
@@ -355,7 +355,7 @@ void CryptMsg::sign_data(BYTE *STRING, DWORD LENGTH, BYTE **s, DWORD *slen, Cert
     SigParams.dwMsgEncodingType = MY_ENCODING_TYPE;
     SigParams.pSigningCert = pCert;
     //SigParams.HashAlgorithm.pszObjId = szOID_RSA_SHA1RSA;
-    SigParams.HashAlgorithm.pszObjId = (LPSTR)szOID_CP_GOST_R3411;
+    SigParams.HashAlgorithm.pszObjId = (LPSTR)szOID_CP_GOST_R3411_12_256;
     SigParams.HashAlgorithm.Parameters.cbData = 0;
 
     SigParams.cMsgCert = 1;

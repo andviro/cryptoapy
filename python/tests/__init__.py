@@ -5,7 +5,7 @@ import os
 from base64 import b64encode
 
 from pyasn1_modules.rfc2459 import id_at_commonName as CN
-from cprocsp import csp, cryptoapi
+from cprocsp import csp, cryptoapi, PROV_GOST
 from binascii import hexlify
 
 test_local = True

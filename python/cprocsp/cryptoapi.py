@@ -368,7 +368,10 @@ def check_signature(cert, sig, data, cont=None, provider=None):
 
     for i in range(sign.num_signers()):
         isign = csp.CertInfo(sign, i)
-        if not cs.get_cert_by_info(isign):
+        try:
+            if not cs.get_cert_by_info(isign):
+                continue
+        except ValueError:
             continue
         return sign.verify_data(data, i)
     return False
