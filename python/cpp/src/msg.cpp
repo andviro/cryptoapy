@@ -111,7 +111,7 @@ void CryptMsg::encrypt_data(BYTE *STRING, DWORD LENGTH, BYTE **s, DWORD *slen) t
     // Инициализация структуры с нулем.
     memset(&EncryptAlgorithm, 0, sizeof(CRYPT_ALGORITHM_IDENTIFIER));
     //EncryptAlgorithm.pszObjId = OID_CipherVar_Default;
-    EncryptAlgorithm.pszObjId = (LPSTR)szOID_CP_GOST_28147;
+    EncryptAlgorithm.pszObjId = (LPSTR)ENCRYPT_OID;
 
     // Инициализация структуры CRYPT_ENCRYPT_MESSAGE_PARA.
     memset(&EncryptParams, 0, sizeof(EncryptParams));

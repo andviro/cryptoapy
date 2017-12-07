@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals, print_function
 
-from . import csp
+from . import csp, PROV_GOST
 from .certutils import Attributes, CertValidity, KeyUsage, EKU,\
     CertExtensions, SubjectAltName, CertificatePolicies, PKCS7Msg, \
     CertExtension, CertificateInfo, autopem, set_q_defaults
@@ -25,8 +25,11 @@ else:
 
 PROV_KC1_GR3410_2001 = str("Crypto-Pro GOST R 34.10-2001 KC1 CSP")
 PROV_KC2_GR3410_2001 = str("Crypto-Pro GOST R 34.10-2001 KC2 CSP")
+PROV_KC1_GR3410_2012 = str("Crypto-Pro GOST R 34.10-2012 KC1 CSP")
+PROV_KC2_GR3410_2012 = str("Crypto-Pro GOST R 34.10-2012 KC2 CSP")
 PROV_HSM = str("Crypto-Pro HSM CSP")
 PROV_GR3410_2001_HSM_LOCAL = str("Crypto-Pro GOST R 34.10-2001 HSM Local CSP")
+PROV_GR3410_2012_HSM_LOCAL = str("Crypto-Pro GOST R 34.10-2012 HSM Local CSP")
 
 
 # Обертка для функций, которые могут не сработать из-за длительного простоя
@@ -72,7 +75,7 @@ def _mkcontext(cont, provider, flags=None):
     if flags is None:
         flags = csp.CRYPT_VERIFYCONTEXT
 
-    return csp.Crypt(cont, csp.PROV_GOST_2001_DH, flags, provider)
+    return csp.Crypt(cont, PROV_GOST, flags, provider)
 
 
 def gen_key(cont, local=True, silent=False, provider=None):
@@ -95,13 +98,13 @@ def gen_key(cont, local=True, silent=False, provider=None):
     cont = _from_hex(cont)
 
     try:
-        ctx = csp.Crypt(cont, csp.PROV_GOST_2001_DH, silent_flag, provider)
+        ctx = csp.Crypt(cont, PROV_GOST, silent_flag, provider)
     except (ValueError, SystemError):
 
         if platform.system() == 'Linux' and provider != PROV_HSM and not cont.startswith(b'\\\\'):
             cont = b'\\\\.\\HDIMAGE\\' + cont
 
-        ctx = csp.Crypt(cont, csp.PROV_GOST_2001_DH, csp.CRYPT_NEWKEYSET |
+        ctx = csp.Crypt(cont, PROV_GOST, csp.CRYPT_NEWKEYSET |
                         silent_flag, provider)
 
     ctx.set_password(str(''), csp.AT_KEYEXCHANGE)
@@ -136,7 +139,7 @@ def remove_key(cont, local=True, provider=None):
     cont = _from_hex(cont)
     if provider is None:
         provider = PROV_HSM if not local else None
-    csp.Crypt.remove(cont, csp.PROV_GOST_2001_DH, provider)
+    csp.Crypt.remove(cont, PROV_GOST, provider)
     return True
 
 
@@ -180,7 +183,7 @@ def create_request(cont, params, local=True, provider=None, insert_zeroes=False)
     if provider is None:
         provider = PROV_HSM if not local else None
     cont = _from_hex(cont)
-    ctx = csp.Crypt(cont, csp.PROV_GOST_2001_DH, csp.CRYPT_SILENT, provider)
+    ctx = csp.Crypt(cont, PROV_GOST, csp.CRYPT_SILENT, provider)
     req = csp.CertRequest(ctx)
     set_q_defaults(params, insert_zeroes)
     req.set_subject(Attributes(params.get('Attributes', [])).encode())
@@ -390,11 +393,6 @@ def encrypt(certs, data):
     return encrypted
 
 
-def encrypt_ehpem(cert):
-    cert = csp.Cert(autopem(cert))
-    ctx = csp.Crypt(b'', csp.PROV_GOST_2001_DH, csp.CRYPT_VERIFYCONTEXT, None)
-
-
 @retry
 def decrypt(data, thumb, cont=None, provider=None):
     """Дешифрование данных из сообщения
@@ -528,7 +526,7 @@ class Hash(object):
         '''
         self._ctx = csp.Crypt(
             b'',
-            csp.PROV_GOST_2001_DH,
+            PROV_GOST,
             csp.CRYPT_VERIFYCONTEXT,
             None
         )
