@@ -2,7 +2,7 @@
 from __future__ import unicode_literals, print_function
 
 from pyasn1_modules.rfc2459 import id_at_commonName as CN
-from cprocsp import cryptoapi, certutils, csp
+from cprocsp import cryptoapi, certutils, csp, PROV_GOST
 import sys
 from binascii import hexlify
 from base64 import b64decode
@@ -322,7 +322,10 @@ def test_hash_digest_empty():
     h = cryptoapi.Hash(data)
     digest_str = hexlify(h.digest())
     print(digest_str)
-    assert digest_str == b'981e5f3ca30c841487830f84fb433e13ac1101569b9c13584ac483234cd656c0'
+    if PROV_GOST == csp.PROV_GOST_2001_DH:
+        assert digest_str == b'981e5f3ca30c841487830f84fb433e13ac1101569b9c13584ac483234cd656c0'
+        return
+    assert digest_str == b'3f539a213e97c802cc229d474c6aa32a825a360b2a933a949fd925208d9ce1bb'
 
 
 def test_hash_sign_verify():
@@ -362,7 +365,11 @@ def test_hmac():
     key = b'1234'
     data = b'The quick brown fox jumps over the lazy dog'
     mac = cryptoapi.HMAC(key, data)
-    assert mac.hexdigest() == b'7b61bdd0c74c9eb391c640ccff001ff0ac533bcdff2e0f063e453c2eb8d7508d'
+    if PROV_GOST == csp.PROV_GOST_2001_DH:
+        assert mac.hexdigest() == b'7b61bdd0c74c9eb391c640ccff001ff0ac533bcdff2e0f063e453c2eb8d7508d'
+        return
+    else:
+        assert mac.hexdigest() == b'1ebbf47b9e470d2d8eec9cfb8dea614d36ef189562219104d9b3a77ac20f6d21'
 
 
 def test_pkcs7_info_from_file():

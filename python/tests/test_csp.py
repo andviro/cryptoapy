@@ -675,7 +675,10 @@ def test_hash_digest_empty():
     hash1 = csp.Hash(ctx, data)
     digest_str = hexlify(hash1.digest())
     print(digest_str)
-    assert digest_str == b'981e5f3ca30c841487830f84fb433e13ac1101569b9c13584ac483234cd656c0'
+    if PROV_GOST == csp.PROV_GOST_2001_DH:
+        assert digest_str == b'981e5f3ca30c841487830f84fb433e13ac1101569b9c13584ac483234cd656c0'
+        return
+    assert digest_str == b'3f539a213e97c802cc229d474c6aa32a825a360b2a933a949fd925208d9ce1bb'
 
 
 def test_hash_digest_string():
@@ -689,7 +692,10 @@ def test_hash_digest_string():
     hash1 = csp.Hash(ctx, data)
     digest_str = hexlify(hash1.digest())
     print(digest_str)
-    assert digest_str == b'9004294a361a508c586fe53d1f1b02746765e71b765472786e4770d565830a76'
+    if PROV_GOST == csp.PROV_GOST_2001_DH:
+        assert digest_str == b'9004294a361a508c586fe53d1f1b02746765e71b765472786e4770d565830a76'
+        return
+    assert b'3e7dea7f2384b6c5a3d0e24aaa29c05e89ddd762145030ec22c71a6db8b2c1f4'
 
 
 def test_sign_hash():
@@ -738,7 +744,12 @@ def test_hash_hmac():
     data = b'The quick brown fox jumps over the lazy dog'
     hash1 = csp.Hash(ctx, data, key)
     digest_str = hexlify(hash1.digest())
-    assert digest_str == b'7b61bdd0c74c9eb391c640ccff001ff0ac533bcdff2e0f063e453c2eb8d7508d'
+    print(digest_str)
+    if PROV_GOST == csp.PROV_GOST_2001_DH:
+        assert digest_str == b'7b61bdd0c74c9eb391c640ccff001ff0ac533bcdff2e0f063e453c2eb8d7508d'
+        return
+    else:
+        assert digest_str == b'1ebbf47b9e470d2d8eec9cfb8dea614d36ef189562219104d9b3a77ac20f6d21'
 
 
 def test_import_public_key_info():
@@ -748,5 +759,5 @@ def test_import_public_key_info():
     pkey = context.import_public_key_info(cert)
     assert pkey
     keyBlob = pkey.encode(None)
-    print(keyBlob)
-    assert len(keyBlob) == 100
+#      print(keyBlob)
+    assert len(keyBlob) == 101
