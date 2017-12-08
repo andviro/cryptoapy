@@ -2,7 +2,7 @@
 from __future__ import unicode_literals, print_function
 
 from pyasn1_modules.rfc2459 import id_at_commonName as CN
-from cprocsp import cryptoapi, certutils, csp
+from cprocsp import cryptoapi, certutils, csp, PROV_GOST
 import sys
 from binascii import hexlify
 from base64 import b64decode
@@ -18,6 +18,22 @@ else:
     unicode = unicode
 
 TEST_ALL = os.environ.get('TEST_ALL', None)
+
+
+def test_autopem():
+    pem = b'''-----BEGIN CERTIFICATE-----
+MIIBfDCCATagAwIBAgIJAK94OSlzVBsWMA0GCSqGSIb3DQEBBQUAMBYxFDASBgNV
+BAMTC3BlbS5pbnZhbGlkMB4XDTEzMDcxNzE0NDAyMFoXDTIzMDcxNTE0NDAyMFow
+FjEUMBIGA1UEAxMLcGVtLmludmFsaWQwTDANBgkqhkiG9w0BAQEFAAM7ADA4AjEA
+vtIM2QADJDHcqxZugx7MULbenrNUFrmoMDfEaedYveWY3wBxOw642L4nFWxN/fwL
+AgMBAAGjdzB1MB0GA1UdDgQWBBQ4O0ZSUfTA6C+Y+QZ3MpeMhysxYjBGBgNVHSME
+PzA9gBQ4O0ZSUfTA6C+Y+QZ3MpeMhysxYqEapBgwFjEUMBIGA1UEAxMLcGVtLmlu
+dmFsaWSCCQCveDkpc1QbFjAMBgNVHRMEBTADAQH/MA0GCSqGSIb3DQEBBQUAAzEA
+XwKIF+Kf4OhcqbdQp253HG2KBt/WZwvNLo/bBlkrGYwfacbGuWT8nKJG70ujdKKf
+-----END CERTIFICATE-----'''
+
+    cert = certutils.autopem(pem)
+    assert len(cert) == 384
 
 
 def test_address_oid():
@@ -171,6 +187,14 @@ def test_get_certificate_cont_provider():
     assert cert_by_thumb == cert_by_name
 
 
+def test_bind_to_container():
+    cert = cryptoapi.get_certificate(get_test_thumb())
+    assert cert
+    assert cryptoapi.bind_cert_to_key(test_container, cert, local=test_local, store=True)
+    c = cryptoapi.get_certificate(cont=test_container)
+    assert c == cert
+
+
 msg = b'Ahahahahahahahahahahahahahahaahahahahhahahahahah!!!!!!111111'
 
 
@@ -298,7 +322,10 @@ def test_hash_digest_empty():
     h = cryptoapi.Hash(data)
     digest_str = hexlify(h.digest())
     print(digest_str)
-    assert digest_str == b'981e5f3ca30c841487830f84fb433e13ac1101569b9c13584ac483234cd656c0'
+    if PROV_GOST == csp.PROV_GOST_2001_DH:
+        assert digest_str == b'981e5f3ca30c841487830f84fb433e13ac1101569b9c13584ac483234cd656c0'
+        return
+    assert digest_str == b'3f539a213e97c802cc229d474c6aa32a825a360b2a933a949fd925208d9ce1bb'
 
 
 def test_hash_sign_verify():
@@ -338,7 +365,11 @@ def test_hmac():
     key = b'1234'
     data = b'The quick brown fox jumps over the lazy dog'
     mac = cryptoapi.HMAC(key, data)
-    assert mac.hexdigest() == b'7b61bdd0c74c9eb391c640ccff001ff0ac533bcdff2e0f063e453c2eb8d7508d'
+    if PROV_GOST == csp.PROV_GOST_2001_DH:
+        assert mac.hexdigest() == b'7b61bdd0c74c9eb391c640ccff001ff0ac533bcdff2e0f063e453c2eb8d7508d'
+        return
+    else:
+        assert mac.hexdigest() == b'1ebbf47b9e470d2d8eec9cfb8dea614d36ef189562219104d9b3a77ac20f6d21'
 
 
 def test_pkcs7_info_from_file():

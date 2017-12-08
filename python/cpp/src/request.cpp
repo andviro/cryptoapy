@@ -58,7 +58,7 @@ CertRequest::CertRequest(Crypt *ctx) throw (CSPException) : ctx(ctx) {
     CertReqInfo.dwVersion = CERT_REQUEST_V1;
 
     ZeroMemory(&SigAlg, sizeof(SigAlg));
-    SigAlg.pszObjId = (char *)szOID_CP_GOST_R3411_R3410EL;
+    SigAlg.pszObjId = (char *)CERTSIGN_OID;
 
     pbPublicKeyInfo = NULL;
     bool res = CryptExportPublicKeyInfo( ctx->hprov, AT_KEYEXCHANGE, MY_ENC_TYPE,

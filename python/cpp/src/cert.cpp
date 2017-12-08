@@ -80,7 +80,7 @@ Cert *Cert::self_sign(Crypt *ctx, BYTE *STRING, DWORD LENGTH)  throw(CSPExceptio
     CRYPT_ALGORITHM_IDENTIFIER algid;
     DWORD hasi = sizeof(algid);
     memset(&algid, 0, hasi);
-    algid.pszObjId = (char *)szOID_CP_GOST_R3411;
+    algid.pszObjId = (char *)SELFSIGN_OID;
 
     PCCERT_CONTEXT pc = CertCreateSelfSignCertificate(ctx->hprov,
                         &issuer,

@@ -6,6 +6,7 @@
 %feature("python:slot", "tp_iternext", functype="iternextfunc") CryptIter::next;
 %newobject Crypt::get_key;
 %newobject Crypt::import_key;
+%newobject Crypt::import_public_key_info;
 %newobject Crypt::create_key;
 %newobject Crypt::name;
 %newobject Crypt::prov_name;

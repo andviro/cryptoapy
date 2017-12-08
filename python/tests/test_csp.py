@@ -1,7 +1,7 @@
 # coding: utf-8
 from __future__ import unicode_literals, print_function
 
-from cprocsp import csp
+from cprocsp import csp, PROV_GOST
 from nose.tools import raises
 import sys
 import os
@@ -36,7 +36,7 @@ def test_context_simple():
     '''
     context = csp.Crypt(
         b'',
-        csp.PROV_GOST_2001_DH,
+        PROV_GOST,
         csp.CRYPT_VERIFYCONTEXT,
         test_provider
     )
@@ -51,7 +51,7 @@ def test_context_named_keystore():
     '''
     context = csp.Crypt(
         test_container,
-        csp.PROV_GOST_2001_DH,
+        PROV_GOST,
         0,
         test_provider,
     )
@@ -63,7 +63,7 @@ def test_context_named_keystore():
 def test_context_not_found():
     ctx = csp.Crypt(
         b"some_wrong_ctx",
-        csp.PROV_GOST_2001_DH,
+        PROV_GOST,
         csp.CRYPT_SILENT,
         test_provider,
     )
@@ -91,9 +91,9 @@ def test_export_import_pubkey():
     `Key` для расшифровки закрытого ключа.
 
     '''
-    context = csp.Crypt(test_container, csp.PROV_GOST_2001_DH, 0, test_provider)
+    context = csp.Crypt(test_container, PROV_GOST, 0, test_provider)
 
-    recipient = csp.Crypt(b'', csp.PROV_GOST_2001_DH, csp.CRYPT_VERIFYCONTEXT, test_provider)
+    recipient = csp.Crypt(b'', PROV_GOST, csp.CRYPT_VERIFYCONTEXT, test_provider)
 
     sk = context.get_key()
     assert sk
@@ -101,50 +101,53 @@ def test_export_import_pubkey():
     pk = recipient.import_key(sk.encode())
     assert pk
 
-# def test_create_named_container():
-    #'''
-    # Новый контейнер ключей может быть создан вызовом функции `Context` с
-    # флагом `csp.CRYPT_NEWKEYSET`. Первый параметр должен при этом содержать
-    # полное имя создаваемого контейнера. Хранилище ключей создается пустым.
-    # Идентифицирует контейнер имя, которое возвращается функцией `Crypt.name()`.
-    # Создать ключ в новом хранилище можно функцией `Crypt.create_key(flags, keyspec)`.
-    # Параметр `flags` может принимать значение `csp.CRYPT_EXPORTABLE`, что
-    # делает ключ извлекаемым или `0`, тогда ключ нельзя будет экспортировать
-    # функцией `Key.encode()`. Параметр `keyspec` принимает значение
-    #`csp.AT_KEYEXCHANGE` или `csp.AT_SIGNATURE`.
-    #'''
-    # ctx = csp.Context('new_test', csp.PROV_GOST_2001_DH, 0)
-    # if ctx is None:
-    # ctx = csp.Context(r'\\.\hdimage\new_test', csp.PROV_GOST_2001_DH, csp.CRYPT_NEWKEYSET)
-    # assert ctx
-    # name = ctx.name()
-    # assert name == 'new_test'
-    # key = ctx.get_key()
-    # if key is None:
-    # key = ctx.create_key(csp.CRYPT_EXPORTABLE)
-    # ekey = ctx.get_key(csp.AT_KEYEXCHANGE)
-    # if ekey is None:
-    # ekey = ctx.create_key(csp.CRYPT_EXPORTABLE, csp.AT_KEYEXCHANGE)
-    # assert ekey
-    # return name
-# def test_export_import_private_key():
-    # name = test_create_named_container()
-    # sender = csp.Context(name, csp.PROV_GOST_2001_DH, 0)
-    # receiver = csp.Context("test", csp.PROV_GOST_2001_DH, 0)
-    # rec_key = receiver.get_key(csp.AT_KEYEXCHANGE)
-    # assert rec_key
-    # sender_key = sender.get_key(csp.AT_KEYEXCHANGE)
-    # assert sender_key
-    # receiver_pub = sender.import_key(rec_key.encode(), sender_key)
-    # assert receiver_pub
-    # sender_priv = sender_key.encode_key(receiver_pub)
-    # receiver_new_key = receiver.import_key(sender_priv, rec_key)
-    # assert receiver_new_key
-    # Для удаления ключевого контейнера функции `csp.Context()` в числе флагов
-    # передается `csp.CRYPT_DELETEKEYSET`. При этом она возвращает `None`, т.к.
-    # контекст не с чем связывать.
-    # res = csp.Context(name, csp.PROV_GOST_2001_DH, csp.CRYPT_DELETEKEYSET)
-    # assert res is None
+#  def test_create_named_container():
+#      '''
+#      Новый контейнер ключей может быть создан вызовом функции `Context` с
+#      флагом `csp.CRYPT_NEWKEYSET`. Первый параметр должен при этом содержать
+#      полное имя создаваемого контейнера. Хранилище ключей создается пустым.
+#      Идентифицирует контейнер имя, которое возвращается функцией `Crypt.name()`.
+#      Создать ключ в новом хранилище можно функцией `Crypt.create_key(flags, keyspec)`.
+#      Параметр `flags` может принимать значение `csp.CRYPT_EXPORTABLE`, что
+#      делает ключ извлекаемым или `0`, тогда ключ нельзя будет экспортировать
+#      функцией `Key.encode()`. Параметр `keyspec` принимает значение
+#      `csp.AT_KEYEXCHANGE` или `csp.AT_SIGNATURE`.
+#      '''
+#      ctx = csp.Context('new_test', PROV_GOST, 0)
+#      if ctx is None:
+#          ctx = csp.Context(r'\\.\hdimage\new_test', PROV_GOST, csp.CRYPT_NEWKEYSET)
+#      assert ctx
+#      name = ctx.name()
+#      assert name == 'new_test'
+#      key = ctx.get_key()
+#      if key is None:
+#          key = ctx.create_key(csp.CRYPT_EXPORTABLE)
+#      ekey = ctx.get_key(csp.AT_KEYEXCHANGE)
+#      if ekey is None:
+#          ekey = ctx.create_key(csp.CRYPT_EXPORTABLE, csp.AT_KEYEXCHANGE)
+#      assert ekey
+#      return name
+#
+#
+#  def test_export_import_private_key():
+#      name = test_create_named_container()
+#      sender = csp.Context(name, PROV_GOST, 0)
+#      receiver = csp.Context("test", PROV_GOST, 0)
+#      rec_key = receiver.get_key(csp.AT_KEYEXCHANGE)
+#      assert rec_key
+#      sender_key = sender.get_key(csp.AT_KEYEXCHANGE)
+#      assert sender_key
+#      receiver_pub = sender.import_key(rec_key.encode(), sender_key)
+#      assert receiver_pub
+#      sender_priv = sender_key.encode_key(receiver_pub)
+#      receiver_new_key = receiver.import_key(sender_priv, rec_key)
+#      assert receiver_new_key
+#
+#      # Для удаления ключевого контейнера функции `csp.Context()` в числе флагов
+#      # передается `csp.CRYPT_DELETEKEYSET`. При этом она возвращает `None`, т.к.
+#      # контекст не с чем связывать.
+#      res = csp.Context(name, PROV_GOST, csp.CRYPT_DELETEKEYSET)
+#      assert res is None
 
 
 def test_store():
@@ -212,7 +215,7 @@ def test_cert_from_data():
 
 
 def test_store_key():
-    context = csp.Crypt(test_container, csp.PROV_GOST_2001_DH, 0, test_provider)
+    context = csp.Crypt(test_container, PROV_GOST, 0, test_provider)
     key = context.get_key()
     certdata = test_extract_cert()
     newc = csp.Cert(certdata)
@@ -351,7 +354,7 @@ def test_sign_data():
     '''
     ctx = csp.Crypt(
         test_container,
-        csp.PROV_GOST_2001_DH,
+        PROV_GOST,
         0, test_provider
     )
     cs = csp.CertStore(ctx, b"MY")
@@ -372,7 +375,7 @@ def test_detached_sign():
     '''
     ctx = csp.Crypt(
         test_container,
-        csp.PROV_GOST_2001_DH,
+        PROV_GOST,
         0,
         test_provider
     )
@@ -407,7 +410,7 @@ def test_msg_signatures():
     '''
     ctx = csp.Crypt(
         b'',
-        csp.PROV_GOST_2001_DH,
+        PROV_GOST,
         csp.CRYPT_VERIFYCONTEXT,
         test_provider
     )
@@ -458,7 +461,7 @@ def test_detached_sign2():
     '''
     ctx = csp.Crypt(
         test_container,
-        csp.PROV_GOST_2001_DH,
+        PROV_GOST,
         0,
         test_provider
     )
@@ -648,7 +651,7 @@ def test_hash_digest_random():
     '''
     ctx = csp.Crypt(
         b'',
-        csp.PROV_GOST_2001_DH,
+        PROV_GOST,
         csp.CRYPT_VERIFYCONTEXT,
         test_provider
     )
@@ -664,7 +667,7 @@ def test_hash_digest_random():
 def test_hash_digest_empty():
     ctx = csp.Crypt(
         b'',
-        csp.PROV_GOST_2001_DH,
+        PROV_GOST,
         csp.CRYPT_VERIFYCONTEXT,
         test_provider
     )
@@ -672,13 +675,16 @@ def test_hash_digest_empty():
     hash1 = csp.Hash(ctx, data)
     digest_str = hexlify(hash1.digest())
     print(digest_str)
-    assert digest_str == b'981e5f3ca30c841487830f84fb433e13ac1101569b9c13584ac483234cd656c0'
+    if PROV_GOST == csp.PROV_GOST_2001_DH:
+        assert digest_str == b'981e5f3ca30c841487830f84fb433e13ac1101569b9c13584ac483234cd656c0'
+        return
+    assert digest_str == b'3f539a213e97c802cc229d474c6aa32a825a360b2a933a949fd925208d9ce1bb'
 
 
 def test_hash_digest_string():
     ctx = csp.Crypt(
         b'',
-        csp.PROV_GOST_2001_DH,
+        PROV_GOST,
         csp.CRYPT_VERIFYCONTEXT,
         test_provider
     )
@@ -686,7 +692,10 @@ def test_hash_digest_string():
     hash1 = csp.Hash(ctx, data)
     digest_str = hexlify(hash1.digest())
     print(digest_str)
-    assert digest_str == b'9004294a361a508c586fe53d1f1b02746765e71b765472786e4770d565830a76'
+    if PROV_GOST == csp.PROV_GOST_2001_DH:
+        assert digest_str == b'9004294a361a508c586fe53d1f1b02746765e71b765472786e4770d565830a76'
+        return
+    assert b'3e7dea7f2384b6c5a3d0e24aaa29c05e89ddd762145030ec22c71a6db8b2c1f4'
 
 
 def test_sign_hash():
@@ -700,7 +709,7 @@ def test_sign_hash():
 def test_verify_hash():
     ctx = csp.Crypt(
         b'',
-        csp.PROV_GOST_2001_DH,
+        PROV_GOST,
         csp.CRYPT_VERIFYCONTEXT,
         test_provider
     )
@@ -714,7 +723,7 @@ def test_verify_hash():
 def test_derive_key():
     ctx = csp.Crypt(
         b'',
-        csp.PROV_GOST_2001_DH,
+        PROV_GOST,
         csp.CRYPT_VERIFYCONTEXT,
         test_provider
     )
@@ -728,11 +737,27 @@ def test_hash_hmac():
     key = test_derive_key()
     ctx = csp.Crypt(
         b'',
-        csp.PROV_GOST_2001_DH,
+        PROV_GOST,
         csp.CRYPT_VERIFYCONTEXT,
         test_provider
     )
     data = b'The quick brown fox jumps over the lazy dog'
     hash1 = csp.Hash(ctx, data, key)
     digest_str = hexlify(hash1.digest())
-    assert digest_str == b'7b61bdd0c74c9eb391c640ccff001ff0ac533bcdff2e0f063e453c2eb8d7508d'
+    print(digest_str)
+    if PROV_GOST == csp.PROV_GOST_2001_DH:
+        assert digest_str == b'7b61bdd0c74c9eb391c640ccff001ff0ac533bcdff2e0f063e453c2eb8d7508d'
+        return
+    else:
+        assert digest_str == b'1ebbf47b9e470d2d8eec9cfb8dea614d36ef189562219104d9b3a77ac20f6d21'
+
+
+def test_import_public_key_info():
+    context = csp.Crypt(test_container, PROV_GOST, 0, test_provider)
+    cs = csp.CertStore(None, b"MY")
+    cert = list(cs.find_by_name(test_cn))[0]
+    pkey = context.import_public_key_info(cert)
+    assert pkey
+    keyBlob = pkey.encode(None)
+#      print(keyBlob)
+    assert len(keyBlob) == 101

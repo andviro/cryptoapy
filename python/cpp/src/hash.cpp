@@ -9,7 +9,7 @@ void Hash::init(Crypt *ctx, Key *key) throw(CSPException)
     pkey = 0;
     if(!CryptCreateHash(
         ctx->hprov,
-        (key? CALG_GR3411_HMAC : CALG_GR3411), 
+        (key? CALG_GR3411_2012_256_HMAC: CALG_GR3411_2012_256), 
         (key? key->hkey : 0), 
         0, 
         &hhash)) 
