@@ -748,5 +748,5 @@ def test_import_public_key_info():
     pkey = context.import_public_key_info(cert)
     assert pkey
     keyBlob = pkey.encode(None)
-    print(len(keyBlob))
+    print(keyBlob)
     assert len(keyBlob) == 100
