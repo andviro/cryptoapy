@@ -258,7 +258,7 @@ def get_certificate(thumb=None, name=None, cont=None, provider=None):
     if thumb is not None:
         res = list(cs.find_by_thumb(unhexlify(thumb)))
     else:
-        res = list(cs.find_by_name(bytes(name)))
+        res = list(c for c in cs.find_by_name(bytes(name)) if csp.CertInfo(c).name() == 'CN=' + name)
     assert len(res), 'Cert not found'
     cert = res[0]
     return cert.extract()
