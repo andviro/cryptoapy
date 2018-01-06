@@ -16,11 +16,6 @@
 
 #define MY_ENC_TYPE (X509_ASN_ENCODING | PKCS_7_ASN_ENCODING)
 #define ENCRYPT_OID szOID_CP_GOST_28147
-#if 0
-#define CERTSIGN_OID szOID_CP_GOST_R3411_R3410EL
-#else
-#define CERTSIGN_OID szOID_CP_GOST_R3411_12_256_R3410
-#endif
 void debug_log(char *s, ...);
 #ifdef DEBUG_LOG
 #    define LOG debug_log

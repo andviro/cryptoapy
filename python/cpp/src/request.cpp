@@ -57,9 +57,6 @@ CertRequest::CertRequest(Crypt *ctx) throw (CSPException) : ctx(ctx) {
     ZeroMemory(&CertReqInfo, sizeof(CertReqInfo));
     CertReqInfo.dwVersion = CERT_REQUEST_V1;
 
-    ZeroMemory(&SigAlg, sizeof(SigAlg));
-    SigAlg.pszObjId = (char *)CERTSIGN_OID;
-
     pbPublicKeyInfo = NULL;
     bool res = CryptExportPublicKeyInfo( ctx->hprov, AT_KEYEXCHANGE, MY_ENC_TYPE,
             NULL, &cbPublicKeyInfo );
@@ -75,6 +72,16 @@ CertRequest::CertRequest(Crypt *ctx) throw (CSPException) : ctx(ctx) {
     CertReqInfo.SubjectPublicKeyInfo = *pbPublicKeyInfo;
     CertReqInfo.cAttribute = 0;
     CertReqInfo.rgAttribute = NULL;
+    ZeroMemory(&SigAlg, sizeof(SigAlg));
+    if (0 == strcmp(CertReqInfo.SubjectPublicKeyInfo.Algorithm.pszObjId, szOID_CP_GOST_R3410EL)) {
+        SigAlg.pszObjId = (char *)szOID_CP_GOST_R3411_R3410EL;
+        return;
+    }
+    if (0 == strcmp(CertReqInfo.SubjectPublicKeyInfo.Algorithm.pszObjId, szOID_CP_GOST_R3410_12_512)) {
+        SigAlg.pszObjId = (char *)szOID_CP_GOST_R3411_12_512_R3410;
+        return;
+    }
+    SigAlg.pszObjId = (char *)szOID_CP_GOST_R3411_12_256_R3410;
 }
 
 CertRequest::~CertRequest() throw (CSPException) {
