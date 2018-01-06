@@ -6,6 +6,17 @@
 
 using namespace std;
 
+char *sigAlg(char *pubKeyAlg) {
+    if (0 == strcmp(pubKeyAlg, szOID_CP_GOST_R3410EL)) {
+        return (char *)szOID_CP_GOST_R3411_R3410EL;
+    }
+    if (0 == strcmp(pubKeyAlg, szOID_CP_GOST_R3410_12_512)) {
+        return (char *)szOID_CP_GOST_R3411_12_512_R3410;
+    }
+    return (char *)szOID_CP_GOST_R3411_12_256_R3410;
+}
+
+
 int CertRequest::add_attribute(BYTE *STRING, DWORD LENGTH) throw (CSPException)
 {
     CRYPT_ATTRIBUTE *pa;
@@ -73,15 +84,7 @@ CertRequest::CertRequest(Crypt *ctx) throw (CSPException) : ctx(ctx) {
     CertReqInfo.cAttribute = 0;
     CertReqInfo.rgAttribute = NULL;
     ZeroMemory(&SigAlg, sizeof(SigAlg));
-    if (0 == strcmp(CertReqInfo.SubjectPublicKeyInfo.Algorithm.pszObjId, szOID_CP_GOST_R3410EL)) {
-        SigAlg.pszObjId = (char *)szOID_CP_GOST_R3411_R3410EL;
-        return;
-    }
-    if (0 == strcmp(CertReqInfo.SubjectPublicKeyInfo.Algorithm.pszObjId, szOID_CP_GOST_R3410_12_512)) {
-        SigAlg.pszObjId = (char *)szOID_CP_GOST_R3411_12_512_R3410;
-        return;
-    }
-    SigAlg.pszObjId = (char *)szOID_CP_GOST_R3411_12_256_R3410;
+    SigAlg.pszObjId = sigAlg(CertReqInfo.SubjectPublicKeyInfo.Algorithm.pszObjId);
 }
 
 CertRequest::~CertRequest() throw (CSPException) {
