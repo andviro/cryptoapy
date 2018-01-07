@@ -3,14 +3,37 @@
 #include "cert.hpp"
 #include "key.hpp"
 
+ALG_ID hashCAlg(char *pubKeyAlg) {
+    if (0 == strcmp(pubKeyAlg, szOID_CP_GOST_R3410EL)) {
+        return CALG_GR3411;
+    }
+    if (0 == strcmp(pubKeyAlg, szOID_CP_GOST_R3410_12_512)) {
+        return CALG_GR3411_2012_512;
+    }
+    return CALG_GR3411_2012_256;
+}
+
 void Hash::init(Crypt *ctx, Key *key) throw(CSPException)
 {
+    ALG_ID     Algid = CALG_GR3411_2012_256;
+    HCRYPTKEY  hKey = 0;
+    DWORD slen = sizeof(Algid);
+    if (key) {
+        hKey = key->hkey;
+        if (!CryptGetKeyParam( hKey, KP_ALGID, (BYTE *)&Algid, &slen, 0)) {
+            throw CSPException("Hash::init() failed getting key param");
+        }
+    } else {
+        if (ctx->parent) {
+            Algid = hashCAlg(ctx->parent->pcert->pCertInfo->SubjectPublicKeyInfo.Algorithm.pszObjId);
+        }
+    }
     parent = 0;
     pkey = 0;
     if(!CryptCreateHash(
         ctx->hprov,
-        (key? CALG_GR3411_2012_256_HMAC: CALG_GR3411_2012_256), 
-        (key? key->hkey : 0), 
+        Algid, 
+        hKey, 
         0, 
         &hhash)) 
     {
@@ -146,7 +169,7 @@ void Hash::sign(BYTE **s, DWORD *slen, DWORD dwKeyspec) throw(CSPException)
  */
 bool Hash::verify(Cert *cert, BYTE *STRING, DWORD LENGTH) throw (CSPException)
 {
-    HCRYPTKEY hPubKey = NULL;
+    HCRYPTKEY hPubKey = 0;
     // Get the public key from the certificate
     if (!CryptImportPublicKeyInfo(
         parent->hprov, 

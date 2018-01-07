@@ -695,7 +695,7 @@ def test_hash_digest_string():
     if PROV_GOST == csp.PROV_GOST_2001_DH:
         assert digest_str == b'9004294a361a508c586fe53d1f1b02746765e71b765472786e4770d565830a76'
         return
-    assert b'3e7dea7f2384b6c5a3d0e24aaa29c05e89ddd762145030ec22c71a6db8b2c1f4'
+    assert digest_str == b'3e7dea7f2384b6c5a3d0e24aaa29c05e89ddd762145030ec22c71a6db8b2c1f4'
 
 
 def test_sign_hash():
