@@ -3,36 +3,24 @@
 #include "cert.hpp"
 #include "key.hpp"
 
-ALG_ID hashCAlg(char *pubKeyAlg) {
-    if (0 == strcmp(pubKeyAlg, szOID_CP_GOST_R3410EL)) {
+ALG_ID hashCAlg(int length) {
+    if (2001 == length) {
         return CALG_GR3411;
     }
-    if (0 == strcmp(pubKeyAlg, szOID_CP_GOST_R3410_12_512)) {
+    if (512 == length) {
         return CALG_GR3411_2012_512;
     }
     return CALG_GR3411_2012_256;
 }
 
-void Hash::init(Crypt *ctx, Key *key) throw(CSPException)
+void Hash::init(Crypt *ctx, Key *key, int length) throw(CSPException)
 {
-    ALG_ID     Algid = CALG_GR3411_2012_256;
-    HCRYPTKEY  hKey = 0;
-    DWORD slen = sizeof(Algid);
-    if (key) {
-        hKey = key->hkey;
-        if (!CryptGetKeyParam( hKey, KP_ALGID, (BYTE *)&Algid, &slen, 0)) {
-            throw CSPException("Hash::init() failed getting key param");
-        }
-    } else {
-        if (ctx->parent) {
-            Algid = hashCAlg(ctx->parent->pcert->pCertInfo->SubjectPublicKeyInfo.Algorithm.pszObjId);
-        }
-    }
+    HCRYPTKEY  hKey = key? key->hkey: 0;
     parent = 0;
     pkey = 0;
     if(!CryptCreateHash(
         ctx->hprov,
-        Algid, 
+        hashCAlg(length), 
         hKey, 
         0, 
         &hhash)) 
@@ -75,15 +63,15 @@ void Hash::init(Crypt *ctx, Key *key) throw(CSPException)
  * * key -- `csp.Key`, если задан, хэш будет создан как HMAC
  *
  */
-Hash::Hash(Crypt *ctx, BYTE *STRING, DWORD LENGTH, Key *key) throw(CSPException)
+Hash::Hash(Crypt *ctx, BYTE *STRING, DWORD LENGTH, int length, Key *key) throw(CSPException)
 {
-    init(ctx, key);
+    init(ctx, key, length);
     this->update(STRING, LENGTH);
 }
 
-Hash::Hash(Crypt *ctx, Key *key) throw(CSPException)
+Hash::Hash(Crypt *ctx, int length, Key *key) throw(CSPException)
 {
-    init(ctx, key);
+    init(ctx, key, length);
 }
 
 Hash::~Hash() throw(CSPException)

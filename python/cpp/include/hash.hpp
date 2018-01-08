@@ -21,13 +21,13 @@ private:
     HCRYPTHASH hhash;
     Crypt *parent;
     Key *pkey;
-    void init(Crypt *ctx, Key *key) throw(CSPException);
+    void init(Crypt *ctx, Key *key, int length) throw(CSPException);
     HMAC_INFO   HmacInfo;
 protected:
     //
 public:
-    Hash(Crypt *ctx, BYTE *STRING, DWORD LENGTH, Key *key=0) throw(CSPException);
-    Hash(Crypt *ctx, Key *key=0) throw(CSPException);
+    Hash(Crypt *ctx, BYTE *STRING, DWORD LENGTH, int length=0, Key *key=0) throw(CSPException);
+    Hash(Crypt *ctx, int length=0, Key *key=0) throw(CSPException);
 
     virtual ~Hash() throw(CSPException);
 
