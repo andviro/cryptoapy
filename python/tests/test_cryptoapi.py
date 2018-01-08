@@ -2,7 +2,7 @@
 from __future__ import unicode_literals, print_function
 
 from pyasn1_modules.rfc2459 import id_at_commonName as CN
-from cprocsp import cryptoapi, certutils, csp, PROV_GOST
+from cprocsp import cryptoapi, certutils, csp
 import sys
 from binascii import hexlify
 from base64 import b64decode
@@ -319,10 +319,11 @@ def test_cert_key_id():
 
 def test_hash_digest_empty():
     data = b''
-    h = cryptoapi.Hash(data)
+    length = 0 if test_cn.endswith('2012') else 2001
+    h = cryptoapi.Hash(data, length)
     digest_str = hexlify(h.digest())
     print(digest_str)
-    if PROV_GOST == csp.PROV_GOST_2001_DH:
+    if length == 2001:
         assert digest_str == b'981e5f3ca30c841487830f84fb433e13ac1101569b9c13584ac483234cd656c0'
         return
     assert digest_str == b'3f539a213e97c802cc229d474c6aa32a825a360b2a933a949fd925208d9ce1bb'
@@ -333,31 +334,34 @@ def test_hash_sign_verify():
     bad_data = os.urandom(1024)
     thumb = get_test_thumb()
     cert = cryptoapi.get_certificate(thumb)
+    length = 0 if test_cn.endswith('2012') else 2001
 
-    h = cryptoapi.SignedHash(thumb, data)
+    h = cryptoapi.SignedHash(thumb, data, length)
     sig = h.sign()
 
-    good = cryptoapi.Hash(data)
+    good = cryptoapi.Hash(data, length)
     assert good.verify(cert, sig)
 
-    bad = cryptoapi.Hash(bad_data)
+    bad = cryptoapi.Hash(bad_data, length)
     assert not bad.verify(cert, sig)
 
 
 def test_hash_sign_verify_cont_provider():
     data = os.urandom(1024)
     bad_data = os.urandom(1024)
+    length = 0 if test_cn.endswith('2012') else 2001
 
     h = cryptoapi.SignedHash(None, data, cont=test_container,
+                             length=length,
                              provider=test_provider)
     sig = h.sign()
 
     cert = cryptoapi.get_certificate(None, cont=test_container,
                                      provider=test_provider)
     assert cert
-    good = cryptoapi.Hash(data)
+    good = cryptoapi.Hash(data, length)
     assert good.verify(cert, sig)
-    bad = cryptoapi.Hash(bad_data)
+    bad = cryptoapi.Hash(bad_data, length)
     assert not bad.verify(cert, sig)
 
 
@@ -365,11 +369,8 @@ def test_hmac():
     key = b'1234'
     data = b'The quick brown fox jumps over the lazy dog'
     mac = cryptoapi.HMAC(key, data)
-    if PROV_GOST == csp.PROV_GOST_2001_DH:
-        assert mac.hexdigest() == b'7b61bdd0c74c9eb391c640ccff001ff0ac533bcdff2e0f063e453c2eb8d7508d'
-        return
-    else:
-        assert mac.hexdigest() == b'1ebbf47b9e470d2d8eec9cfb8dea614d36ef189562219104d9b3a77ac20f6d21'
+    print(mac.hexdigest())
+    assert mac.hexdigest() == b'3e7dea7f2384b6c5a3d0e24aaa29c05e89ddd762145030ec22c71a6db8b2c1f4'
 
 
 def test_pkcs7_info_from_file():

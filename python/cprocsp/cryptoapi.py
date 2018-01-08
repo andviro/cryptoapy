@@ -517,11 +517,15 @@ class Hash(object):
 
     DIGEST_URI = "http://www.w3.org/2001/04/xmldsig-more#gostr3411"
 
-    def _init_hash(self, data, key=None):
-        self._hash = (csp.Hash(self._ctx, data, key)
-                      if data else csp.Hash(self._ctx, key))
+    def _init_hash(self, data, length=0, key=None):
+        if key is None:
+            self._hash = (csp.Hash(self._ctx, data, length)
+                          if data else csp.Hash(self._ctx, length))
+            return
+        self._hash = (csp.Hash(self._ctx, data, length, key)
+                      if data else csp.Hash(self._ctx, length, key))
 
-    def __init__(self, data=None):
+    def __init__(self, data=None, length=0, key=None):
         '''
         Инициализация хэша. Если присутствует параметр `data`, в него
         подгружаются начальные данные.
@@ -533,7 +537,7 @@ class Hash(object):
             csp.CRYPT_VERIFYCONTEXT,
             None
         )
-        self._init_hash(data)
+        self._init_hash(data, length, key)
 
     def update(self, data):
         '''
@@ -593,17 +597,17 @@ class HMAC(Hash):
 
     '''
 
-    def __init__(self, key, data=None):
+    def __init__(self, key, data=None, length=0):
         '''
         Инициализация HMAC-а. Помимо параметров базового класса, получает `key`
         -- байтовую строку с секретом
 
         '''
-        _keyhash = Hash(key)
+        _keyhash = Hash(data, length)
         _key = _keyhash._derive_key()
 
         self._ctx = _keyhash._ctx
-        self._init_hash(data, _key)
+        self._init_hash(data, length, _key)
 
 
 class SignedHash(Hash):
@@ -635,7 +639,7 @@ class SignedHash(Hash):
 
     SIGNATURE_URI = "http://www.w3.org/2001/04/xmldsig-more#gostr34102001-gostr3411"
 
-    def __init__(self, thumb, data=None, cont=None, provider=None):
+    def __init__(self, thumb, data=None, length=0, cont=None, provider=None):
         '''
         Инициализация хэша. Помимо параметров базового класса, получает `thumb`
         -- отпечаток сертификата для проверки подписи. Если None -- сертификат берется из контейнера.
@@ -652,7 +656,7 @@ class SignedHash(Hash):
             self._ctx = csp.Crypt(store_lst[0])
         else:
             self._ctx = ctx
-        self._init_hash(data)
+        self._init_hash(data, length)
 
     def sign(self):
         '''

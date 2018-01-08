@@ -8,8 +8,8 @@ from pyasn1_modules.rfc2459 import id_at_commonName as CN
 from cprocsp import csp, cryptoapi
 from binascii import hexlify
 
-# suffix = b'_2012'
-suffix = b''
+suffix = b'_2012'
+#  suffix = b''
 test_local = True
 test_provider = str("Crypto-Pro HSM CSP") if not test_local else None
 test_container = b'csp_test_keyset_hsm' if not test_local else b'csp_test_keyset' + suffix

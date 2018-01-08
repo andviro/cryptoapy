@@ -6022,6 +6022,64 @@ fail:
 }
 
 
+SWIGINTERN PyObject *_wrap_Crypt_parent_set(PyObject *self, PyObject *args) {
+  PyObject *resultobj = 0;
+  Crypt *arg1 = (Crypt *) 0 ;
+  Cert *arg2 = (Cert *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  void *argp2 = 0 ;
+  int res2 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:Crypt_parent_set",&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_Crypt, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Crypt_parent_set" "', argument " "1"" of type '" "Crypt *""'"); 
+  }
+  arg1 = reinterpret_cast< Crypt * >(argp1);
+  res2 = SWIG_ConvertPtr(obj1, &argp2,SWIGTYPE_p_Cert, SWIG_POINTER_DISOWN |  0 );
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "Crypt_parent_set" "', argument " "2"" of type '" "Cert *""'"); 
+  }
+  arg2 = reinterpret_cast< Cert * >(argp2);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    if (arg1) (arg1)->parent = arg2;
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Crypt_parent_get(PyObject *self, PyObject *args) {
+  PyObject *resultobj = 0;
+  Crypt *arg1 = (Crypt *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  Cert *result = 0 ;
+  
+  if (args && PyTuple_Check(args) && PyTuple_GET_SIZE(args) > 0) SWIG_exception_fail(SWIG_TypeError, "Crypt_parent_get takes no arguments");
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_Crypt, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Crypt_parent_get" "', argument " "1"" of type '" "Crypt *""'"); 
+  }
+  arg1 = reinterpret_cast< Crypt * >(argp1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (Cert *) ((arg1)->parent);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_Cert, 0 |  0 );
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
 SWIGINTERN int _wrap_new_Crypt__SWIG_0(PyObject *self, PyObject *args) {
   PyObject *resultobj = 0;
   BYTE *arg1 = (BYTE *) 0 ;
@@ -13754,14 +13812,98 @@ SWIGINTERN int _wrap_new_Hash__SWIG_0(PyObject *self, PyObject *args) {
   Crypt *arg1 = (Crypt *) 0 ;
   BYTE *arg2 = (BYTE *) 0 ;
   DWORD arg3 ;
-  Key *arg4 = (Key *) 0 ;
+  int arg4 ;
+  Key *arg5 = (Key *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
   char *cstr2 = NULL ;
   Py_ssize_t len2 = 0 ;
   int res2 = 1 ;
-  void *argp4 = 0 ;
-  int res4 = 0 ;
+  int val4 ;
+  int ecode4 = 0 ;
+  void *argp5 = 0 ;
+  int res5 = 0 ;
+  PyObject * obj1 = 0 ;
+  PyObject * obj2 = 0 ;
+  PyObject * obj3 = 0 ;
+  PyObject * obj4 = 0 ;
+  Hash *result = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OOOO:new_Hash",&obj1,&obj2,&obj3,&obj4)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj1, &argp1,SWIGTYPE_p_Crypt, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "new_Hash" "', argument " "1"" of type '" "Crypt *""'"); 
+  }
+  arg1 = reinterpret_cast< Crypt * >(argp1);
+#if py_version_hex>=0x03000000
+  if (PyBytes_Check(obj2))
+#else  
+  if (PyString_Check(obj2))
+#endif
+  {
+#if PY_VERSION_HEX>=0x03000000
+    res2 = PyBytes_AsStringAndSize(obj2, &cstr2, &len2);
+#else
+    res2 = PyString_AsStringAndSize(obj2, &cstr2, &len2);
+#endif
+    if (!cstr2) {
+      res2 = 1;
+    }
+    /*%#if PY_VERSION_HEX>=0x03000000*/
+    /*Py_XDECREF(obj2);*/
+    /*%#endif*/
+  } 
+  
+  if(res2){
+    SWIG_exception_fail(SWIG_ArgError(SWIG_TypeError), "in method '" "new_Hash" "', argument " "2"" of type '" "BYTE *""'");
+  } else {
+    arg2 = (BYTE *) cstr2;
+    arg3 = (DWORD) len2;
+  }
+  ecode4 = SWIG_AsVal_int(obj3, &val4);
+  if (!SWIG_IsOK(ecode4)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode4), "in method '" "new_Hash" "', argument " "4"" of type '" "int""'");
+  } 
+  arg4 = static_cast< int >(val4);
+  res5 = SWIG_ConvertPtr(obj4, &argp5,SWIGTYPE_p_Key, 0 |  0 );
+  if (!SWIG_IsOK(res5)) {
+    SWIG_exception_fail(SWIG_ArgError(res5), "in method '" "new_Hash" "', argument " "5"" of type '" "Key *""'"); 
+  }
+  arg5 = reinterpret_cast< Key * >(argp5);
+  try {
+    {
+      SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+      result = (Hash *)new Hash(arg1,arg2,arg3,arg4,arg5);
+      SWIG_PYTHON_THREAD_END_ALLOW;
+    }
+  }
+  catch(CSPException &_e) {
+    PyErr_SetString(PyExc_SystemError, (&_e)->msg);
+    SWIG_fail;
+    
+  }
+  
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_Hash, SWIG_BUILTIN_INIT |  0 );
+  result->ref();
+  return resultobj == Py_None ? -1 : 0;
+fail:
+  return -1;
+}
+
+
+SWIGINTERN int _wrap_new_Hash__SWIG_1(PyObject *self, PyObject *args) {
+  PyObject *resultobj = 0;
+  Crypt *arg1 = (Crypt *) 0 ;
+  BYTE *arg2 = (BYTE *) 0 ;
+  DWORD arg3 ;
+  int arg4 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  char *cstr2 = NULL ;
+  Py_ssize_t len2 = 0 ;
+  int res2 = 1 ;
+  int val4 ;
+  int ecode4 = 0 ;
   PyObject * obj1 = 0 ;
   PyObject * obj2 = 0 ;
   PyObject * obj3 = 0 ;
@@ -13798,11 +13940,11 @@ SWIGINTERN int _wrap_new_Hash__SWIG_0(PyObject *self, PyObject *args) {
     arg2 = (BYTE *) cstr2;
     arg3 = (DWORD) len2;
   }
-  res4 = SWIG_ConvertPtr(obj3, &argp4,SWIGTYPE_p_Key, 0 |  0 );
-  if (!SWIG_IsOK(res4)) {
-    SWIG_exception_fail(SWIG_ArgError(res4), "in method '" "new_Hash" "', argument " "4"" of type '" "Key *""'"); 
-  }
-  arg4 = reinterpret_cast< Key * >(argp4);
+  ecode4 = SWIG_AsVal_int(obj3, &val4);
+  if (!SWIG_IsOK(ecode4)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode4), "in method '" "new_Hash" "', argument " "4"" of type '" "int""'");
+  } 
+  arg4 = static_cast< int >(val4);
   try {
     {
       SWIG_PYTHON_THREAD_BEGIN_ALLOW;
@@ -13824,7 +13966,7 @@ fail:
 }
 
 
-SWIGINTERN int _wrap_new_Hash__SWIG_1(PyObject *self, PyObject *args) {
+SWIGINTERN int _wrap_new_Hash__SWIG_2(PyObject *self, PyObject *args) {
   PyObject *resultobj = 0;
   Crypt *arg1 = (Crypt *) 0 ;
   BYTE *arg2 = (BYTE *) 0 ;
@@ -13890,14 +14032,67 @@ fail:
 }
 
 
-SWIGINTERN int _wrap_new_Hash__SWIG_2(PyObject *self, PyObject *args) {
+SWIGINTERN int _wrap_new_Hash__SWIG_3(PyObject *self, PyObject *args) {
   PyObject *resultobj = 0;
   Crypt *arg1 = (Crypt *) 0 ;
-  Key *arg2 = (Key *) 0 ;
+  int arg2 ;
+  Key *arg3 = (Key *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
-  void *argp2 = 0 ;
-  int res2 = 0 ;
+  int val2 ;
+  int ecode2 = 0 ;
+  void *argp3 = 0 ;
+  int res3 = 0 ;
+  PyObject * obj1 = 0 ;
+  PyObject * obj2 = 0 ;
+  PyObject * obj3 = 0 ;
+  Hash *result = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OOO:new_Hash",&obj1,&obj2,&obj3)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj1, &argp1,SWIGTYPE_p_Crypt, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "new_Hash" "', argument " "1"" of type '" "Crypt *""'"); 
+  }
+  arg1 = reinterpret_cast< Crypt * >(argp1);
+  ecode2 = SWIG_AsVal_int(obj2, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "new_Hash" "', argument " "2"" of type '" "int""'");
+  } 
+  arg2 = static_cast< int >(val2);
+  res3 = SWIG_ConvertPtr(obj3, &argp3,SWIGTYPE_p_Key, 0 |  0 );
+  if (!SWIG_IsOK(res3)) {
+    SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "new_Hash" "', argument " "3"" of type '" "Key *""'"); 
+  }
+  arg3 = reinterpret_cast< Key * >(argp3);
+  try {
+    {
+      SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+      result = (Hash *)new Hash(arg1,arg2,arg3);
+      SWIG_PYTHON_THREAD_END_ALLOW;
+    }
+  }
+  catch(CSPException &_e) {
+    PyErr_SetString(PyExc_SystemError, (&_e)->msg);
+    SWIG_fail;
+    
+  }
+  
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_Hash, SWIG_BUILTIN_INIT |  0 );
+  result->ref();
+  return resultobj == Py_None ? -1 : 0;
+fail:
+  return -1;
+}
+
+
+SWIGINTERN int _wrap_new_Hash__SWIG_4(PyObject *self, PyObject *args) {
+  PyObject *resultobj = 0;
+  Crypt *arg1 = (Crypt *) 0 ;
+  int arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int val2 ;
+  int ecode2 = 0 ;
   PyObject * obj1 = 0 ;
   PyObject * obj2 = 0 ;
   Hash *result = 0 ;
@@ -13908,11 +14103,11 @@ SWIGINTERN int _wrap_new_Hash__SWIG_2(PyObject *self, PyObject *args) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "new_Hash" "', argument " "1"" of type '" "Crypt *""'"); 
   }
   arg1 = reinterpret_cast< Crypt * >(argp1);
-  res2 = SWIG_ConvertPtr(obj2, &argp2,SWIGTYPE_p_Key, 0 |  0 );
-  if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "new_Hash" "', argument " "2"" of type '" "Key *""'"); 
-  }
-  arg2 = reinterpret_cast< Key * >(argp2);
+  ecode2 = SWIG_AsVal_int(obj2, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "new_Hash" "', argument " "2"" of type '" "int""'");
+  } 
+  arg2 = static_cast< int >(val2);
   try {
     {
       SWIG_PYTHON_THREAD_BEGIN_ALLOW;
@@ -13934,7 +14129,7 @@ fail:
 }
 
 
-SWIGINTERN int _wrap_new_Hash__SWIG_3(PyObject *self, PyObject *args) {
+SWIGINTERN int _wrap_new_Hash__SWIG_5(PyObject *self, PyObject *args) {
   PyObject *resultobj = 0;
   Crypt *arg1 = (Crypt *) 0 ;
   void *argp1 = 0 ;
@@ -13971,14 +14166,14 @@ fail:
 
 SWIGINTERN int _wrap_new_Hash(PyObject *self, PyObject *args) {
   Py_ssize_t argc;
-  PyObject *argv[4] = {
+  PyObject *argv[5] = {
     0
   };
   Py_ssize_t ii;
   
   if (!PyTuple_Check(args)) SWIG_fail;
   argc = args ? PyObject_Length(args) : 0;
-  for (ii = 0; (ii < 3) && (ii < argc); ii++) {
+  for (ii = 0; (ii < 4) && (ii < argc); ii++) {
     argv[ii] = PyTuple_GET_ITEM(args,ii);
   }
   if (argc == 1) {
@@ -13987,7 +14182,7 @@ SWIGINTERN int _wrap_new_Hash(PyObject *self, PyObject *args) {
     int res = SWIG_ConvertPtr(argv[0], &vptr, SWIGTYPE_p_Crypt, 0);
     _v = SWIG_CheckState(res);
     if (_v) {
-      return _wrap_new_Hash__SWIG_3(self, args);
+      return _wrap_new_Hash__SWIG_5(self, args);
     }
   }
   if (argc == 2) {
@@ -13996,11 +14191,12 @@ SWIGINTERN int _wrap_new_Hash(PyObject *self, PyObject *args) {
     int res = SWIG_ConvertPtr(argv[0], &vptr, SWIGTYPE_p_Crypt, 0);
     _v = SWIG_CheckState(res);
     if (_v) {
-      void *vptr = 0;
-      int res = SWIG_ConvertPtr(argv[1], &vptr, SWIGTYPE_p_Key, 0);
-      _v = SWIG_CheckState(res);
+      {
+        int res = SWIG_AsVal_int(argv[1], NULL);
+        _v = SWIG_CheckState(res);
+      }
       if (_v) {
-        return _wrap_new_Hash__SWIG_2(self, args);
+        return _wrap_new_Hash__SWIG_4(self, args);
       }
     }
   }
@@ -14019,9 +14215,29 @@ SWIGINTERN int _wrap_new_Hash(PyObject *self, PyObject *args) {
       }
       if (_v) {
         if (argc <= 2) {
-          return _wrap_new_Hash__SWIG_1(self, args);
+          return _wrap_new_Hash__SWIG_2(self, args);
         }
-        return _wrap_new_Hash__SWIG_1(self, args);
+        return _wrap_new_Hash__SWIG_2(self, args);
+      }
+    }
+  }
+  if (argc == 3) {
+    int _v;
+    void *vptr = 0;
+    int res = SWIG_ConvertPtr(argv[0], &vptr, SWIGTYPE_p_Crypt, 0);
+    _v = SWIG_CheckState(res);
+    if (_v) {
+      {
+        int res = SWIG_AsVal_int(argv[1], NULL);
+        _v = SWIG_CheckState(res);
+      }
+      if (_v) {
+        void *vptr = 0;
+        int res = SWIG_ConvertPtr(argv[2], &vptr, SWIGTYPE_p_Key, 0);
+        _v = SWIG_CheckState(res);
+        if (_v) {
+          return _wrap_new_Hash__SWIG_3(self, args);
+        }
       }
     }
   }
@@ -14039,11 +14255,41 @@ SWIGINTERN int _wrap_new_Hash(PyObject *self, PyObject *args) {
 #endif
       }
       if (_v) {
-        void *vptr = 0;
-        int res = SWIG_ConvertPtr(argv[2], &vptr, SWIGTYPE_p_Key, 0);
-        _v = SWIG_CheckState(res);
+        {
+          int res = SWIG_AsVal_int(argv[2], NULL);
+          _v = SWIG_CheckState(res);
+        }
         if (_v) {
-          return _wrap_new_Hash__SWIG_0(self, args);
+          return _wrap_new_Hash__SWIG_1(self, args);
+        }
+      }
+    }
+  }
+  if (argc == 4) {
+    int _v;
+    void *vptr = 0;
+    int res = SWIG_ConvertPtr(argv[0], &vptr, SWIGTYPE_p_Crypt, 0);
+    _v = SWIG_CheckState(res);
+    if (_v) {
+      {
+#if py_version_hex>=0x03000000
+        _v = PyBytes_Check(argv[1]) ? 1 : 0;
+#else  
+        _v = PyString_Check(argv[1]) ? 1 : 0;
+#endif
+      }
+      if (_v) {
+        {
+          int res = SWIG_AsVal_int(argv[2], NULL);
+          _v = SWIG_CheckState(res);
+        }
+        if (_v) {
+          void *vptr = 0;
+          int res = SWIG_ConvertPtr(argv[3], &vptr, SWIGTYPE_p_Key, 0);
+          _v = SWIG_CheckState(res);
+          if (_v) {
+            return _wrap_new_Hash__SWIG_0(self, args);
+          }
         }
       }
     }
@@ -14052,9 +14298,11 @@ SWIGINTERN int _wrap_new_Hash(PyObject *self, PyObject *args) {
 fail:
   SWIG_SetErrorMsg(PyExc_NotImplementedError,"Wrong number or type of arguments for overloaded function 'new_Hash'.\n"
     "  Possible C/C++ prototypes are:\n"
-    "    Hash::Hash(Crypt *,BYTE *,DWORD,Key *)\n"
+    "    Hash::Hash(Crypt *,BYTE *,DWORD,int,Key *)\n"
+    "    Hash::Hash(Crypt *,BYTE *,DWORD,int)\n"
     "    Hash::Hash(Crypt *,BYTE *,DWORD)\n"
-    "    Hash::Hash(Crypt *,Key *)\n"
+    "    Hash::Hash(Crypt *,int,Key *)\n"
+    "    Hash::Hash(Crypt *,int)\n"
     "    Hash::Hash(Crypt *)\n");
   return -1;
 }
@@ -16788,8 +17036,11 @@ SWIGINTERN SwigPyClientData SwigPyBuiltin__CryptIter_clientdata = {0, 0, 0, 0, 0
 
 SWIGPY_DESTRUCTOR_CLOSURE(_wrap_delete_Crypt)
 static SwigPyGetSet Crypt___dict___getset = { SwigPyObject_get___dict__, 0 };
+static SwigPyGetSet Crypt_parent_getset = { _wrap_Crypt_parent_get, _wrap_Crypt_parent_set };
 SWIGINTERN PyGetSetDef SwigPyBuiltin__Crypt_getset[] = {
     { (char*) "__dict__", (getter) SwigPyBuiltin_GetterClosure, (setter) 0, (char*)"Crypt.__dict__", (void*) &Crypt___dict___getset }
+,
+    { (char*) "parent", (getter) SwigPyBuiltin_GetterClosure, (setter) SwigPyBuiltin_SetterClosure, (char*)"Crypt.parent", (void*) &Crypt_parent_getset }
 ,
     {NULL, NULL, NULL, NULL, NULL} /* Sentinel */
 };
