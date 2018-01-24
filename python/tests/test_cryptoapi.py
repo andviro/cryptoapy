@@ -320,7 +320,7 @@ def test_cert_key_id():
 def test_hash_digest_empty():
     data = b''
     length = 0 if test_cn.endswith('2012') else 2001
-    h = cryptoapi.Hash(data, length)
+    h = cryptoapi.Hash(data, length=length)
     digest_str = hexlify(h.digest())
     print(digest_str)
     if length == 2001:
@@ -336,13 +336,13 @@ def test_hash_sign_verify():
     cert = cryptoapi.get_certificate(thumb)
     length = 0 if test_cn.endswith('2012') else 2001
 
-    h = cryptoapi.SignedHash(thumb, data, length)
+    h = cryptoapi.SignedHash(thumb, data, length=length)
     sig = h.sign()
 
-    good = cryptoapi.Hash(data, length)
+    good = cryptoapi.Hash(data, length=length)
     assert good.verify(cert, sig)
 
-    bad = cryptoapi.Hash(bad_data, length)
+    bad = cryptoapi.Hash(bad_data, length=length)
     assert not bad.verify(cert, sig)
 
 
@@ -359,9 +359,9 @@ def test_hash_sign_verify_cont_provider():
     cert = cryptoapi.get_certificate(None, cont=test_container,
                                      provider=test_provider)
     assert cert
-    good = cryptoapi.Hash(data, length)
+    good = cryptoapi.Hash(data, length=length)
     assert good.verify(cert, sig)
-    bad = cryptoapi.Hash(bad_data, length)
+    bad = cryptoapi.Hash(bad_data, length=length)
     assert not bad.verify(cert, sig)
 
 

@@ -69,9 +69,6 @@ def _mkcontext(cont, provider, flags=None):
 
     cont = _from_hex(cont)
 
-    if platform.system() == 'Linux' and provider != PROV_HSM and not cont.startswith(b'\\\\'):
-        cont = b'\\\\.\\HDIMAGE\\' + cont
-
     if flags is None:
         flags = csp.CRYPT_VERIFYCONTEXT
 
@@ -100,12 +97,9 @@ def gen_key(cont, local=True, silent=False, provider=None):
     try:
         ctx = csp.Crypt(cont, PROV_GOST, silent_flag, provider)
     except (ValueError, SystemError):
-
         if platform.system() == 'Linux' and provider != PROV_HSM and not cont.startswith(b'\\\\'):
             cont = b'\\\\.\\HDIMAGE\\' + cont
-
-        ctx = csp.Crypt(cont, PROV_GOST, csp.CRYPT_NEWKEYSET |
-                        silent_flag, provider)
+        ctx = csp.Crypt(cont, PROV_GOST, csp.CRYPT_NEWKEYSET | silent_flag, provider)
 
     ctx.set_password(str(''), csp.AT_KEYEXCHANGE)
     ctx.set_password(str(''), csp.AT_SIGNATURE)
@@ -517,15 +511,14 @@ class Hash(object):
 
     DIGEST_URI = "http://www.w3.org/2001/04/xmldsig-more#gostr3411"
 
-    def _init_hash(self, data, length=0, key=None):
+    def _init_hash(self, data, key=None, length=0):
         if key is None:
-            self._hash = (csp.Hash(self._ctx, data, length)
-                          if data else csp.Hash(self._ctx, length))
+            self._hash = (csp.Hash(self._ctx, data, length) if data else csp.Hash(self._ctx, length))
             return
-        self._hash = (csp.Hash(self._ctx, data, length, key)
-                      if data else csp.Hash(self._ctx, length, key))
+        self._hash = (csp.Hash(self._ctx, data, key, length)
+                      if data else csp.Hash(self._ctx, key, length))
 
-    def __init__(self, data=None, length=0, key=None):
+    def __init__(self, data=None, key=None, length=0):
         '''
         Инициализация хэша. Если присутствует параметр `data`, в него
         подгружаются начальные данные.
@@ -537,7 +530,7 @@ class Hash(object):
             csp.CRYPT_VERIFYCONTEXT,
             None
         )
-        self._init_hash(data, length, key)
+        self._init_hash(data, key, length)
 
     def update(self, data):
         '''
@@ -603,11 +596,11 @@ class HMAC(Hash):
         -- байтовую строку с секретом
 
         '''
-        _keyhash = Hash(data, length)
+        _keyhash = Hash(data, length=length)
         _key = _keyhash._derive_key()
 
         self._ctx = _keyhash._ctx
-        self._init_hash(data, length, _key)
+        self._init_hash(data, _key, length)
 
 
 class SignedHash(Hash):
@@ -639,7 +632,7 @@ class SignedHash(Hash):
 
     SIGNATURE_URI = "http://www.w3.org/2001/04/xmldsig-more#gostr34102001-gostr3411"
 
-    def __init__(self, thumb, data=None, length=0, cont=None, provider=None):
+    def __init__(self, thumb, data=None, cont=None, provider=None, length=0):
         '''
         Инициализация хэша. Помимо параметров базового класса, получает `thumb`
         -- отпечаток сертификата для проверки подписи. Если None -- сертификат берется из контейнера.
@@ -656,7 +649,7 @@ class SignedHash(Hash):
             self._ctx = csp.Crypt(store_lst[0])
         else:
             self._ctx = ctx
-        self._init_hash(data, length)
+        self._init_hash(data, length=length)
 
     def sign(self):
         '''

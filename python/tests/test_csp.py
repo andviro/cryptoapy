@@ -527,7 +527,9 @@ def test_verify_file():
         with open(case_path('{0}.p7s'.format(name)), 'rb') as f:
             sigdata = f.read()
         sign = csp.Signature(sigdata)
-        print(sign.num_signers)
+        print(name, sign.num_signers())
+        if sign.num_signers() <= 0:
+            continue
         for c in csp.CertStore(sign):
             print(b64encode(c.thumbprint()))
         assert all(sign.verify_data(data, n) for n in range(sign.num_signers()))
@@ -743,7 +745,7 @@ def test_hash_hmac():
         test_provider
     )
     data = b'The quick brown fox jumps over the lazy dog'
-    hash1 = csp.Hash(ctx, data, 0, key)
+    hash1 = csp.Hash(ctx, data, key, 0)
     digest_str = hexlify(hash1.digest())
     print(digest_str)
     assert digest_str == b'3e7dea7f2384b6c5a3d0e24aaa29c05e89ddd762145030ec22c71a6db8b2c1f4'

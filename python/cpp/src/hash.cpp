@@ -63,16 +63,28 @@ void Hash::init(Crypt *ctx, Key *key, int length) throw(CSPException)
  * * key -- `csp.Key`, если задан, хэш будет создан как HMAC
  *
  */
-Hash::Hash(Crypt *ctx, BYTE *STRING, DWORD LENGTH, int length, Key *key) throw(CSPException)
+Hash::Hash(Crypt *ctx, BYTE *STRING, DWORD LENGTH, Key *key, int length) throw(CSPException)
 {
     init(ctx, key, length);
     this->update(STRING, LENGTH);
 }
 
-Hash::Hash(Crypt *ctx, int length, Key *key) throw(CSPException)
+Hash::Hash(Crypt *ctx, BYTE *STRING, DWORD LENGTH, int length) throw(CSPException)
+{
+    init(ctx, 0, length);
+    this->update(STRING, LENGTH);
+}
+
+Hash::Hash(Crypt *ctx, Key *key, int length) throw(CSPException)
 {
     init(ctx, key, length);
 }
+
+Hash::Hash(Crypt *ctx, int length) throw(CSPException)
+{
+    init(ctx, 0, length);
+}
+
 
 Hash::~Hash() throw(CSPException)
 {

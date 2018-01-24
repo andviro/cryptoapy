@@ -26,8 +26,10 @@ private:
 protected:
     //
 public:
-    Hash(Crypt *ctx, BYTE *STRING, DWORD LENGTH, int length=0, Key *key=0) throw(CSPException);
-    Hash(Crypt *ctx, int length=0, Key *key=0) throw(CSPException);
+    Hash(Crypt *ctx, BYTE *STRING, DWORD LENGTH, Key *key, int length=0) throw(CSPException);
+    Hash(Crypt *ctx, BYTE *STRING, DWORD LENGTH, int length=0) throw(CSPException);
+    Hash(Crypt *ctx, Key *key, int length=0) throw(CSPException);
+    Hash(Crypt *ctx, int length=0) throw(CSPException);
 
     virtual ~Hash() throw(CSPException);
 
