@@ -489,6 +489,8 @@ def cert_info(cert):
         SerialNumber=':'.join(hex(ord(x))[2:]
                               for x in reversed(info.serial())),
         Subject=Attributes.load(info.name(False)).decode(),
+        SignatureAlgorithm=info.sign_algorithm(),
+        PublicKeyAlgorithm=info.public_key_algorithm(),
         Extensions=infoasn.EKU(),
     )
     return res

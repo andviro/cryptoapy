@@ -73,6 +73,12 @@ char *CertInfo::sign_algorithm()
     return psi->SignatureAlgorithm.pszObjId;
 }
 
+char *CertInfo::public_key_algorithm()
+{
+    LOG("CertInfo::public_key_algorithm\n");
+    return psi->SubjectPublicKeyInfo.Algorithm.pszObjId;
+}
+
 void CertInfo::name(BYTE **s, DWORD *slen, bool decode) throw(CSPException)
 {
     LOG("CertInfo::name()\n");

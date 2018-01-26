@@ -11013,6 +11013,31 @@ fail:
 }
 
 
+SWIGINTERN PyObject *_wrap_CertInfo_public_key_algorithm(PyObject *self, PyObject *args) {
+  PyObject *resultobj = 0;
+  CertInfo *arg1 = (CertInfo *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  char *result = 0 ;
+  
+  if (args && PyTuple_Check(args) && PyTuple_GET_SIZE(args) > 0) SWIG_exception_fail(SWIG_TypeError, "CertInfo_public_key_algorithm takes no arguments");
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_CertInfo, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "CertInfo_public_key_algorithm" "', argument " "1"" of type '" "CertInfo *""'"); 
+  }
+  arg1 = reinterpret_cast< CertInfo * >(argp1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (char *)(arg1)->public_key_algorithm();
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_FromCharPtr((const char *)result);
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
 SWIGINTERN PyObject *_wrap_CertInfo_serial(PyObject *self, PyObject *args) {
   PyObject *resultobj = 0;
   CertInfo *arg1 = (CertInfo *) 0 ;
@@ -19253,6 +19278,7 @@ SWIGINTERN PyMethodDef SwigPyBuiltin__CertInfo_methods[] = {
   { "not_after", (PyCFunction) _wrap_CertInfo_not_after, METH_VARARGS, (char *) "not_after()" },
   { "usage", (PyCFunction) _wrap_CertInfo_usage, METH_VARARGS, (char *) "usage() -> BYTE" },
   { "sign_algorithm", (PyCFunction) _wrap_CertInfo_sign_algorithm, METH_VARARGS, (char *) "sign_algorithm() -> char *" },
+  { "public_key_algorithm", (PyCFunction) _wrap_CertInfo_public_key_algorithm, METH_VARARGS, (char *) "public_key_algorithm() -> char *" },
   { "serial", (PyCFunction) _wrap_CertInfo_serial, METH_VARARGS, (char *) "serial()" },
   { "extensions", (PyCFunction) _wrap_CertInfo_extensions, METH_VARARGS, (char *) "extensions() -> ExtIter" },
   { NULL, NULL, 0, NULL } /* Sentinel */

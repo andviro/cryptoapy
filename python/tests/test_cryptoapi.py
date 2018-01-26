@@ -308,6 +308,8 @@ def test_cert_info():
     ci = cryptoapi.cert_info(cert)
     assert ci
     assert ci['Thumbprint'] == thumb
+    assert ci.get('PublicKeyAlgorithm')
+    assert ci.get('SignatureAlgorithm')
 
 
 def test_cert_key_id():
