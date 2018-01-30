@@ -8109,6 +8109,39 @@ fail:
 }
 
 
+SWIGINTERN PyObject *_wrap_Key_alg_id(PyObject *self, PyObject *args) {
+  PyObject *resultobj = 0;
+  Key *arg1 = (Key *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  ALG_ID result;
+  
+  if (args && PyTuple_Check(args) && PyTuple_GET_SIZE(args) > 0) SWIG_exception_fail(SWIG_TypeError, "Key_alg_id takes no arguments");
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_Key, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Key_alg_id" "', argument " "1"" of type '" "Key *""'"); 
+  }
+  arg1 = reinterpret_cast< Key * >(argp1);
+  try {
+    {
+      SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+      result = (ALG_ID)(arg1)->alg_id();
+      SWIG_PYTHON_THREAD_END_ALLOW;
+    }
+  }
+  catch(CSPException &_e) {
+    PyErr_SetString(PyExc_SystemError, (&_e)->msg);
+    SWIG_fail;
+    
+  }
+  
+  resultobj = SWIG_From_unsigned_SS_int(static_cast< unsigned int >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
 SWIGPY_DESTRUCTOR_CLOSURE(_wrap_delete_Key) /* defines _wrap_delete_Key_destructor_closure */
 
 SWIGINTERN PyObject *_wrap_Cert_duplicate(PyObject *self, PyObject *args) {
@@ -17837,6 +17870,7 @@ SWIGINTERN PyMethodDef SwigPyBuiltin__Key_methods[] = {
 		"\n"
 		"" },
   { "extract_cert", (PyCFunction) _wrap_Key_extract_cert, METH_VARARGS, (char *) "extract_cert()" },
+  { "alg_id", (PyCFunction) _wrap_Key_alg_id, METH_VARARGS, (char *) "alg_id() -> ALG_ID" },
   { NULL, NULL, 0, NULL } /* Sentinel */
 };
 

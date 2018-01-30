@@ -22,6 +22,8 @@ public:
 
     void extract_cert(BYTE **s, DWORD *slen) throw (CSPException);
 
+    ALG_ID alg_id() throw (CSPException);
+
     friend class Crypt;
     friend class Hash;
 };

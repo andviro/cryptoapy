@@ -338,7 +338,7 @@ def test_hash_sign_verify():
     cert = cryptoapi.get_certificate(thumb)
     length = 0 if test_cn.endswith('2012') else 2001
 
-    h = cryptoapi.SignedHash(thumb, data, length=length)
+    h = cryptoapi.SignedHash(thumb, data)
     sig = h.sign()
 
     good = cryptoapi.Hash(data, length=length)
@@ -354,7 +354,6 @@ def test_hash_sign_verify_cont_provider():
     length = 0 if test_cn.endswith('2012') else 2001
 
     h = cryptoapi.SignedHash(None, data, cont=test_container,
-                             length=length,
                              provider=test_provider)
     sig = h.sign()
 

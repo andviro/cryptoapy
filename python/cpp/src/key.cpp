@@ -52,6 +52,19 @@ void Key::store_cert(Cert *c) throw (CSPException) {
     }
 }
 
+
+ALG_ID Key::alg_id() throw (CSPException) {
+    ALG_ID res;
+    DWORD size = sizeof(res);
+    if(!CryptGetKeyParam(hkey, KP_ALGID, (BYTE*)&res, &size, 0))
+    {
+        DWORD err = GetLastError();
+        throw CSPException("Key.alg_id: couldn't get key algorithm ID", err);
+    }
+    return res;
+}
+
+
 void Key::extract_cert(BYTE **s, DWORD *slen) throw (CSPException) {
     if(!CryptGetKeyParam( 
         hkey, 

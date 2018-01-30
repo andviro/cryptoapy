@@ -651,6 +651,16 @@ class SignedHash(Hash):
             self._ctx = csp.Crypt(store_lst[0])
         else:
             self._ctx = ctx
+        if length == 0:
+            # XXX: для подписываемого хэша можно вычислить длину по алгоритму закрытого
+            # ключа в контейнере
+            algID = self._ctx.get_key().alg_id()
+            if algID == csp.CALG_DH_GR3410_12_256_SF:
+                length = 256
+            elif algID == csp.CALG_DH_GR3410_12_512_SF:
+                length = 512
+            elif algID == csp.CALG_DH_EL_SF:
+                length = 2001
         self._init_hash(data, length=length)
 
     def sign(self):
