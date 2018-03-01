@@ -72,7 +72,12 @@ def _mkcontext(cont, provider, flags=None):
     if flags is None:
         flags = csp.CRYPT_VERIFYCONTEXT
 
-    return csp.Crypt(cont, PROV_GOST, flags, provider)
+    if isinstance(provider, tuple):
+        provider, provtype = provider
+    else:
+        provtype = PROV_GOST
+
+    return csp.Crypt(cont, provtype, flags, provider)
 
 
 def gen_key(cont, local=True, silent=False, provider=None):
@@ -84,16 +89,21 @@ def gen_key(cont, local=True, silent=False, provider=None):
     :silent: Если True, включает режим без диалоговых окон. Без аппаратного датчика случайных
         чисел в таком режиме контейнер создать невозможно!
         По умолчанию silent=False
-    :provider: Если не None, флаг local игнорируется и криптопровайдер
-        выбирается принудительно
+    :provider: По умолчанию None, в этом случае флаг local игнорируется и
+        криптопровайдер выбирается принудительно.
+
+        Если в качестве криптопровайдера передана строка, то она используется в
+        качестве имени, тип берется из константы PROV_GOST.
+        Если передан кортеж вида (тип, имя), то в создании контекста участвуют
+        оба переданных параметра.
     :returns: True, если операция успешна
 
     '''
     silent_flag = csp.CRYPT_SILENT if silent else 0
+
     if provider is None:
         provider = PROV_HSM if not local else None
     cont = _from_hex(cont)
-
     try:
         ctx = csp.Crypt(cont, PROV_GOST, silent_flag, provider)
     except (ValueError, SystemError):
@@ -125,15 +135,24 @@ def remove_key(cont, local=True, provider=None):
 
     :cont: Имя контейнера
     :local: Если True, контейнер удаляется в локальном хранилище по умолчанию
-    :provider: Если не None, флаг local игнорируется и криптопровайдер
-        выбирается принудительно
+    :provider: По умолчанию None, в этом случае флаг local игнорируется и
+        криптопровайдер выбирается принудительно.
+
+        Если в качестве криптопровайдера передана строка, то она используется в
+        качестве имени, тип берется из константы PROV_GOST.
+        Если передан кортеж вида (тип, имя), то в создании контекста участвуют
+        оба переданных параметра.
     :returns: True, если операция успешна
 
     '''
     cont = _from_hex(cont)
     if provider is None:
         provider = PROV_HSM if not local else None
-    csp.Crypt.remove(cont, PROV_GOST, provider)
+    if isinstance(provider, tuple):
+        provider, provtype = provider
+    else:
+        provtype = PROV_GOST
+    csp.Crypt.remove(cont, provtype, provider)
     return True
 
 
@@ -167,8 +186,13 @@ def create_request(cont, params, local=True, provider=None, insert_zeroes=False)
             закодированных в DER-кодировку внешними средставми
         }
     :local: Если True, работа идет с локальным хранилищем
-    :provider: Если не None, флаг local игнорируется и криптопровайдер
-        выбирается принудительно
+    :provider: По умолчанию None, в этом случае флаг local игнорируется и
+        криптопровайдер выбирается принудительно.
+
+        Если в качестве криптопровайдера передана строка, то она используется в
+        качестве имени, тип берется из константы PROV_GOST.
+        Если передан кортеж вида (тип, имя), то в создании контекста участвуют
+        оба переданных параметра.
     :insert_zeroes: Если True, в запрос добавляются нулевые значения для ИНН, ОГРН
     :returns: байтовая строка с запросом в DER-кодировке
 
@@ -176,8 +200,7 @@ def create_request(cont, params, local=True, provider=None, insert_zeroes=False)
 
     if provider is None:
         provider = PROV_HSM if not local else None
-    cont = _from_hex(cont)
-    ctx = csp.Crypt(cont, PROV_GOST, csp.CRYPT_SILENT, provider)
+    ctx = _mkcontext(cont, provider, csp.CRYPT_SILENT)
     req = csp.CertRequest(ctx)
     set_q_defaults(params, insert_zeroes)
     req.set_subject(Attributes(params.get('Attributes', [])).encode())
@@ -211,8 +234,13 @@ def bind_cert_to_key(cont, cert, local=True, provider=None, store=False):
     :cont: Имя контейнера
     :cert: Сертификат в байтовой строке
     :local: Если True, работа идет с локальным хранилищем
-    :provider: Если не None, флаг local игнорируется и криптопровайдер
-        выбирается принудительно
+    :provider: По умолчанию None, в этом случае флаг local игнорируется и
+        криптопровайдер выбирается принудительно.
+
+        Если в качестве криптопровайдера передана строка, то она используется в
+        качестве имени, тип берется из константы PROV_GOST.
+        Если передан кортеж вида (тип, имя), то в создании контекста участвуют
+        оба переданных параметра.
     :store: Сохранять сертификат в контейнере провайдера (по умолчанию -- False)
     :returns: отпечаток сертификата в виде строки
 
@@ -237,7 +265,13 @@ def get_certificate(thumb=None, name=None, cont=None, provider=None):
     :thumb: отпечаток, возвращенный функцией `bind_cert_to_key`
     :name: имя субъекта для поиска (передается вместо параметра :thumb:)
     :cont: контейнер для поиска сертификата (если указан, thumb и name игнорируются)
-    :provider: провайдер для поиска сертификата (по умолчанию дефолтный для контейнера)
+    :provider: По умолчанию None, в этом случае используется дефолтный для
+        провайдера PROV_GOST.
+
+        Если в качестве криптопровайдера передана строка, то она используется в
+        качестве имени, тип берется из константы PROV_GOST.
+        Если передан кортеж вида (тип, имя), то в создании контекста участвуют
+        оба переданных параметра.
     :returns: сертификат в байтовой строке
 
     """
@@ -252,7 +286,8 @@ def get_certificate(thumb=None, name=None, cont=None, provider=None):
     if thumb is not None:
         res = list(cs.find_by_thumb(unhexlify(thumb)))
     else:
-        res = list(c for c in cs.find_by_name(bytes(name)) if csp.CertInfo(c).name() == 'CN=' + name)
+        res = list(c for c in cs.find_by_name(bytes(name))
+                   if csp.CertInfo(c).name() == 'CN=' + name)
     assert len(res), 'Cert not found'
     cert = res[0]
     return cert.extract()
@@ -263,6 +298,10 @@ def get_key(cont=None, provider=None):
 
     :cont: контейнер для поиска сертификата (по умолчанию -- системный)
     :provider: провайдер для поиска сертификата (по умолчанию дефолтный для контейнера)
+        Если в качестве криптопровайдера передана строка, то она используется в
+        качестве имени, тип берется из константы PROV_GOST.
+        Если передан кортеж вида (тип, имя), то в создании контекста участвуют
+        оба переданных параметра.
     :returns: данные открытого ключа в байтовой строке
 
     """
@@ -279,6 +318,10 @@ def sign(thumb, data, include_data, cont=None, provider=None):
     :include_data: булев флаг, если True -- данные прицепляются вместе с подписью
     :cont: контейнер для поиска сертификата (если указан -- thumb игнорируется)
     :provider: провайдер для поиска сертификата (по умолчанию дефолтный для контейнера)
+        Если в качестве криптопровайдера передана строка, то она используется в
+        качестве имени, тип берется из константы PROV_GOST.
+        Если передан кортеж вида (тип, имя), то в создании контекста участвуют
+        оба переданных параметра.
     :returns: данные и/или подпись в виде байтовой строки
 
     """
@@ -307,6 +350,10 @@ def sign_and_encrypt(thumb, certs, data, cont=None, provider=None):
     :data: байтовая строка с данными
     :cont: контейнер для поиска сертификата (по умолчанию -- системный)
     :provider: провайдер для поиска сертификата (по умолчанию дефолтный для контейнера)
+        Если в качестве криптопровайдера передана строка, то она используется в
+        качестве имени, тип берется из константы PROV_GOST.
+        Если передан кортеж вида (тип, имя), то в создании контекста участвуют
+        оба переданных параметра.
     :returns: данные и подпись, зашифрованные и закодированные в байтовую строку
 
     """
@@ -340,6 +387,10 @@ def check_signature(cert, sig, data, cont=None, provider=None):
     :sig: данные подписи в байтовой строке
     :cont: контейнер для поиска сертификата
     :provider: провайдер для поиска сертификата (по умолчанию дефолтный для контейнера)
+        Если в качестве криптопровайдера передана строка, то она используется в
+        качестве имени, тип берется из константы PROV_GOST.
+        Если передан кортеж вида (тип, имя), то в создании контекста участвуют
+        оба переданных параметра.
     :returns: True или False
 
     Если и :cert: и :cont: переданы как None, подпись считается верной, если хотя бы один
@@ -399,6 +450,10 @@ def decrypt(data, thumb, cont=None, provider=None):
     :data: данные в байтовой строке
     :cont: контейнер для поиска сертификата (по умолчанию -- системный)
     :provider: провайдер для поиска сертификата (по умолчанию дефолтный для контейнера)
+        Если в качестве криптопровайдера передана строка, то она используется в
+        качестве имени, тип берется из константы PROV_GOST.
+        Если передан кортеж вида (тип, имя), то в создании контекста участвуют
+        оба переданных параметра.
     :returns: шифрованные данные в байтовой строке
 
     """
@@ -515,23 +570,19 @@ class Hash(object):
 
     def _init_hash(self, data, key=None, length=0):
         if key is None:
-            self._hash = (csp.Hash(self._ctx, data, length) if data else csp.Hash(self._ctx, length))
+            self._hash = (csp.Hash(self._ctx, data, length)
+                          if data else csp.Hash(self._ctx, length))
             return
         self._hash = (csp.Hash(self._ctx, data, key, length)
                       if data else csp.Hash(self._ctx, key, length))
 
-    def __init__(self, data=None, key=None, length=0):
+    def __init__(self, data=None, key=None, length=0, provider=None):
         '''
         Инициализация хэша. Если присутствует параметр `data`, в него
         подгружаются начальные данные.
 
         '''
-        self._ctx = csp.Crypt(
-            b'',
-            PROV_GOST,
-            csp.CRYPT_VERIFYCONTEXT,
-            None
-        )
+        self._ctx = _mkcontext('', provider)
         self._init_hash(data, key, length)
 
     def update(self, data):
@@ -641,6 +692,10 @@ class SignedHash(Hash):
 
         :cont: контейнер для поиска сертификата (по умолчанию -- системный)
         :provider: провайдер для поиска сертификата (по умолчанию дефолтный для контейнера)
+            Если в качестве криптопровайдера передана строка, то она используется в
+            качестве имени, тип берется из константы PROV_GOST.
+            Если передан кортеж вида (тип, имя), то в создании контекста участвуют
+            оба переданных параметра.
 
         '''
         ctx = _mkcontext(cont, provider, csp.CRYPT_SILENT)
