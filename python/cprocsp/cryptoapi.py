@@ -74,6 +74,8 @@ def _mkcontext(cont, provider, flags=None):
 
     if isinstance(provider, tuple):
         provider, provtype = provider
+    elif provider == PROV_HSM:
+        provtype = csp.PROV_GOST_2001_DH
     else:
         provtype = PROV_GOST
 
@@ -101,15 +103,14 @@ def gen_key(cont, local=True, silent=False, provider=None):
     '''
     silent_flag = csp.CRYPT_SILENT if silent else 0
 
-    if provider is None:
-        provider = PROV_HSM if not local else None
-    cont = _from_hex(cont)
+    if provider is None and not local:
+        provider = PROV_HSM
     try:
-        ctx = csp.Crypt(cont, PROV_GOST, silent_flag, provider)
+        ctx = _mkcontext(cont, provider, silent_flag)
     except (ValueError, SystemError):
         if platform.system() == 'Linux' and provider != PROV_HSM and not cont.startswith(b'\\\\'):
             cont = b'\\\\.\\HDIMAGE\\' + cont
-        ctx = csp.Crypt(cont, PROV_GOST, csp.CRYPT_NEWKEYSET | silent_flag, provider)
+        ctx = _mkcontext(cont, provider, csp.CRYPT_NEWKEYSET | silent_flag)
 
     ctx.set_password(str(''), csp.AT_KEYEXCHANGE)
     ctx.set_password(str(''), csp.AT_SIGNATURE)
@@ -146,8 +147,8 @@ def remove_key(cont, local=True, provider=None):
 
     '''
     cont = _from_hex(cont)
-    if provider is None:
-        provider = PROV_HSM if not local else None
+    if provider is None and not local:
+        provider = PROV_HSM
     if isinstance(provider, tuple):
         provider, provtype = provider
     else:
@@ -198,8 +199,8 @@ def create_request(cont, params, local=True, provider=None, insert_zeroes=False)
 
     """
 
-    if provider is None:
-        provider = PROV_HSM if not local else None
+    if provider is None and not local:
+        provider = PROV_HSM
     ctx = _mkcontext(cont, provider, csp.CRYPT_SILENT)
     req = csp.CertRequest(ctx)
     set_q_defaults(params, insert_zeroes)
@@ -245,8 +246,8 @@ def bind_cert_to_key(cont, cert, local=True, provider=None, store=False):
     :returns: отпечаток сертификата в виде строки
 
     """
-    if provider is None:
-        provider = PROV_HSM if not local else None
+    if provider is None and not local:
+        provider = PROV_HSM
     ctx = _mkcontext(cont, provider, csp.CRYPT_SILENT)
     cert = autopem(cert)
     newc = csp.Cert(cert)

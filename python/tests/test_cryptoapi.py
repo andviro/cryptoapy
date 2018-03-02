@@ -385,6 +385,12 @@ def test_pkcs7_info_from_file():
 def test_gen_remove_key():
     if TEST_ALL is None:
         return
-
     assert cryptoapi.gen_key('test_container_temp'), 'Could not generate key'
+    key_exists = True
     assert cryptoapi.remove_key('test_container_temp'), 'Could not remove key'
+    try:
+        key = cryptoapi.get_key('test_container_temp')
+        assert not key
+    except (SystemError, ValueError):
+        key_exists = False
+    assert not key_exists
