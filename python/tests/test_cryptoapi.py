@@ -321,7 +321,7 @@ def test_cert_key_id():
 
 def test_hash_digest_empty():
     data = b''
-    length = 0 if test_cn.endswith('2012') else 2001
+    length = 0 if test_cn.endswith(b'2012') else 2001
     h = cryptoapi.Hash(data, length=length)
     digest_str = hexlify(h.digest())
     print(digest_str)
@@ -336,7 +336,7 @@ def test_hash_sign_verify():
     bad_data = os.urandom(1024)
     thumb = get_test_thumb()
     cert = cryptoapi.get_certificate(thumb)
-    length = 0 if test_cn.endswith('2012') else 2001
+    length = 0 if test_cn.endswith(b'2012') else 2001
 
     h = cryptoapi.SignedHash(thumb, data)
     sig = h.sign()
@@ -351,7 +351,7 @@ def test_hash_sign_verify():
 def test_hash_sign_verify_cont_provider():
     data = os.urandom(1024)
     bad_data = os.urandom(1024)
-    length = 0 if test_cn.endswith('2012') else 2001
+    length = 0 if test_cn.endswith(b'2012') else 2001
 
     h = cryptoapi.SignedHash(None, data, cont=test_container,
                              provider=test_provider)

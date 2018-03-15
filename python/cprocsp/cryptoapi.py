@@ -103,6 +103,8 @@ def gen_key(cont, local=True, silent=False, provider=None):
     '''
     silent_flag = csp.CRYPT_SILENT if silent else 0
 
+    cont = _from_hex(cont)
+
     if provider is None and not local:
         provider = PROV_HSM
     try:
@@ -288,7 +290,7 @@ def get_certificate(thumb=None, name=None, cont=None, provider=None):
         res = list(cs.find_by_thumb(unhexlify(thumb)))
     else:
         res = list(c for c in cs.find_by_name(bytes(name))
-                   if csp.CertInfo(c).name() == 'CN=' + name)
+                   if csp.CertInfo(c).name() == b'CN=' + bytes(name))
     assert len(res), 'Cert not found'
     cert = res[0]
     return cert.extract()

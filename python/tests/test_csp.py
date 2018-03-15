@@ -193,7 +193,7 @@ def test_extract_cert():
     Метод `Cert.extract()` возвращает закодированный сертификат в виде байтовой строки.
     '''
     cs = csp.CertStore(None, b"MY")
-    cert = list(c for c in cs.find_by_name(bytes(test_cn)) if csp.CertInfo(c).name() == 'CN=' + test_cn)[0]
+    cert = list(c for c in cs.find_by_name(bytes(test_cn)) if csp.CertInfo(c).name() == b'CN=' + test_cn)[0]
     cdata = cert.extract()
     assert len(cdata)
     return cdata
@@ -634,7 +634,7 @@ def test_cert_acquire_key():
     исключение `ValueError`.
     '''
     cs = csp.CertStore(None, b"MY")
-    cert = list(c for c in cs.find_by_name(bytes(test_cn)) if csp.CertInfo(c).name() == 'CN=' + test_cn)[0]
+    cert = list(c for c in cs.find_by_name(bytes(test_cn)) if csp.CertInfo(c).name() == b'CN=' + test_cn)[0]
     ctx = csp.Crypt(cert)
     return ctx
 
@@ -658,7 +658,7 @@ def test_hash_digest_random():
         test_provider
     )
     data = os.urandom(1024)
-    length = 0 if test_cn.endswith('2012') else 2001
+    length = 0 if test_cn.endswith(b'2012') else 2001
     hash1 = csp.Hash(ctx, data, length)
     hash2 = csp.Hash(ctx, length)
     hash2.update(data)
@@ -676,7 +676,7 @@ def test_hash_digest_empty():
         test_provider
     )
     data = b''
-    length = 0 if test_cn.endswith('2012') else 2001
+    length = 0 if test_cn.endswith(b'2012') else 2001
     hash1 = csp.Hash(ctx, data, length)
     digest_str = hexlify(hash1.digest())
     print(digest_str, length)
@@ -694,7 +694,7 @@ def test_hash_digest_string():
         test_provider
     )
     data = b'The quick brown fox jumps over the lazy dog'
-    length = 0 if test_cn.endswith('2012') else 2001
+    length = 0 if test_cn.endswith(b'2012') else 2001
     hash1 = csp.Hash(ctx, data, length)
     digest_str = hexlify(hash1.digest())
     print(digest_str, length)
@@ -707,7 +707,7 @@ def test_hash_digest_string():
 def test_sign_hash():
     ctx = test_cert_acquire_key()
     data = os.urandom(1024)
-    length = 0 if test_cn.endswith('2012') else 2001
+    length = 0 if test_cn.endswith(b'2012') else 2001
     hash1 = csp.Hash(ctx, data, length)
     signature1 = hash1.sign()
     return signature1, data
@@ -717,8 +717,8 @@ def test_verify_hash():
     sign, data = test_sign_hash()
     ctx = test_cert_acquire_key()
     cs = csp.CertStore(ctx, b"MY")
-    cert = list(c for c in cs.find_by_name(bytes(test_cn)) if csp.CertInfo(c).name() == 'CN=' + test_cn)[0]
-    length = 0 if test_cn.endswith('2012') else 2001
+    cert = list(c for c in cs.find_by_name(bytes(test_cn)) if csp.CertInfo(c).name() == b'CN=' + test_cn)[0]
+    length = 0 if test_cn.endswith(b'2012') else 2001
     hash1 = csp.Hash(ctx, data, length)
     assert hash1.verify(cert, sign)
 
@@ -754,7 +754,7 @@ def test_hash_hmac():
 def test_import_public_key_info():
     context = csp.Crypt(test_container, PROV_GOST, 0, test_provider)
     cs = csp.CertStore(None, b"MY")
-    cert = list(c for c in cs.find_by_name(bytes(test_cn)) if csp.CertInfo(c).name() == 'CN=' + test_cn)[0]
+    cert = list(c for c in cs.find_by_name(bytes(test_cn)) if csp.CertInfo(c).name() == b'CN=' + test_cn)[0]
     pkey = context.import_public_key_info(cert)
     assert pkey
     keyBlob = pkey.encode(None)

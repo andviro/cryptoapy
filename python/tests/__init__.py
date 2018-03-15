@@ -66,6 +66,6 @@ def teardown_package():
 def get_test_thumb():
     cs = csp.CertStore(None, b"MY")
     certs = list(c for c in cs.find_by_name(bytes(test_cn))
-                 if csp.CertInfo(c).name() == 'CN=' + test_cn)
+                 if csp.CertInfo(c).name() == b'CN=' + test_cn)
     assert len(certs), 'Test certificate not found'
     return hexlify(certs[0].thumbprint())
