@@ -20,7 +20,7 @@ Key::~Key() throw(CSPException) {
 }
 
 void Key::encode(BYTE **s, DWORD *slen, Key *cryptkey) throw(CSPException) {
-    LOG("Key.encode(%p)\n", cryptkey);
+    LOG("Key::encode(%p)\n", cryptkey);
     HCRYPTKEY expkey;
     DWORD blobtype;
     if (cryptkey) {
@@ -32,14 +32,14 @@ void Key::encode(BYTE **s, DWORD *slen, Key *cryptkey) throw(CSPException) {
     }
 
     if(!CryptExportKey( hkey, expkey, blobtype, 0, NULL, slen)) {
-        throw CSPException("Key.encode: Error computing key blob length");
+        throw CSPException("Key::encode: Error computing key blob length");
     }
 
     *s = (BYTE *)malloc(*slen);
 
     if(!CryptExportKey( hkey, expkey, blobtype, 0, (BYTE *)*s, slen)) {
         free((void *)*s);
-        throw CSPException("Key.encode: Error exporting key blob");
+        throw CSPException("Key::encode: Error exporting key blob");
     }
 };
 
@@ -74,13 +74,13 @@ void Key::extract_cert(BYTE **s, DWORD *slen) throw (CSPException) {
         0))
     {
         DWORD err = GetLastError();
-        throw CSPException("Key.extract_cert: couldn't get certificate blob length", err);
+        throw CSPException("Key::extract_cert: couldn't get certificate blob length", err);
     }
 
     *s = (BYTE*)malloc(*slen);
 
     if(!*s) {
-        throw CSPException("Key.extract_cert: memory allocation error");
+        throw CSPException("Key::extract_cert: memory allocation error");
     }
 
     //--------------------------------------------------------------------
@@ -94,7 +94,7 @@ void Key::extract_cert(BYTE **s, DWORD *slen) throw (CSPException) {
         0))
     {
         DWORD err = GetLastError();
-        throw CSPException("Key.extract_cert: couldn't copy certificate blob", err);
+        throw CSPException("Key::extract_cert: couldn't copy certificate blob", err);
     }
 }
 
@@ -107,14 +107,14 @@ void Key::encrypt(BYTE *STRING, DWORD LENGTH, BYTE **s, DWORD *slen) throw(CSPEx
     if(!CryptEncrypt( hkey, NULL, true, 0, NULL, slen, LENGTH)) {
         DWORD err = GetLastError();
         LOG("    error getting encrypted data size %x\n", err);
-        throw CSPException("Key.encrypt: Getting buffer size failed.", err);
+        throw CSPException("Key::encrypt: Getting buffer size failed.", err);
     }
     LOG("    encrypted data size is %u\n", *slen);
     // Распределение памяти под возвращаемый BLOB.
     *s = (BYTE*)malloc(*slen);
     if(!*s) {
         DWORD err = GetLastError();
-        throw CSPException("Key.encrypt: Memory allocation error while encrypting.", err);
+        throw CSPException("Key::encrypt: Memory allocation error while encrypting.", err);
     }
     LOG("    encrypting data\n");
     // Повторный вызов функции CryptEncryptMessage для зашифрования содержимого.
@@ -122,7 +122,29 @@ void Key::encrypt(BYTE *STRING, DWORD LENGTH, BYTE **s, DWORD *slen) throw(CSPEx
         DWORD err = GetLastError();
         LOG("    encryption error %x\n", err);
         free((void *)*s);
-        throw CSPException("Key.encrypt: Encryption failed.", err);
+        throw CSPException("Key::encrypt: Encryption failed.", err);
     }
     LOG("    encrypted succesfully\n");
+}
+
+void Key::decrypt(BYTE *STRING, DWORD LENGTH, BYTE **s, DWORD *slen) throw(CSPException)
+{
+    LOG("Key::decrypt(%p, %u)\n", STRING, LENGTH);
+    // Распределение памяти под возвращаемый BLOB.
+    *slen = LENGTH;
+    *s = (BYTE*)malloc(*slen);
+    if(!*s) {
+        DWORD err = GetLastError();
+        throw CSPException("Key::decrypt: Memory allocation error while decrypting.", err);
+    }
+    memcpy(*s, STRING, LENGTH);
+    LOG("    decrypting data\n");
+    if(!CryptDecrypt( hkey, NULL, true, 0, *s, slen)) {
+        DWORD err = GetLastError();
+        LOG("    decryption error %x\n", err);
+        free((void *)*s);
+        throw CSPException("Key::decrypt: Decryption failed.", err);
+    }
+    *s = (BYTE *)realloc((void *)*s, (size_t)*slen) // новый размер данных может быть меньше исходного
+    LOG("    decrypted succesfully\n");
 }

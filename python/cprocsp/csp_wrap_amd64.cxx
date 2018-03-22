@@ -8196,6 +8196,93 @@ fail:
 }
 
 
+SWIGINTERN PyObject *_wrap_Key_decrypt(PyObject *self, PyObject *args) {
+  PyObject *resultobj = 0;
+  Key *arg1 = (Key *) 0 ;
+  BYTE *arg2 = (BYTE *) 0 ;
+  DWORD arg3 ;
+  BYTE **arg4 = (BYTE **) 0 ;
+  DWORD *arg5 = (DWORD *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  char *cstr2 = NULL ;
+  Py_ssize_t len2 = 0 ;
+  int res2 = 1 ;
+  BYTE *carray4 = 0 ;
+  DWORD size4 = 0 ;
+  PyObject *res4 = NULL ;
+  PyObject * obj1 = 0 ;
+  
+  arg4 = &carray4;
+  arg5 = &size4;
+  if (!PyArg_ParseTuple(args,(char *)"O:Key_decrypt",&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_Key, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Key_decrypt" "', argument " "1"" of type '" "Key *""'"); 
+  }
+  arg1 = reinterpret_cast< Key * >(argp1);
+#if py_version_hex>=0x03000000
+  if (PyBytes_Check(obj1))
+#else  
+  if (PyString_Check(obj1))
+#endif
+  {
+#if PY_VERSION_HEX>=0x03000000
+    res2 = PyBytes_AsStringAndSize(obj1, &cstr2, &len2);
+#else
+    res2 = PyString_AsStringAndSize(obj1, &cstr2, &len2);
+#endif
+    if (!cstr2) {
+      res2 = 1;
+    }
+    /*%#if PY_VERSION_HEX>=0x03000000*/
+    /*Py_XDECREF(obj1);*/
+    /*%#endif*/
+  } 
+  
+  if(res2){
+    SWIG_exception_fail(SWIG_ArgError(SWIG_TypeError), "in method '" "Key_decrypt" "', argument " "2"" of type '" "BYTE *""'");
+  } else {
+    arg2 = (BYTE *) cstr2;
+    arg3 = (DWORD) len2;
+  }
+  try {
+    {
+      SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+      (arg1)->decrypt(arg2,arg3,arg4,arg5);
+      SWIG_PYTHON_THREAD_END_ALLOW;
+    }
+  }
+  catch(CSPException &_e) {
+    PyErr_SetString(PyExc_SystemError, (&_e)->msg);
+    SWIG_fail;
+    
+  }
+  
+  resultobj = SWIG_Py_Void();
+  if (*arg4) {
+    if (*arg5 > INT_MAX) {
+      swig_type_info* pchar_descriptor = SWIG_pchar_descriptor();
+      res4 = pchar_descriptor ? 
+      SWIG_InternalNewPointerObj(const_cast< BYTE * >(*arg4), pchar_descriptor, 0) : SWIG_Py_Void();
+    } else {
+#if PY_VERSION_HEX >= 0x03000000
+      res4 = PyBytes_FromStringAndSize((char *)*arg4, static_cast< int >(*arg5));
+#else
+      res4 = PyString_FromStringAndSize((char *)*arg4, static_cast< int >(*arg5));
+#endif
+    }
+    resultobj = SWIG_Python_AppendOutput(resultobj, res4);
+    free(*arg4);
+  } else {
+    resultobj = SWIG_Python_AppendOutput(resultobj, SWIG_Py_Void());
+  }
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
 SWIGINTERN PyObject *_wrap_Key_alg_id(PyObject *self, PyObject *args) {
   PyObject *resultobj = 0;
   Key *arg1 = (Key *) 0 ;
@@ -17959,6 +18046,14 @@ SWIGINTERN PyMethodDef SwigPyBuiltin__Key_methods[] = {
   { "extract_cert", (PyCFunction) _wrap_Key_extract_cert, METH_VARARGS, (char *) "extract_cert()" },
   { "encrypt", (PyCFunction) _wrap_Key_encrypt, METH_VARARGS, (char *) "\n"
 		"encrypt(STRING)\n"
+		"\n"
+		"Parameters\n"
+		"----------\n"
+		"STRING: BYTE *\n"
+		"\n"
+		"" },
+  { "decrypt", (PyCFunction) _wrap_Key_decrypt, METH_VARARGS, (char *) "\n"
+		"decrypt(STRING)\n"
 		"\n"
 		"Parameters\n"
 		"----------\n"
