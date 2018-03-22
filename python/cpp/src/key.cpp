@@ -53,13 +53,13 @@ void Key::store_cert(Cert *c) throw (CSPException) {
 }
 
 void Key::set_alg_id(ALG_ID id) throw (CSPException) {
-    if (!CryptSetKeyParam(hkey, KP_ALGID, (LPBYTE) ke_alg, 0)) {
+    if (!CryptSetKeyParam(hkey, KP_ALGID, (LPBYTE) id, 0)) {
         throw CSPException("Key.set_alg_id: couldn't set key parameter");
     }
 }
 
 void Key::set_mode(DWORD mode) throw (CSPException) {
-    if (!CryptSetKeyParam(hkey, KP_MOD, (LPBYTE) &mode, 0)) {
+    if (!CryptSetKeyParam(hkey, KP_MODE, (LPBYTE) &mode, 0)) {
         throw CSPException("Key.set_mode: couldn't set key parameter");
     }
 }

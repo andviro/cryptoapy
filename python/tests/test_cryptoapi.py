@@ -394,3 +394,9 @@ def test_gen_remove_key():
     except (SystemError, ValueError):
         key_exists = False
     assert not key_exists
+
+
+def test_block_encrypt():
+    thumb = get_test_thumb()
+    cert = cryptoapi.get_certificate(thumb)
+    encryptedData, ephemData, sessionKeyData, ivData = cryptoapi.block_encrypt(cert, b'adkasdlkad')

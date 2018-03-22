@@ -8238,6 +8238,86 @@ fail:
 }
 
 
+SWIGINTERN PyObject *_wrap_Key_set_alg_id(PyObject *self, PyObject *args) {
+  PyObject *resultobj = 0;
+  Key *arg1 = (Key *) 0 ;
+  ALG_ID arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  unsigned int val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:Key_set_alg_id",&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_Key, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Key_set_alg_id" "', argument " "1"" of type '" "Key *""'"); 
+  }
+  arg1 = reinterpret_cast< Key * >(argp1);
+  ecode2 = SWIG_AsVal_unsigned_SS_int(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "Key_set_alg_id" "', argument " "2"" of type '" "ALG_ID""'");
+  } 
+  arg2 = static_cast< ALG_ID >(val2);
+  try {
+    {
+      SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+      (arg1)->set_alg_id(arg2);
+      SWIG_PYTHON_THREAD_END_ALLOW;
+    }
+  }
+  catch(CSPException &_e) {
+    PyErr_SetString(PyExc_SystemError, (&_e)->msg);
+    SWIG_fail;
+    
+  }
+  
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Key_set_mode(PyObject *self, PyObject *args) {
+  PyObject *resultobj = 0;
+  Key *arg1 = (Key *) 0 ;
+  DWORD arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:Key_set_mode",&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_Key, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Key_set_mode" "', argument " "1"" of type '" "Key *""'"); 
+  }
+  arg1 = reinterpret_cast< Key * >(argp1);
+#if PY_VERSION_HEX >= 0x03000000
+  arg2 = PyLong_AsUnsignedLong(obj1);
+#else
+  arg2 = PyInt_AsUnsignedLongMask(obj1);
+#endif
+  try {
+    {
+      SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+      (arg1)->set_mode(arg2);
+      SWIG_PYTHON_THREAD_END_ALLOW;
+    }
+  }
+  catch(CSPException &_e) {
+    PyErr_SetString(PyExc_SystemError, (&_e)->msg);
+    SWIG_fail;
+    
+  }
+  
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
 SWIGINTERN PyObject *_wrap_Key_alg_id(PyObject *self, PyObject *args) {
   PyObject *resultobj = 0;
   Key *arg1 = (Key *) 0 ;
@@ -8265,6 +8345,62 @@ SWIGINTERN PyObject *_wrap_Key_alg_id(PyObject *self, PyObject *args) {
   }
   
   resultobj = SWIG_From_unsigned_SS_int(static_cast< unsigned int >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_Key_get_iv(PyObject *self, PyObject *args) {
+  PyObject *resultobj = 0;
+  Key *arg1 = (Key *) 0 ;
+  BYTE **arg2 = (BYTE **) 0 ;
+  DWORD *arg3 = (DWORD *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  BYTE *carray2 = 0 ;
+  DWORD size2 = 0 ;
+  PyObject *res2 = NULL ;
+  
+  arg2 = &carray2;
+  arg3 = &size2;
+  if (args && PyTuple_Check(args) && PyTuple_GET_SIZE(args) > 0) SWIG_exception_fail(SWIG_TypeError, "Key_get_iv takes no arguments");
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_Key, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "Key_get_iv" "', argument " "1"" of type '" "Key *""'"); 
+  }
+  arg1 = reinterpret_cast< Key * >(argp1);
+  try {
+    {
+      SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+      (arg1)->get_iv(arg2,arg3);
+      SWIG_PYTHON_THREAD_END_ALLOW;
+    }
+  }
+  catch(CSPException &_e) {
+    PyErr_SetString(PyExc_SystemError, (&_e)->msg);
+    SWIG_fail;
+    
+  }
+  
+  resultobj = SWIG_Py_Void();
+  if (*arg2) {
+    if (*arg3 > INT_MAX) {
+      swig_type_info* pchar_descriptor = SWIG_pchar_descriptor();
+      res2 = pchar_descriptor ? 
+      SWIG_InternalNewPointerObj(const_cast< BYTE * >(*arg2), pchar_descriptor, 0) : SWIG_Py_Void();
+    } else {
+#if PY_VERSION_HEX >= 0x03000000
+      res2 = PyBytes_FromStringAndSize((char *)*arg2, static_cast< int >(*arg3));
+#else
+      res2 = PyString_FromStringAndSize((char *)*arg2, static_cast< int >(*arg3));
+#endif
+    }
+    resultobj = SWIG_Python_AppendOutput(resultobj, res2);
+    free(*arg2);
+  } else {
+    resultobj = SWIG_Python_AppendOutput(resultobj, SWIG_Py_Void());
+  }
   return resultobj;
 fail:
   return NULL;
@@ -18015,7 +18151,24 @@ SWIGINTERN PyMethodDef SwigPyBuiltin__Key_methods[] = {
 		"STRING: BYTE *\n"
 		"\n"
 		"" },
+  { "set_alg_id", (PyCFunction) _wrap_Key_set_alg_id, METH_VARARGS, (char *) "\n"
+		"set_alg_id(id)\n"
+		"\n"
+		"Parameters\n"
+		"----------\n"
+		"id: ALG_ID\n"
+		"\n"
+		"" },
+  { "set_mode", (PyCFunction) _wrap_Key_set_mode, METH_VARARGS, (char *) "\n"
+		"set_mode(mode)\n"
+		"\n"
+		"Parameters\n"
+		"----------\n"
+		"mode: DWORD\n"
+		"\n"
+		"" },
   { "alg_id", (PyCFunction) _wrap_Key_alg_id, METH_VARARGS, (char *) "alg_id() -> ALG_ID" },
+  { "get_iv", (PyCFunction) _wrap_Key_get_iv, METH_VARARGS, (char *) "get_iv()" },
   { NULL, NULL, 0, NULL } /* Sentinel */
 };
 
