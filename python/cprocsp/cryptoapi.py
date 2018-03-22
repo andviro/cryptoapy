@@ -434,13 +434,12 @@ def encrypt(certs, data):
     :returns: шифрованные данные в байтовой строке
 
     """
-    bin_data = data
     certs = [autopem(c) for c in certs]
     msg = csp.CryptMsg()
     for c in certs:
         cert = csp.Cert(c)
         msg.add_recipient(cert)
-    encrypted = msg.encrypt_data(bin_data)
+    encrypted = msg.encrypt_data(data)
     return encrypted
 
 
@@ -475,6 +474,30 @@ def decrypt(data, thumb, cont=None, provider=None):
     msg = csp.CryptMsg(bin_data)
     msg.decrypt_by_cert(cert)
     return msg.get_data()
+
+
+@retry
+def block_encrypt(cert, data, local=True, provider=None):
+    """Шифрование данных на сертификатах получателей
+    TODO: документация
+    """
+    if provider is None and not local:
+        provider = PROV_HSM
+    ctx = _mkcontext('', provider, csp.CRYPT_VERIFYCONTEXT)
+    cert = autopem(cert)
+    cert = csp.Cert(cert)
+    pkey = ctx.import_public_key_info(cert)
+    keyData = pkey.encode()
+    ephemKey = ctx.create_key(csp.CRYPT_EXPORTABLE, csp.CALG_DH_EL_EPHEM)
+    ephemData = ephemKey.encode()
+    agreeKey = ctx.import_key(keyData, ephemKey)
+    agreeKey.set_alg_id(csp.CALG_PRO_EXPORT)
+    sessionKey = ctx.create_key(csp.CRYPT_EXPORTABLE, csp.CALG_G28147)
+    sessionKeyData = sessionKey.export(agreeKey)
+    sessionKey.set_mod(csp.CRYPT_MODE_CBCSTRICT)
+    ivData = sessionKey.get_iv()
+    encryptedData = sessionKey.encrypt(data)
+    return encryptedData, ephemData, sessionKeyData, ivData
 
 
 def pkcs7_info(data):

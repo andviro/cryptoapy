@@ -52,6 +52,17 @@ void Key::store_cert(Cert *c) throw (CSPException) {
     }
 }
 
+void Key::set_alg_id(ALG_ID id) throw (CSPException) {
+    if (!CryptSetKeyParam(hkey, KP_ALGID, (LPBYTE) ke_alg, 0)) {
+        throw CSPException("Key.set_alg_id: couldn't set key parameter");
+    }
+}
+
+void Key::set_mode(DWORD mode) throw (CSPException) {
+    if (!CryptSetKeyParam(hkey, KP_MOD, (LPBYTE) &mode, 0)) {
+        throw CSPException("Key.set_mode: couldn't set key parameter");
+    }
+}
 
 ALG_ID Key::alg_id() throw (CSPException) {
     ALG_ID res;
@@ -62,6 +73,23 @@ ALG_ID Key::alg_id() throw (CSPException) {
         throw CSPException("Key.alg_id: couldn't get key algorithm ID", err);
     }
     return res;
+}
+
+void Key::get_iv(BYTE **s, DWORD *slen) throw (CSPException) {
+    if(!CryptGetKeyParam( hkey, KP_IV, NULL, slen, 0))
+    {
+        DWORD err = GetLastError();
+        throw CSPException("Key::get_iv: couldn't get iv blob length", err);
+    }
+    *s = (BYTE*)malloc(*slen);
+    if(!*s) {
+        throw CSPException("Key::get_iv: memory allocation error");
+    }
+    if(!CryptGetKeyParam( hkey, KP_IV, *s, slen, 0))
+    {
+        DWORD err = GetLastError();
+        throw CSPException("Key::get_iv: couldn't copy iv blob", err);
+    }
 }
 
 
