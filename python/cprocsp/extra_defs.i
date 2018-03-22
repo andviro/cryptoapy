@@ -1,6 +1,24 @@
 /* vim: ft=swig
 */
 
+/* Режим блочного шифрования с обратной связью на базе ГОСТ 28147-89, шифр-текст блока всегда является IV для следующего.*/
+/*! \ingroup ProCSPData
+*  \brief Режим блочного шифрования с обратной связью на базе ГОСТ 28147-89, шифр-текст блока всегда является IV для следующего
+*/
+#define CRYPT_MODE_CBCSTRICT	1 
+
+/* CRYPT_PUBKEY_ALG_OID_GROUP_ID */
+#define szOID_CP_GOST_R3410 "1.2.643.2.2.20"
+#define szOID_CP_GOST_R3410EL "1.2.643.2.2.19"
+#define szOID_CP_GOST_R3410_12_256 "1.2.643.7.1.1.1.1"
+#define szOID_CP_GOST_R3410_12_512 "1.2.643.7.1.1.1.2"
+#define szOID_CP_DH_EX "1.2.643.2.2.99"
+#define szOID_CP_DH_EL "1.2.643.2.2.98"
+#define szOID_CP_DH_12_256 "1.2.643.7.1.1.6.1"
+#define szOID_CP_DH_12_512 "1.2.643.7.1.1.6.2"
+#define szOID_CP_GOST_R3410_94_ESDH "1.2.643.2.2.97"
+#define szOID_CP_GOST_R3410_01_ESDH "1.2.643.2.2.96"
+
 // Имена провайдеров как в CSP 1.1
 #define CP_DEF_PROV_A "Crypto-Pro Cryptographic Service Provider"
 #define CP_DEF_PROV_W L"Crypto-Pro Cryptographic Service Provider"

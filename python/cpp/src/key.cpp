@@ -25,7 +25,7 @@ void Key::encode(BYTE **s, DWORD *slen, Key *cryptkey) throw(CSPException) {
     DWORD blobtype;
     if (cryptkey) {
         expkey = cryptkey -> hkey;
-        blobtype = PLAINTEXTKEYBLOB;
+        blobtype = SIMPLEBLOB;
     } else {
         expkey = 0;
         blobtype = PUBLICKEYBLOB;
@@ -53,7 +53,7 @@ void Key::store_cert(Cert *c) throw (CSPException) {
 }
 
 void Key::set_alg_id(ALG_ID id) throw (CSPException) {
-    if (!CryptSetKeyParam(hkey, KP_ALGID, (LPBYTE) id, 0)) {
+    if (!CryptSetKeyParam(hkey, KP_ALGID, (LPBYTE) &id, 0)) {
         throw CSPException("Key.set_alg_id: couldn't set key parameter");
     }
 }
@@ -132,21 +132,23 @@ void Key::encrypt(BYTE *STRING, DWORD LENGTH, BYTE **s, DWORD *slen) throw(CSPEx
     LOG("Key::encrypt(%p, %u)\n", STRING, LENGTH);
     LOG("    getting encrypted data size\n");
     // Вызов функции CryptEncryptMessage.
-    if(!CryptEncrypt( hkey, NULL, true, 0, NULL, slen, LENGTH)) {
-        DWORD err = GetLastError();
-        LOG("    error getting encrypted data size %x\n", err);
-        throw CSPException("Key::encrypt: Getting buffer size failed.", err);
-    }
+    *slen = LENGTH;
+    // TODO: неизбыточное вычисление размера буфера
+//     if(!CryptEncrypt( hkey, NULL, true, 0, NULL, slen, LENGTH)) {
+//         DWORD err = GetLastError();
+//         LOG("    error getting encrypted data size %x\n", err);
+//         throw CSPException("Key::encrypt: Getting buffer size failed.", err);
+//     }
     LOG("    encrypted data size is %u\n", *slen);
     // Распределение памяти под возвращаемый BLOB.
-    *s = (BYTE*)malloc(*slen);
+    *s = (BYTE*)malloc(LENGTH + 32768);
     if(!*s) {
         DWORD err = GetLastError();
         throw CSPException("Key::encrypt: Memory allocation error while encrypting.", err);
     }
     LOG("    encrypting data\n");
     // Повторный вызов функции CryptEncryptMessage для зашифрования содержимого.
-    if(!CryptEncrypt( hkey, NULL, true, 0, *s, slen, LENGTH)) {
+    if(!CryptEncrypt( hkey, NULL, true, 0, *s, slen, LENGTH + 32768)) {
         DWORD err = GetLastError();
         LOG("    encryption error %x\n", err);
         free((void *)*s);

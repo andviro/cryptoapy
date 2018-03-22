@@ -477,25 +477,30 @@ def decrypt(data, thumb, cont=None, provider=None):
 
 
 @retry
-def block_encrypt(cert, data, local=True, provider=None):
+def block_encrypt(cert, data):
     """Шифрование данных на сертификатах получателей
     TODO: документация
     """
-    if provider is None and not local:
-        provider = PROV_HSM
-    ctx = _mkcontext('', provider, csp.CRYPT_VERIFYCONTEXT)
     cert = autopem(cert)
     cert = csp.Cert(cert)
-    pkey = ctx.import_public_key_info(cert)
-    keyData = pkey.encode()
-    ephemKey = ctx.create_key(csp.CRYPT_EXPORTABLE, csp.CALG_DH_EL_EPHEM)
+    pkaid = csp.CertInfo(cert).public_key_algorithm()
+    if pkaid == csp.szOID_CP_GOST_R3410_12_256:
+        provtype, keyalg = PROV_GOST, csp.CALG_DH_GR3410_12_256_EPHEM
+    elif pkaid == csp.szOID_CP_GOST_R3410_12_512:
+        provtype, keyalg = PROV_GOST, csp.CALG_DH_GR3410_12_512_EPHEM
+    else:
+        provtype, keyalg = csp.PROV_GOST_2001_DH, csp.CALG_DH_EL_EPHEM
+    ctx = csp.Crypt(b'', provtype, csp.CRYPT_VERIFYCONTEXT, None)
+    pubKey = ctx.import_public_key_info(cert)
+    keyData = pubKey.encode()
+    ephemKey = ctx.create_key(csp.CRYPT_EXPORTABLE, keyalg)
     ephemData = ephemKey.encode()
     agreeKey = ctx.import_key(keyData, ephemKey)
     agreeKey.set_alg_id(csp.CALG_PRO_EXPORT)
     sessionKey = ctx.create_key(csp.CRYPT_EXPORTABLE, csp.CALG_G28147)
-    sessionKeyData = sessionKey.export(agreeKey)
-    sessionKey.set_mod(csp.CRYPT_MODE_CBCSTRICT)
     ivData = sessionKey.get_iv()
+    sessionKeyData = sessionKey.encode(agreeKey)
+    sessionKey.set_mode(csp.CRYPT_MODE_CBCSTRICT)
     encryptedData = sessionKey.encrypt(data)
     return encryptedData, ephemData, sessionKeyData, ivData
 

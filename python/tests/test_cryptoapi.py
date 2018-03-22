@@ -400,3 +400,7 @@ def test_block_encrypt():
     thumb = get_test_thumb()
     cert = cryptoapi.get_certificate(thumb)
     encryptedData, ephemData, sessionKeyData, ivData = cryptoapi.block_encrypt(cert, b'adkasdlkad')
+    assert len(encryptedData)
+    assert len(ephemData)
+    assert len(sessionKeyData)
+    assert len(ivData)
