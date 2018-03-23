@@ -434,13 +434,12 @@ def encrypt(certs, data):
     :returns: шифрованные данные в байтовой строке
 
     """
-    bin_data = data
     certs = [autopem(c) for c in certs]
     msg = csp.CryptMsg()
     for c in certs:
         cert = csp.Cert(c)
         msg.add_recipient(cert)
-    encrypted = msg.encrypt_data(bin_data)
+    encrypted = msg.encrypt_data(data)
     return encrypted
 
 
@@ -475,6 +474,70 @@ def decrypt(data, thumb, cont=None, provider=None):
     msg = csp.CryptMsg(bin_data)
     msg.decrypt_by_cert(cert)
     return msg.get_data()
+
+
+@retry
+def block_encrypt(cert, data):
+    """Асимметричное шифрование данных на сертификатe получателя с генерацией эфемерной пары
+
+    :certs: список сертификатов в байтовых строках
+    :data: данные в байтовой строке
+    :returns: кортеж вида (шифрованные данные, эфемерный ключ, сессионный ключ, инициализационный вектор)
+    """
+    cert = autopem(cert)
+    cert = csp.Cert(cert)
+    pkaid = csp.CertInfo(cert).public_key_algorithm()
+    if pkaid == csp.szOID_CP_GOST_R3410_12_256:
+        provtype, keyalg = csp.PROV_GOST_2012_256, csp.CALG_DH_GR3410_12_256_EPHEM
+    elif pkaid == csp.szOID_CP_GOST_R3410_12_512:
+        provtype, keyalg = csp.PROV_GOST_2012_512, csp.CALG_DH_GR3410_12_512_EPHEM
+    else:
+        provtype, keyalg = csp.PROV_GOST_2001_DH, csp.CALG_DH_EL_EPHEM
+    ctx = csp.Crypt(b'', provtype, csp.CRYPT_VERIFYCONTEXT, None)
+    pubKey = ctx.import_public_key_info(cert)
+    keyData = pubKey.encode()
+    ephemKey = ctx.create_key(csp.CRYPT_EXPORTABLE, keyalg)
+    ephemData = ephemKey.encode()
+    agreeKey = ctx.import_key(keyData, ephemKey)
+    agreeKey.set_alg_id(csp.CALG_PRO12_EXPORT)
+    sessionKey = ctx.create_key(csp.CRYPT_EXPORTABLE, csp.CALG_G28147)
+    ivData = sessionKey.get_iv()
+    sessionKeyData = sessionKey.encode(agreeKey)
+    sessionKey.set_mode(csp.CRYPT_MODE_CBCSTRICT)
+    encryptedData = sessionKey.encrypt(data)
+    return encryptedData, ephemData, sessionKeyData, ivData
+
+
+@retry
+def block_decrypt(cont, encryptedData, ephemData, sessionKeyData, ivData, provider=None):
+    """Асимметричное дешифрование данных, полученных функцией block_encrypt
+
+    :cont: Имя контейнера
+    :encryptedData: шифрованные данные
+    :ephemData: эфемерный ключ
+    :sessionKeyData: сессионный ключ
+    :ivData: инициализационный вектор
+    :provider: по умолчанию None, в этом случае используется дефолтный для
+        провайдера PROV_GOST.
+
+        Если в качестве криптопровайдера передана строка, то она используется в
+        качестве имени, тип берется из константы PROV_GOST.
+        Если передан кортеж вида (тип, имя), то в создании контекста участвуют
+        оба переданных параметра.
+    :returns: дешифрованные данные (дополненные до размера, кратного блоку шифрования)
+    """
+    ctx = _mkcontext(cont, provider, 0)
+    userKey = ctx.get_key(csp.AT_KEYEXCHANGE)
+    agreeKey = ctx.import_key(ephemData, userKey)
+    agreeKey.set_alg_id(csp.CALG_PRO12_EXPORT)
+    sessionKey = ctx.import_key(sessionKeyData, agreeKey)
+    sessionKey.set_mode(csp.CRYPT_MODE_CBCSTRICT)
+    try:
+        sessionKey.set_padding(csp.RANDOM_PADDING)
+    except Exception:
+        pass  # XXX возможная для VipNet CSP ошибка игнорируется
+    sessionKey.set_iv(ivData)
+    return sessionKey.decrypt(encryptedData)
 
 
 def pkcs7_info(data):
