@@ -478,8 +478,11 @@ def decrypt(data, thumb, cont=None, provider=None):
 
 @retry
 def block_encrypt(cert, data):
-    """Шифрование данных на сертификатах получателей
-    TODO: документация
+    """Асимметричное шифрование данных на сертификатe получателя с генерацией эфемерной пары
+
+    :certs: список сертификатов в байтовых строках
+    :data: данные в байтовой строке
+    :returns: кортеж вида (шифрованные данные, эфемерный ключ, сессионный ключ, инициализационный вектор)
     """
     cert = autopem(cert)
     cert = csp.Cert(cert)
@@ -507,8 +510,21 @@ def block_encrypt(cert, data):
 
 @retry
 def block_decrypt(cont, encryptedData, ephemData, sessionKeyData, ivData, provider=None):
-    """
-    TODO: документация
+    """Асимметричное дешифрование данных, полученных функцией block_encrypt
+
+    :cont: Имя контейнера
+    :encryptedData: шифрованные данные
+    :ephemData: эфемерный ключ
+    :sessionKeyData: сессионный ключ
+    :ivData: инициализационный вектор
+    :provider: по умолчанию None, в этом случае используется дефолтный для
+        провайдера PROV_GOST.
+
+        Если в качестве криптопровайдера передана строка, то она используется в
+        качестве имени, тип берется из константы PROV_GOST.
+        Если передан кортеж вида (тип, имя), то в создании контекста участвуют
+        оба переданных параметра.
+    :returns: дешифрованные данные (дополненные до размера, кратного блоку шифрования)
     """
     ctx = _mkcontext(cont, provider, 0)
     userKey = ctx.get_key(csp.AT_KEYEXCHANGE)
