@@ -58,6 +58,18 @@ void Key::set_alg_id(ALG_ID id) throw (CSPException) {
     }
 }
 
+void Key::set_iv(BYTE *STRING, DWORD LENGTH) throw (CSPException) {
+    if (!CryptSetKeyParam(hkey, KP_IV, STRING, 0)) {
+        throw CSPException("Key.set_iv: couldn't set key parameter");
+    }
+}
+
+void Key::set_padding(DWORD padding) throw (CSPException) {
+    if (!CryptSetKeyParam(hkey, KP_PADDING, (BYTE *)&padding, 0)) {
+        throw CSPException("Key.set_padding: couldn't set key parameter");
+    }
+}
+
 void Key::set_mode(DWORD mode) throw (CSPException) {
     if (!CryptSetKeyParam(hkey, KP_MODE, (LPBYTE) &mode, 0)) {
         throw CSPException("Key.set_mode: couldn't set key parameter");
@@ -146,6 +158,7 @@ void Key::encrypt(BYTE *STRING, DWORD LENGTH, BYTE **s, DWORD *slen) throw(CSPEx
         DWORD err = GetLastError();
         throw CSPException("Key::encrypt: Memory allocation error while encrypting.", err);
     }
+    memcpy(*s, STRING, LENGTH);
     LOG("    encrypting data\n");
     // Повторный вызов функции CryptEncryptMessage для зашифрования содержимого.
     if(!CryptEncrypt( hkey, NULL, true, 0, *s, slen, LENGTH + 32768)) {

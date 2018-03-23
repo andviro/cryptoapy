@@ -396,11 +396,16 @@ def test_gen_remove_key():
     assert not key_exists
 
 
-def test_block_encrypt():
+def test_block_encrypt_decrypt():
     thumb = get_test_thumb()
     cert = cryptoapi.get_certificate(thumb)
-    encryptedData, ephemData, sessionKeyData, ivData = cryptoapi.block_encrypt(cert, b'adkasdlkad')
+    data = b'hello world'
+    encryptedData, ephemData, sessionKeyData, ivData = cryptoapi.block_encrypt(cert, data)
     assert len(encryptedData)
     assert len(ephemData)
     assert len(sessionKeyData)
     assert len(ivData)
+    open('encdata.bin', 'wb').write(encryptedData)
+    decryptedData = cryptoapi.block_decrypt(test_container, encryptedData, ephemData, sessionKeyData, ivData)
+    open('decdata.bin', 'wb').write(decryptedData)
+    assert decryptedData[:len(data)] == data

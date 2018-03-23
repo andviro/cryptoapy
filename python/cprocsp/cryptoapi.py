@@ -485,9 +485,9 @@ def block_encrypt(cert, data):
     cert = csp.Cert(cert)
     pkaid = csp.CertInfo(cert).public_key_algorithm()
     if pkaid == csp.szOID_CP_GOST_R3410_12_256:
-        provtype, keyalg = PROV_GOST, csp.CALG_DH_GR3410_12_256_EPHEM
+        provtype, keyalg = csp.PROV_GOST_2012_256, csp.CALG_DH_GR3410_12_256_EPHEM
     elif pkaid == csp.szOID_CP_GOST_R3410_12_512:
-        provtype, keyalg = PROV_GOST, csp.CALG_DH_GR3410_12_512_EPHEM
+        provtype, keyalg = csp.PROV_GOST_2012_512, csp.CALG_DH_GR3410_12_512_EPHEM
     else:
         provtype, keyalg = csp.PROV_GOST_2001_DH, csp.CALG_DH_EL_EPHEM
     ctx = csp.Crypt(b'', provtype, csp.CRYPT_VERIFYCONTEXT, None)
@@ -496,13 +496,32 @@ def block_encrypt(cert, data):
     ephemKey = ctx.create_key(csp.CRYPT_EXPORTABLE, keyalg)
     ephemData = ephemKey.encode()
     agreeKey = ctx.import_key(keyData, ephemKey)
-    agreeKey.set_alg_id(csp.CALG_PRO_EXPORT)
+    agreeKey.set_alg_id(csp.CALG_PRO12_EXPORT)
     sessionKey = ctx.create_key(csp.CRYPT_EXPORTABLE, csp.CALG_G28147)
     ivData = sessionKey.get_iv()
     sessionKeyData = sessionKey.encode(agreeKey)
     sessionKey.set_mode(csp.CRYPT_MODE_CBCSTRICT)
     encryptedData = sessionKey.encrypt(data)
     return encryptedData, ephemData, sessionKeyData, ivData
+
+
+@retry
+def block_decrypt(cont, encryptedData, ephemData, sessionKeyData, ivData, provider=None):
+    """
+    TODO: документация
+    """
+    ctx = _mkcontext(cont, provider, 0)
+    userKey = ctx.get_key(csp.AT_KEYEXCHANGE)
+    agreeKey = ctx.import_key(ephemData, userKey)
+    agreeKey.set_alg_id(csp.CALG_PRO12_EXPORT)
+    sessionKey = ctx.import_key(sessionKeyData, agreeKey)
+    sessionKey.set_mode(csp.CRYPT_MODE_CBCSTRICT)
+    try:
+        sessionKey.set_padding(csp.RANDOM_PADDING)
+    except Exception:
+        pass  # XXX возможная для VipNet CSP ошибка игнорируется
+    sessionKey.set_iv(ivData)
+    return sessionKey.decrypt(encryptedData)
 
 
 def pkcs7_info(data):
