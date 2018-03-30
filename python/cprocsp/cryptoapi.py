@@ -488,18 +488,18 @@ def block_encrypt(cert, data):
     cert = csp.Cert(cert)
     pkaid = csp.CertInfo(cert).public_key_algorithm()
     if pkaid == csp.szOID_CP_GOST_R3410_12_256:
-        provtype, keyalg = csp.PROV_GOST_2012_256, csp.CALG_DH_GR3410_12_256_EPHEM
+        provtype, keyalg, keyexp = csp.PROV_GOST_2012_256, csp.CALG_DH_GR3410_12_256_EPHEM, csp.CALG_PRO12_EXPORT
     elif pkaid == csp.szOID_CP_GOST_R3410_12_512:
-        provtype, keyalg = csp.PROV_GOST_2012_512, csp.CALG_DH_GR3410_12_512_EPHEM
+        provtype, keyalg, keyexp = csp.PROV_GOST_2012_512, csp.CALG_DH_GR3410_12_512_EPHEM, csp.CALG_PRO12_EXPORT
     else:
-        provtype, keyalg = csp.PROV_GOST_2001_DH, csp.CALG_DH_EL_EPHEM
+        provtype, keyalg, keyexp = csp.PROV_GOST_2001_DH, csp.CALG_DH_EL_EPHEM, csp.CALG_PRO_EXPORT
     ctx = csp.Crypt(b'', provtype, csp.CRYPT_VERIFYCONTEXT, None)
     pubKey = ctx.import_public_key_info(cert)
     keyData = pubKey.encode()
     ephemKey = ctx.create_key(csp.CRYPT_EXPORTABLE, keyalg)
     ephemData = ephemKey.encode()
     agreeKey = ctx.import_key(keyData, ephemKey)
-    agreeKey.set_alg_id(csp.CALG_PRO12_EXPORT)
+    agreeKey.set_alg_id(keyexp)
     sessionKey = ctx.create_key(csp.CRYPT_EXPORTABLE, csp.CALG_G28147)
     ivData = sessionKey.get_iv()
     sessionKeyData = sessionKey.encode(agreeKey)
@@ -528,8 +528,13 @@ def block_decrypt(cont, encryptedData, ephemData, sessionKeyData, ivData, provid
     """
     ctx = _mkcontext(cont, provider, 0)
     userKey = ctx.get_key(csp.AT_KEYEXCHANGE)
+    algID = ctx.get_key().alg_id()
+    if algID == csp.CALG_DH_EL_SF:
+        keyexp = csp.CALG_PRO_EXPORT
+    else:
+        keyexp = csp.CALG_PRO12_EXPORT
     agreeKey = ctx.import_key(ephemData, userKey)
-    agreeKey.set_alg_id(csp.CALG_PRO12_EXPORT)
+    agreeKey.set_alg_id(keyexp)
     sessionKey = ctx.import_key(sessionKeyData, agreeKey)
     sessionKey.set_mode(csp.CRYPT_MODE_CBCSTRICT)
     try:
