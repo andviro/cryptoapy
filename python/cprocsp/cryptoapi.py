@@ -254,11 +254,12 @@ def bind_cert_to_key(cont, cert, local=True, provider=None, store=False):
     cert = autopem(cert)
     newc = csp.Cert(cert)
     newc.bind(ctx)
-    cs = csp.CertStore(ctx, b"MY")
-    cs.add_cert(newc)
     if store:
         key = ctx.get_key()
         key.store_cert(newc)
+    else:
+        cs = csp.CertStore(ctx, b"MY")
+        cs.add_cert(newc)
     return hexlify(newc.thumbprint())
 
 
