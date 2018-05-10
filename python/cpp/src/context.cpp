@@ -296,4 +296,3 @@ void Crypt::public_key(BYTE **s, DWORD *slen, DWORD keyspec) throw(CSPException)
     memcpy(*s, pbPublicKeyInfo->PublicKey.pbData, *slen);
     free(pbPublicKeyInfo);
 };
-

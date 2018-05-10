@@ -8,6 +8,7 @@ class Key;
 class Hash;
 class CryptIter;
 class Cert;
+class CSPInfo;
 
 class CryptDesc
 {
@@ -72,6 +73,7 @@ public:
     friend class Signature;
     friend class CertStore;
     friend class CertRequest;
+    friend class CSPInfo;
 };
 
 

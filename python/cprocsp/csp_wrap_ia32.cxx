@@ -3739,52 +3739,53 @@ SwigPyBuiltin_iternextfunc_closure(SwigPyWrapperFunction wrapper, PyObject *a) {
 #define SWIGTYPE_p_CERT_EXTENSION swig_types[0]
 #define SWIGTYPE_p_CERT_PUBLIC_KEY_INFO swig_types[1]
 #define SWIGTYPE_p_CRYPT_INTEGER_BLOB swig_types[2]
-#define SWIGTYPE_p_Cert swig_types[3]
-#define SWIGTYPE_p_CertExtension swig_types[4]
-#define SWIGTYPE_p_CertFind swig_types[5]
-#define SWIGTYPE_p_CertInfo swig_types[6]
-#define SWIGTYPE_p_CertIter swig_types[7]
-#define SWIGTYPE_p_CertRequest swig_types[8]
-#define SWIGTYPE_p_CertStore swig_types[9]
-#define SWIGTYPE_p_Crypt swig_types[10]
-#define SWIGTYPE_p_CryptDesc swig_types[11]
-#define SWIGTYPE_p_CryptIter swig_types[12]
-#define SWIGTYPE_p_CryptMsg swig_types[13]
-#define SWIGTYPE_p_EKUIter swig_types[14]
-#define SWIGTYPE_p_ExtIter swig_types[15]
-#define SWIGTYPE_p_FILETIME swig_types[16]
-#define SWIGTYPE_p_Hash swig_types[17]
-#define SWIGTYPE_p_Key swig_types[18]
-#define SWIGTYPE_p_PCCERT_CONTEXT swig_types[19]
-#define SWIGTYPE_p_PCERT_EXTENSION swig_types[20]
-#define SWIGTYPE_p_RCObj swig_types[21]
-#define SWIGTYPE_p_Signature swig_types[22]
-#define SWIGTYPE_p_SwigPyObject swig_types[23]
-#define SWIGTYPE_p__CERT_INFO swig_types[24]
-#define SWIGTYPE_p__CMS_DH_KEY_INFO swig_types[25]
-#define SWIGTYPE_p__CRYPTOAPI_BLOB swig_types[26]
-#define SWIGTYPE_p__CRYPT_ALGORITHM_IDENTIFIER swig_types[27]
-#define SWIGTYPE_p__CRYPT_BIT_BLOB swig_types[28]
-#define SWIGTYPE_p__GUID swig_types[29]
-#define SWIGTYPE_p__LARGE_INTEGER swig_types[30]
-#define SWIGTYPE_p__LUID swig_types[31]
-#define SWIGTYPE_p_char swig_types[32]
-#define SWIGTYPE_p_float swig_types[33]
-#define SWIGTYPE_p_int swig_types[34]
-#define SWIGTYPE_p_long swig_types[35]
-#define SWIGTYPE_p_long_long swig_types[36]
-#define SWIGTYPE_p_p_unsigned_char swig_types[37]
-#define SWIGTYPE_p_p_void swig_types[38]
-#define SWIGTYPE_p_short swig_types[39]
-#define SWIGTYPE_p_unsigned_char swig_types[40]
-#define SWIGTYPE_p_unsigned_int swig_types[41]
-#define SWIGTYPE_p_unsigned_long swig_types[42]
-#define SWIGTYPE_p_unsigned_long_long swig_types[43]
-#define SWIGTYPE_p_unsigned_short swig_types[44]
-#define SWIGTYPE_p_void swig_types[45]
-#define SWIGTYPE_p_wchar_t swig_types[46]
-static swig_type_info *swig_types[48];
-static swig_module_info swig_module = {swig_types, 47, 0, 0, 0, 0};
+#define SWIGTYPE_p_CSPInfo swig_types[3]
+#define SWIGTYPE_p_Cert swig_types[4]
+#define SWIGTYPE_p_CertExtension swig_types[5]
+#define SWIGTYPE_p_CertFind swig_types[6]
+#define SWIGTYPE_p_CertInfo swig_types[7]
+#define SWIGTYPE_p_CertIter swig_types[8]
+#define SWIGTYPE_p_CertRequest swig_types[9]
+#define SWIGTYPE_p_CertStore swig_types[10]
+#define SWIGTYPE_p_Crypt swig_types[11]
+#define SWIGTYPE_p_CryptDesc swig_types[12]
+#define SWIGTYPE_p_CryptIter swig_types[13]
+#define SWIGTYPE_p_CryptMsg swig_types[14]
+#define SWIGTYPE_p_EKUIter swig_types[15]
+#define SWIGTYPE_p_ExtIter swig_types[16]
+#define SWIGTYPE_p_FILETIME swig_types[17]
+#define SWIGTYPE_p_Hash swig_types[18]
+#define SWIGTYPE_p_Key swig_types[19]
+#define SWIGTYPE_p_PCCERT_CONTEXT swig_types[20]
+#define SWIGTYPE_p_PCERT_EXTENSION swig_types[21]
+#define SWIGTYPE_p_RCObj swig_types[22]
+#define SWIGTYPE_p_Signature swig_types[23]
+#define SWIGTYPE_p_SwigPyObject swig_types[24]
+#define SWIGTYPE_p__CERT_INFO swig_types[25]
+#define SWIGTYPE_p__CMS_DH_KEY_INFO swig_types[26]
+#define SWIGTYPE_p__CRYPTOAPI_BLOB swig_types[27]
+#define SWIGTYPE_p__CRYPT_ALGORITHM_IDENTIFIER swig_types[28]
+#define SWIGTYPE_p__CRYPT_BIT_BLOB swig_types[29]
+#define SWIGTYPE_p__GUID swig_types[30]
+#define SWIGTYPE_p__LARGE_INTEGER swig_types[31]
+#define SWIGTYPE_p__LUID swig_types[32]
+#define SWIGTYPE_p_char swig_types[33]
+#define SWIGTYPE_p_float swig_types[34]
+#define SWIGTYPE_p_int swig_types[35]
+#define SWIGTYPE_p_long swig_types[36]
+#define SWIGTYPE_p_long_long swig_types[37]
+#define SWIGTYPE_p_p_unsigned_char swig_types[38]
+#define SWIGTYPE_p_p_void swig_types[39]
+#define SWIGTYPE_p_short swig_types[40]
+#define SWIGTYPE_p_unsigned_char swig_types[41]
+#define SWIGTYPE_p_unsigned_int swig_types[42]
+#define SWIGTYPE_p_unsigned_long swig_types[43]
+#define SWIGTYPE_p_unsigned_long_long swig_types[44]
+#define SWIGTYPE_p_unsigned_short swig_types[45]
+#define SWIGTYPE_p_void swig_types[46]
+#define SWIGTYPE_p_wchar_t swig_types[47]
+static swig_type_info *swig_types[49];
+static swig_module_info swig_module = {swig_types, 48, 0, 0, 0, 0};
 #define SWIG_TypeQuery(name) SWIG_TypeQueryModule(&swig_module, &swig_module, name)
 #define SWIG_MangledTypeQuery(name) SWIG_MangledTypeQueryModule(&swig_module, &swig_module, name)
 
@@ -3896,6 +3897,7 @@ namespace swig {
 #include "cert.hpp"
 #include "certinfo.hpp"
 #include "context.hpp"
+#include "cspinfo.hpp"
 #include "except.hpp"
 #include "key.hpp"
 #include "msg.hpp"
@@ -7730,6 +7732,291 @@ fail:
 
 
 SWIGPY_DESTRUCTOR_CLOSURE(_wrap_delete_Crypt) /* defines _wrap_delete_Crypt_destructor_closure */
+
+SWIGINTERN int _wrap_new_CSPInfo(PyObject *self, PyObject *args) {
+  PyObject *resultobj = 0;
+  Crypt *arg1 = (Crypt *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj1 = 0 ;
+  CSPInfo *result = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:new_CSPInfo",&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj1, &argp1,SWIGTYPE_p_Crypt, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "new_CSPInfo" "', argument " "1"" of type '" "Crypt *""'"); 
+  }
+  arg1 = reinterpret_cast< Crypt * >(argp1);
+  try {
+    {
+      SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+      result = (CSPInfo *)new CSPInfo(arg1);
+      SWIG_PYTHON_THREAD_END_ALLOW;
+    }
+  }
+  catch(CSPException &_e) {
+    PyErr_SetString(PyExc_SystemError, (&_e)->msg);
+    SWIG_fail;
+    
+  }
+  
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_CSPInfo, SWIG_BUILTIN_INIT |  0 );
+  return resultobj == Py_None ? -1 : 0;
+fail:
+  return -1;
+}
+
+
+SWIGINTERN PyObject *_wrap_delete_CSPInfo(PyObject *self, PyObject *args) {
+  PyObject *resultobj = 0;
+  CSPInfo *arg1 = (CSPInfo *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  
+  if (args && PyTuple_Check(args) && PyTuple_GET_SIZE(args) > 0) SWIG_exception_fail(SWIG_TypeError, "delete_CSPInfo takes no arguments");
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_CSPInfo, SWIG_POINTER_DISOWN |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "delete_CSPInfo" "', argument " "1"" of type '" "CSPInfo *""'"); 
+  }
+  arg1 = reinterpret_cast< CSPInfo * >(argp1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    delete arg1;
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_CSPInfo_free_space(PyObject *self, PyObject *args) {
+  PyObject *resultobj = 0;
+  CSPInfo *arg1 = (CSPInfo *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  DWORD result;
+  
+  if (args && PyTuple_Check(args) && PyTuple_GET_SIZE(args) > 0) SWIG_exception_fail(SWIG_TypeError, "CSPInfo_free_space takes no arguments");
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_CSPInfo, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "CSPInfo_free_space" "', argument " "1"" of type '" "CSPInfo *""'"); 
+  }
+  arg1 = reinterpret_cast< CSPInfo * >(argp1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (DWORD)(arg1)->free_space();
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_From_unsigned_SS_int(static_cast< unsigned int >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_CSPInfo_number_ul(PyObject *self, PyObject *args) {
+  PyObject *resultobj = 0;
+  CSPInfo *arg1 = (CSPInfo *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  DWORD result;
+  
+  if (args && PyTuple_Check(args) && PyTuple_GET_SIZE(args) > 0) SWIG_exception_fail(SWIG_TypeError, "CSPInfo_number_ul takes no arguments");
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_CSPInfo, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "CSPInfo_number_ul" "', argument " "1"" of type '" "CSPInfo *""'"); 
+  }
+  arg1 = reinterpret_cast< CSPInfo * >(argp1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (DWORD)(arg1)->number_ul();
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_From_unsigned_SS_int(static_cast< unsigned int >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_CSPInfo_number_signs(PyObject *self, PyObject *args) {
+  PyObject *resultobj = 0;
+  CSPInfo *arg1 = (CSPInfo *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  DWORD result;
+  
+  if (args && PyTuple_Check(args) && PyTuple_GET_SIZE(args) > 0) SWIG_exception_fail(SWIG_TypeError, "CSPInfo_number_signs takes no arguments");
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_CSPInfo, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "CSPInfo_number_signs" "', argument " "1"" of type '" "CSPInfo *""'"); 
+  }
+  arg1 = reinterpret_cast< CSPInfo * >(argp1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (DWORD)(arg1)->number_signs();
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_From_unsigned_SS_int(static_cast< unsigned int >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_CSPInfo_number_changes(PyObject *self, PyObject *args) {
+  PyObject *resultobj = 0;
+  CSPInfo *arg1 = (CSPInfo *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  DWORD result;
+  
+  if (args && PyTuple_Check(args) && PyTuple_GET_SIZE(args) > 0) SWIG_exception_fail(SWIG_TypeError, "CSPInfo_number_changes takes no arguments");
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_CSPInfo, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "CSPInfo_number_changes" "', argument " "1"" of type '" "CSPInfo *""'"); 
+  }
+  arg1 = reinterpret_cast< CSPInfo * >(argp1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (DWORD)(arg1)->number_changes();
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_From_unsigned_SS_int(static_cast< unsigned int >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_CSPInfo_number_kcards(PyObject *self, PyObject *args) {
+  PyObject *resultobj = 0;
+  CSPInfo *arg1 = (CSPInfo *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  DWORD result;
+  
+  if (args && PyTuple_Check(args) && PyTuple_GET_SIZE(args) > 0) SWIG_exception_fail(SWIG_TypeError, "CSPInfo_number_kcards takes no arguments");
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_CSPInfo, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "CSPInfo_number_kcards" "', argument " "1"" of type '" "CSPInfo *""'"); 
+  }
+  arg1 = reinterpret_cast< CSPInfo * >(argp1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (DWORD)(arg1)->number_kcards();
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_From_unsigned_SS_int(static_cast< unsigned int >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_CSPInfo_number_keys(PyObject *self, PyObject *args) {
+  PyObject *resultobj = 0;
+  CSPInfo *arg1 = (CSPInfo *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  DWORD result;
+  
+  if (args && PyTuple_Check(args) && PyTuple_GET_SIZE(args) > 0) SWIG_exception_fail(SWIG_TypeError, "CSPInfo_number_keys takes no arguments");
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_CSPInfo, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "CSPInfo_number_keys" "', argument " "1"" of type '" "CSPInfo *""'"); 
+  }
+  arg1 = reinterpret_cast< CSPInfo * >(argp1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (DWORD)(arg1)->number_keys();
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_From_unsigned_SS_int(static_cast< unsigned int >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_CSPInfo_keys_remaining(PyObject *self, PyObject *args) {
+  PyObject *resultobj = 0;
+  CSPInfo *arg1 = (CSPInfo *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  DWORD result;
+  
+  if (args && PyTuple_Check(args) && PyTuple_GET_SIZE(args) > 0) SWIG_exception_fail(SWIG_TypeError, "CSPInfo_keys_remaining takes no arguments");
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_CSPInfo, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "CSPInfo_keys_remaining" "', argument " "1"" of type '" "CSPInfo *""'"); 
+  }
+  arg1 = reinterpret_cast< CSPInfo * >(argp1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (DWORD)(arg1)->keys_remaining();
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_From_unsigned_SS_int(static_cast< unsigned int >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_CSPInfo_time(PyObject *self, PyObject *args) {
+  PyObject *resultobj = 0;
+  CSPInfo *arg1 = (CSPInfo *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  DWORD result;
+  
+  if (args && PyTuple_Check(args) && PyTuple_GET_SIZE(args) > 0) SWIG_exception_fail(SWIG_TypeError, "CSPInfo_time takes no arguments");
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_CSPInfo, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "CSPInfo_time" "', argument " "1"" of type '" "CSPInfo *""'"); 
+  }
+  arg1 = reinterpret_cast< CSPInfo * >(argp1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (DWORD)(arg1)->time();
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_From_unsigned_SS_int(static_cast< unsigned int >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_CSPInfo_version(PyObject *self, PyObject *args) {
+  PyObject *resultobj = 0;
+  CSPInfo *arg1 = (CSPInfo *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  WORD result;
+  
+  if (args && PyTuple_Check(args) && PyTuple_GET_SIZE(args) > 0) SWIG_exception_fail(SWIG_TypeError, "CSPInfo_version takes no arguments");
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_CSPInfo, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "CSPInfo_version" "', argument " "1"" of type '" "CSPInfo *""'"); 
+  }
+  arg1 = reinterpret_cast< CSPInfo * >(argp1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (WORD)(arg1)->version();
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_From_unsigned_SS_short(static_cast< unsigned short >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGPY_DESTRUCTOR_CLOSURE(_wrap_delete_CSPInfo) /* defines _wrap_delete_CSPInfo_destructor_closure */
 
 SWIGINTERN int _wrap_new_Key(PyObject *self, PyObject *args) {
   PyObject *resultobj = 0;
@@ -18192,6 +18479,235 @@ static PyHeapTypeObject SwigPyBuiltin__Crypt_type = {
 
 SWIGINTERN SwigPyClientData SwigPyBuiltin__Crypt_clientdata = {0, 0, 0, 0, 0, 0, (PyTypeObject *)&SwigPyBuiltin__Crypt_type};
 
+static SwigPyGetSet CSPInfo___dict___getset = { SwigPyObject_get___dict__, 0 };
+SWIGINTERN PyGetSetDef SwigPyBuiltin__CSPInfo_getset[] = {
+    { (char *) "__dict__", (getter) SwigPyBuiltin_GetterClosure, (setter) 0, (char *)"CSPInfo.__dict__", (void *) &CSPInfo___dict___getset }
+,
+    {NULL, NULL, NULL, NULL, NULL} /* Sentinel */
+};
+
+SWIGINTERN PyObject *
+SwigPyBuiltin__CSPInfo_richcompare(PyObject *self, PyObject *other, int op) {
+  PyObject *result = NULL;
+  PyObject *tuple = PyTuple_New(1);
+  assert(tuple);
+  PyTuple_SET_ITEM(tuple, 0, other);
+  Py_XINCREF(other);
+  if (!result) {
+    if (SwigPyObject_Check(self) && SwigPyObject_Check(other)) {
+      result = SwigPyObject_richcompare((SwigPyObject *)self, (SwigPyObject *)other, op);
+    } else {
+      result = Py_NotImplemented;
+      Py_INCREF(result);
+    }
+  }
+  Py_DECREF(tuple);
+  return result;
+}
+
+SWIGINTERN PyMethodDef SwigPyBuiltin__CSPInfo_methods[] = {
+  { "free_space", (PyCFunction) _wrap_CSPInfo_free_space, METH_VARARGS, (char *) "free_space() -> DWORD" },
+  { "number_ul", (PyCFunction) _wrap_CSPInfo_number_ul, METH_VARARGS, (char *) "number_ul() -> DWORD" },
+  { "number_signs", (PyCFunction) _wrap_CSPInfo_number_signs, METH_VARARGS, (char *) "number_signs() -> DWORD" },
+  { "number_changes", (PyCFunction) _wrap_CSPInfo_number_changes, METH_VARARGS, (char *) "number_changes() -> DWORD" },
+  { "number_kcards", (PyCFunction) _wrap_CSPInfo_number_kcards, METH_VARARGS, (char *) "number_kcards() -> DWORD" },
+  { "number_keys", (PyCFunction) _wrap_CSPInfo_number_keys, METH_VARARGS, (char *) "number_keys() -> DWORD" },
+  { "keys_remaining", (PyCFunction) _wrap_CSPInfo_keys_remaining, METH_VARARGS, (char *) "keys_remaining() -> DWORD" },
+  { "time", (PyCFunction) _wrap_CSPInfo_time, METH_VARARGS, (char *) "time() -> DWORD" },
+  { "version", (PyCFunction) _wrap_CSPInfo_version, METH_VARARGS, (char *) "version() -> WORD" },
+  { NULL, NULL, 0, NULL } /* Sentinel */
+};
+
+static PyHeapTypeObject SwigPyBuiltin__CSPInfo_type = {
+  {
+#if PY_VERSION_HEX >= 0x03000000
+    PyVarObject_HEAD_INIT(NULL, 0)
+#else
+    PyObject_HEAD_INIT(NULL)
+    0,                                        /* ob_size */
+#endif
+    "csp.CSPInfo",                            /* tp_name */
+    sizeof(SwigPyObject),                     /* tp_basicsize */
+    0,                                        /* tp_itemsize */
+    (destructor) (destructor) _wrap_delete_CSPInfo_destructor_closure,/* tp_dealloc */
+    (printfunc) 0,                            /* tp_print */
+    (getattrfunc) 0,                          /* tp_getattr */
+    (setattrfunc) 0,                          /* tp_setattr */
+#if PY_VERSION_HEX >= 0x03000000
+    0,                                        /* tp_compare */
+#else
+    (cmpfunc) 0,                              /* tp_compare */
+#endif
+    (reprfunc) 0,                             /* tp_repr */
+    &SwigPyBuiltin__CSPInfo_type.as_number,   /* tp_as_number */
+    &SwigPyBuiltin__CSPInfo_type.as_sequence, /* tp_as_sequence */
+    &SwigPyBuiltin__CSPInfo_type.as_mapping,  /* tp_as_mapping */
+    (hashfunc) SwigPyObject_hash,             /* tp_hash */
+    (ternaryfunc) 0,                          /* tp_call */
+    (reprfunc) 0,                             /* tp_str */
+    (getattrofunc) 0,                         /* tp_getattro */
+    (setattrofunc) 0,                         /* tp_setattro */
+    &SwigPyBuiltin__CSPInfo_type.as_buffer,   /* tp_as_buffer */
+#if PY_VERSION_HEX >= 0x03000000
+    Py_TPFLAGS_DEFAULT|Py_TPFLAGS_BASETYPE,   /* tp_flags */
+#else
+    Py_TPFLAGS_DEFAULT|Py_TPFLAGS_BASETYPE|Py_TPFLAGS_CHECKTYPES, /* tp_flags */
+#endif
+    "::CSPInfo",                              /* tp_doc */
+    (traverseproc) 0,                         /* tp_traverse */
+    (inquiry) 0,                              /* tp_clear */
+    (richcmpfunc) SwigPyBuiltin__CSPInfo_richcompare,             /* tp_richcompare */
+    0,                                        /* tp_weaklistoffset */
+    (getiterfunc) 0,                          /* tp_iter */
+    (iternextfunc) 0,                         /* tp_iternext */
+    SwigPyBuiltin__CSPInfo_methods,           /* tp_methods */
+    0,                                        /* tp_members */
+    SwigPyBuiltin__CSPInfo_getset,            /* tp_getset */
+    0,                                        /* tp_base */
+    0,                                        /* tp_dict */
+    (descrgetfunc) 0,                         /* tp_descr_get */
+    (descrsetfunc) 0,                         /* tp_descr_set */
+    (Py_ssize_t) offsetof(SwigPyObject, dict),/* tp_dictoffset */
+    (initproc) _wrap_new_CSPInfo,             /* tp_init */
+    (allocfunc) 0,                            /* tp_alloc */
+    (newfunc) 0,                              /* tp_new */
+    (freefunc) 0,                             /* tp_free */
+    (inquiry) 0,                              /* tp_is_gc */
+    (PyObject *) 0,                           /* tp_bases */
+    (PyObject *) 0,                           /* tp_mro */
+    (PyObject *) 0,                           /* tp_cache */
+    (PyObject *) 0,                           /* tp_subclasses */
+    (PyObject *) 0,                           /* tp_weaklist */
+    (destructor) 0,                           /* tp_del */
+#if PY_VERSION_HEX >= 0x02060000
+    (int) 0,                                  /* tp_version_tag */
+#endif
+#if PY_VERSION_HEX >= 0x03040000
+    (destructor) 0,                           /* tp_finalize */
+#endif
+#ifdef COUNT_ALLOCS
+    (Py_ssize_t) 0,                           /* tp_allocs */
+    (Py_ssize_t) 0,                           /* tp_frees */
+    (Py_ssize_t) 0,                           /* tp_maxalloc */
+#if PY_VERSION_HEX >= 0x02050000
+    0,                                        /* tp_prev */
+#endif
+    0,                                        /* tp_next */
+#endif
+  },
+#if PY_VERSION_HEX >= 0x03050000
+  {
+    (unaryfunc) 0,                            /* am_await */
+    (unaryfunc) 0,                            /* am_aiter */
+    (unaryfunc) 0,                            /* am_anext */
+  },
+#endif
+  {
+    (binaryfunc) 0,                           /* nb_add */
+    (binaryfunc) 0,                           /* nb_subtract */
+    (binaryfunc) 0,                           /* nb_multiply */
+#if PY_VERSION_HEX < 0x03000000
+    (binaryfunc) 0,                           /* nb_divide */
+#endif
+    (binaryfunc) 0,                           /* nb_remainder */
+    (binaryfunc) 0,                           /* nb_divmod */
+    (ternaryfunc) 0,                          /* nb_power */
+    (unaryfunc) 0,                            /* nb_negative */
+    (unaryfunc) 0,                            /* nb_positive */
+    (unaryfunc) 0,                            /* nb_absolute */
+    (inquiry) 0,                              /* nb_nonzero */
+    (unaryfunc) 0,                            /* nb_invert */
+    (binaryfunc) 0,                           /* nb_lshift */
+    (binaryfunc) 0,                           /* nb_rshift */
+    (binaryfunc) 0,                           /* nb_and */
+    (binaryfunc) 0,                           /* nb_xor */
+    (binaryfunc) 0,                           /* nb_or */
+#if PY_VERSION_HEX < 0x03000000
+    (coercion) 0,                             /* nb_coerce */
+#endif
+    (unaryfunc) 0,                            /* nb_int */
+#if PY_VERSION_HEX >= 0x03000000
+    (void *) 0,                               /* nb_reserved */
+#else
+    (unaryfunc) 0,                            /* nb_long */
+#endif
+    (unaryfunc) 0,                            /* nb_float */
+#if PY_VERSION_HEX < 0x03000000
+    (unaryfunc) 0,                            /* nb_oct */
+    (unaryfunc) 0,                            /* nb_hex */
+#endif
+    (binaryfunc) 0,                           /* nb_inplace_add */
+    (binaryfunc) 0,                           /* nb_inplace_subtract */
+    (binaryfunc) 0,                           /* nb_inplace_multiply */
+#if PY_VERSION_HEX < 0x03000000
+    (binaryfunc) 0,                           /* nb_inplace_divide */
+#endif
+    (binaryfunc) 0,                           /* nb_inplace_remainder */
+    (ternaryfunc) 0,                          /* nb_inplace_power */
+    (binaryfunc) 0,                           /* nb_inplace_lshift */
+    (binaryfunc) 0,                           /* nb_inplace_rshift */
+    (binaryfunc) 0,                           /* nb_inplace_and */
+    (binaryfunc) 0,                           /* nb_inplace_xor */
+    (binaryfunc) 0,                           /* nb_inplace_or */
+    (binaryfunc) 0,                           /* nb_floor_divide */
+    (binaryfunc) 0,                           /* nb_true_divide */
+    (binaryfunc) 0,                           /* nb_inplace_floor_divide */
+    (binaryfunc) 0,                           /* nb_inplace_true_divide */
+#if PY_VERSION_HEX >= 0x02050000
+    (unaryfunc) 0,                            /* nb_index */
+#endif
+#if PY_VERSION_HEX >= 0x03050000
+    (binaryfunc) 0,                           /* nb_matrix_multiply */
+    (binaryfunc) 0,                           /* nb_inplace_matrix_multiply */
+#endif
+  },
+  {
+    (lenfunc) 0,                              /* mp_length */
+    (binaryfunc) 0,                           /* mp_subscript */
+    (objobjargproc) 0,                        /* mp_ass_subscript */
+  },
+  {
+    (lenfunc) 0,                              /* sq_length */
+    (binaryfunc) 0,                           /* sq_concat */
+    (ssizeargfunc) 0,                         /* sq_repeat */
+    (ssizeargfunc) 0,                         /* sq_item */
+#if PY_VERSION_HEX >= 0x03000000
+    (void *) 0,                               /* was_sq_slice */
+#else
+    (ssizessizeargfunc) 0,                    /* sq_slice */
+#endif
+    (ssizeobjargproc) 0,                      /* sq_ass_item */
+#if PY_VERSION_HEX >= 0x03000000
+    (void *) 0,                               /* was_sq_ass_slice */
+#else
+    (ssizessizeobjargproc) 0,                 /* sq_ass_slice */
+#endif
+    (objobjproc) 0,                           /* sq_contains */
+    (binaryfunc) 0,                           /* sq_inplace_concat */
+    (ssizeargfunc) 0,                         /* sq_inplace_repeat */
+  },
+  {
+#if PY_VERSION_HEX < 0x03000000
+    (readbufferproc) 0,                       /* bf_getreadbuffer */
+    (writebufferproc) 0,                      /* bf_getwritebuffer */
+    (segcountproc) 0,                         /* bf_getsegcount */
+    (charbufferproc) 0,                       /* bf_getcharbuffer */
+#endif
+#if PY_VERSION_HEX >= 0x02060000
+    (getbufferproc) 0,                        /* bf_getbuffer */
+    (releasebufferproc) 0,                    /* bf_releasebuffer */
+#endif
+  },
+    (PyObject *) 0,                           /* ht_name */
+    (PyObject *) 0,                           /* ht_slots */
+#if PY_VERSION_HEX >= 0x03030000
+    (PyObject *) 0,                           /* ht_qualname */
+    0,                                        /* ht_cached_keys */
+#endif
+};
+
+SWIGINTERN SwigPyClientData SwigPyBuiltin__CSPInfo_clientdata = {0, 0, 0, 0, 0, 0, (PyTypeObject *)&SwigPyBuiltin__CSPInfo_type};
+
 static SwigPyGetSet Key___dict___getset = { SwigPyObject_get___dict__, 0 };
 SWIGINTERN PyGetSetDef SwigPyBuiltin__Key_getset[] = {
     { (char *) "__dict__", (getter) SwigPyBuiltin_GetterClosure, (setter) 0, (char *)"Key.__dict__", (void *) &Key___dict___getset }
@@ -21687,6 +22203,7 @@ static void *_p_CryptTo_p_RCObj(void *x, int *SWIGUNUSEDPARM(newmemory)) {
 static swig_type_info _swigt__p_CERT_EXTENSION = {"_p_CERT_EXTENSION", "CERT_EXTENSION *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_CERT_PUBLIC_KEY_INFO = {"_p_CERT_PUBLIC_KEY_INFO", "CERT_PUBLIC_KEY_INFO *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_CRYPT_INTEGER_BLOB = {"_p_CRYPT_INTEGER_BLOB", "CRYPT_INTEGER_BLOB *", 0, 0, (void*)0, 0};
+static swig_type_info _swigt__p_CSPInfo = {"_p_CSPInfo", "CSPInfo *", 0, 0, (void*)&SwigPyBuiltin__CSPInfo_clientdata, 0};
 static swig_type_info _swigt__p_Cert = {"_p_Cert", "Cert *", 0, 0, (void*)&SwigPyBuiltin__Cert_clientdata, 0};
 static swig_type_info _swigt__p_CertExtension = {"_p_CertExtension", "CertExtension *", 0, 0, (void*)&SwigPyBuiltin__CertExtension_clientdata, 0};
 static swig_type_info _swigt__p_CertFind = {"_p_CertFind", "CertFind *", 0, 0, (void*)&SwigPyBuiltin__CertFind_clientdata, 0};
@@ -21736,6 +22253,7 @@ static swig_type_info *swig_type_initial[] = {
   &_swigt__p_CERT_EXTENSION,
   &_swigt__p_CERT_PUBLIC_KEY_INFO,
   &_swigt__p_CRYPT_INTEGER_BLOB,
+  &_swigt__p_CSPInfo,
   &_swigt__p_Cert,
   &_swigt__p_CertExtension,
   &_swigt__p_CertFind,
@@ -21785,6 +22303,7 @@ static swig_type_info *swig_type_initial[] = {
 static swig_cast_info _swigc__p_CERT_EXTENSION[] = {  {&_swigt__p_CERT_EXTENSION, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_CERT_PUBLIC_KEY_INFO[] = {  {&_swigt__p_CERT_PUBLIC_KEY_INFO, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_CRYPT_INTEGER_BLOB[] = {  {&_swigt__p_CRYPT_INTEGER_BLOB, 0, 0, 0},{0, 0, 0, 0}};
+static swig_cast_info _swigc__p_CSPInfo[] = {  {&_swigt__p_CSPInfo, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_Cert[] = {  {&_swigt__p_Cert, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_CertExtension[] = {  {&_swigt__p_CertExtension, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_CertFind[] = {  {&_swigt__p_CertFind, 0, 0, 0},{0, 0, 0, 0}};
@@ -21834,6 +22353,7 @@ static swig_cast_info *swig_cast_initial[] = {
   _swigc__p_CERT_EXTENSION,
   _swigc__p_CERT_PUBLIC_KEY_INFO,
   _swigc__p_CRYPT_INTEGER_BLOB,
+  _swigc__p_CSPInfo,
   _swigc__p_Cert,
   _swigc__p_CertExtension,
   _swigc__p_CertFind,
@@ -23652,6 +24172,29 @@ SWIG_init(void) {
   Py_INCREF(builtin_pytype);
   PyModule_AddObject(m, "Crypt", (PyObject *)builtin_pytype);
   SwigPyBuiltin_AddPublicSymbol(public_interface, "Crypt");
+  d = md;
+  
+  /* type '::CSPInfo' */
+  builtin_pytype = (PyTypeObject *)&SwigPyBuiltin__CSPInfo_type;
+  builtin_pytype->tp_dict = d = PyDict_New();
+  SwigPyBuiltin_SetMetaType(builtin_pytype, metatype);
+  builtin_pytype->tp_new = PyType_GenericNew;
+  builtin_base_count = 0;
+  builtin_bases[builtin_base_count] = NULL;
+  SwigPyBuiltin_InitBases(builtin_pytype, builtin_bases);
+  PyDict_SetItemString(d, "this", this_descr);
+  PyDict_SetItemString(d, "thisown", thisown_descr);
+  if (PyType_Ready(builtin_pytype) < 0) {
+    PyErr_SetString(PyExc_TypeError, "Could not create type 'CSPInfo'.");
+#if PY_VERSION_HEX >= 0x03000000
+    return NULL;
+#else
+    return;
+#endif
+  }
+  Py_INCREF(builtin_pytype);
+  PyModule_AddObject(m, "CSPInfo", (PyObject *)builtin_pytype);
+  SwigPyBuiltin_AddPublicSymbol(public_interface, "CSPInfo");
   d = md;
   
   /* type '::Key' */

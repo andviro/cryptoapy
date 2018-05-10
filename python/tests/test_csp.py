@@ -760,3 +760,10 @@ def test_import_public_key_info():
     keyBlob = pkey.encode(None)
     print(len(keyBlob))
     assert len(keyBlob) >= 100
+
+
+def test_csp_info():
+    context = csp.Crypt(test_container, PROV_GOST, 0, test_provider)
+    info = csp.CSPInfo(context)
+    assert info
+    assert info.version()
