@@ -8036,6 +8036,54 @@ fail:
 }
 
 
+SWIGINTERN PyObject *_wrap_CSPInfo_bytes(PyObject *self, PyObject *args) {
+  PyObject *resultobj = 0;
+  CSPInfo *arg1 = (CSPInfo *) 0 ;
+  BYTE **arg2 = (BYTE **) 0 ;
+  DWORD *arg3 = (DWORD *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  BYTE *carray2 = 0 ;
+  DWORD size2 = 0 ;
+  PyObject *res2 = NULL ;
+  
+  arg2 = &carray2;
+  arg3 = &size2;
+  if (args && PyTuple_Check(args) && PyTuple_GET_SIZE(args) > 0) SWIG_exception_fail(SWIG_TypeError, "CSPInfo_bytes takes no arguments");
+  res1 = SWIG_ConvertPtr(self, &argp1,SWIGTYPE_p_CSPInfo, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "CSPInfo_bytes" "', argument " "1"" of type '" "CSPInfo *""'"); 
+  }
+  arg1 = reinterpret_cast< CSPInfo * >(argp1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    (arg1)->bytes(arg2,arg3);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_Py_Void();
+  if (*arg2) {
+    if (*arg3 > INT_MAX) {
+      swig_type_info* pchar_descriptor = SWIG_pchar_descriptor();
+      res2 = pchar_descriptor ? 
+      SWIG_InternalNewPointerObj(const_cast< BYTE * >(*arg2), pchar_descriptor, 0) : SWIG_Py_Void();
+    } else {
+#if PY_VERSION_HEX >= 0x03000000
+      res2 = PyBytes_FromStringAndSize((char *)*arg2, static_cast< int >(*arg3));
+#else
+      res2 = PyString_FromStringAndSize((char *)*arg2, static_cast< int >(*arg3));
+#endif
+    }
+    resultobj = SWIG_Python_AppendOutput(resultobj, res2);
+    free(*arg2);
+  } else {
+    resultobj = SWIG_Python_AppendOutput(resultobj, SWIG_Py_Void());
+  }
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
 SWIGINTERN PyObject *_wrap_CSPInfo_version(PyObject *self, PyObject *args) {
   PyObject *resultobj = 0;
   CSPInfo *arg1 = (CSPInfo *) 0 ;
@@ -18559,6 +18607,7 @@ SWIGINTERN PyMethodDef SwigPyBuiltin__CSPInfo_methods[] = {
   { "number_keys", (PyCFunction) _wrap_CSPInfo_number_keys, METH_VARARGS, (char *) "number_keys() -> DWORD" },
   { "keys_remaining", (PyCFunction) _wrap_CSPInfo_keys_remaining, METH_VARARGS, (char *) "keys_remaining() -> DWORD" },
   { "time", (PyCFunction) _wrap_CSPInfo_time, METH_VARARGS, (char *) "time() -> DWORD" },
+  { "bytes", (PyCFunction) _wrap_CSPInfo_bytes, METH_VARARGS, (char *) "bytes()" },
   { "version", (PyCFunction) _wrap_CSPInfo_version, METH_VARARGS, (char *) "version() -> WORD" },
   { NULL, NULL, 0, NULL } /* Sentinel */
 };

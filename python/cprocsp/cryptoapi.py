@@ -570,6 +570,46 @@ def pkcs7_info(data):
     return res
 
 
+def provider_params(cont=None, provider=None):
+    """Служебная информация о криптопровайдере
+
+    :cont: контейнер для поиска сертификата (если указан, thumb и name игнорируются)
+    :provider: По умолчанию None, в этом случае используется дефолтный для
+        провайдера PROV_GOST.
+
+        Если в качестве криптопровайдера передана строка, то она используется в
+        качестве имени, тип берется из константы PROV_GOST.
+        Если передан кортеж вида (тип, имя), то в создании контекста участвуют
+        оба переданных параметра.
+    :returns: словарь с информацией следующего вида:
+    {
+        'Time': long,          # [> time_t <]
+        'Version': int,        # [> версия структуры <]
+        'FreeSpace': long,     # [> свободное место на /var в bytes <]
+        'NumberUL': long,      # [> "\\local\\number_UL" --- количество выпущенных ключей УЛ <]
+        'NumberSigns': long,   # [> "\\local\\number_signs" --- количество операций подписи <]
+        'NumberChanges': long, # [> "\\local\\Kcard_changes" --- количество смен карт канала "К" <]
+        'NumberKCards': long,  # [> "\\local\\number_Kcard_sessions" --- количество выпущенных в последний раз карт канала "К" <]
+        'NumberKeys': long,    # [> "\\local\\number_keys" --- количество выпущенных  <]
+        'KeysRemaining': long, # [> остаток ДСРФ <]
+    }
+    """
+    ctx = _mkcontext(cont, provider, csp.CRYPT_SILENT)
+    info = csp.CSPInfo(ctx)
+    assert info
+    return dict(
+        Time=info.time(),
+        Version=info.version(),
+        FreeSpace=info.free_space(),
+        NumberUL=info.number_ul(),
+        NumberSigns=info.number_signs(),
+        NumberChanges=info.number_changes(),
+        NumberKCards=info.number_kcards(),
+        NumberKeys=info.number_keys(),
+        KeysRemaining=info.keys_remaining(),
+    )
+
+
 def cert_subject_id(cert):
     """Функция получения Subject Key Id сертификата.
 

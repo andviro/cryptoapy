@@ -409,3 +409,8 @@ def test_block_encrypt_decrypt():
     decryptedData = cryptoapi.block_decrypt(test_container, encryptedData, ephemData, sessionKeyData, ivData)
     open('decdata.bin', 'wb').write(decryptedData)
     assert decryptedData[:len(data)] == data
+
+
+def test_provider_params(provider=None):
+    info = cryptoapi.provider_params(test_container, provider)
+    assert len(info) == 9

@@ -767,3 +767,4 @@ def test_csp_info():
     info = csp.CSPInfo(context)
     assert info
     assert info.version()
+    assert len(info.bytes())

@@ -20,6 +20,7 @@ public:
     DWORD number_keys();
     DWORD keys_remaining();
     DWORD time();
+    void bytes(BYTE **s, DWORD *slen);
     WORD version();
 };
 
