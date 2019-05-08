@@ -8,6 +8,7 @@ class Key;
 class Hash;
 class CryptIter;
 class Cert;
+class CSPInfo;
 
 class CryptDesc
 {
@@ -38,10 +39,10 @@ class Crypt : public RCObj
     HCRYPTPROV hprov;
     char *cont_name;
     char *pr_name;
-    Cert *parent;
 
 public:
 
+    Cert *parent;
     Crypt (BYTE *STRING, DWORD LENGTH, DWORD type, DWORD flags, char *name=NULL) throw(CSPException, CSPNotFound);
     Crypt (Cert *pcert) throw(CSPNotFound);
     ~Crypt() throw(CSPException);
@@ -72,6 +73,7 @@ public:
     friend class Signature;
     friend class CertStore;
     friend class CertRequest;
+    friend class CSPInfo;
 };
 
 

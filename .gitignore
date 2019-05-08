@@ -24,3 +24,5 @@ csp.py
 *.so
 *.o
 *.a
+*.bak
+log

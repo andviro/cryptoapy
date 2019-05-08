@@ -22,6 +22,7 @@ public:
     void not_after(BYTE **s, DWORD *slen) throw(CSPException);
     BYTE usage() throw(CSPException);
     char *sign_algorithm();
+    char *public_key_algorithm();
     void serial(BYTE **s, DWORD *slen) throw(CSPException);
     ExtIter *extensions() throw(CSPException);
 

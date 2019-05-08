@@ -3,14 +3,25 @@
 #include "cert.hpp"
 #include "key.hpp"
 
-void Hash::init(Crypt *ctx, Key *key) throw(CSPException)
+ALG_ID hashCAlg(int length) {
+    if (2001 == length) {
+        return CALG_GR3411;
+    }
+    if (512 == length) {
+        return CALG_GR3411_2012_512;
+    }
+    return CALG_GR3411_2012_256;
+}
+
+void Hash::init(Crypt *ctx, Key *key, int length) throw(CSPException)
 {
+    HCRYPTKEY  hKey = key? key->hkey: 0;
     parent = 0;
     pkey = 0;
     if(!CryptCreateHash(
         ctx->hprov,
-        (key? CALG_GR3411_HMAC : CALG_GR3411), 
-        (key? key->hkey : 0), 
+        hashCAlg(length), 
+        hKey, 
         0, 
         &hhash)) 
     {
@@ -52,16 +63,28 @@ void Hash::init(Crypt *ctx, Key *key) throw(CSPException)
  * * key -- `csp.Key`, если задан, хэш будет создан как HMAC
  *
  */
-Hash::Hash(Crypt *ctx, BYTE *STRING, DWORD LENGTH, Key *key) throw(CSPException)
+Hash::Hash(Crypt *ctx, BYTE *STRING, DWORD LENGTH, Key *key, int length) throw(CSPException)
 {
-    init(ctx, key);
+    init(ctx, key, length);
     this->update(STRING, LENGTH);
 }
 
-Hash::Hash(Crypt *ctx, Key *key) throw(CSPException)
+Hash::Hash(Crypt *ctx, BYTE *STRING, DWORD LENGTH, int length) throw(CSPException)
 {
-    init(ctx, key);
+    init(ctx, 0, length);
+    this->update(STRING, LENGTH);
 }
+
+Hash::Hash(Crypt *ctx, Key *key, int length) throw(CSPException)
+{
+    init(ctx, key, length);
+}
+
+Hash::Hash(Crypt *ctx, int length) throw(CSPException)
+{
+    init(ctx, 0, length);
+}
+
 
 Hash::~Hash() throw(CSPException)
 {
@@ -146,7 +169,7 @@ void Hash::sign(BYTE **s, DWORD *slen, DWORD dwKeyspec) throw(CSPException)
  */
 bool Hash::verify(Cert *cert, BYTE *STRING, DWORD LENGTH) throw (CSPException)
 {
-    HCRYPTKEY hPubKey = NULL;
+    HCRYPTKEY hPubKey = 0;
     // Get the public key from the certificate
     if (!CryptImportPublicKeyInfo(
         parent->hprov, 

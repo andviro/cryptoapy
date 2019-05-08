@@ -49,7 +49,7 @@ def set_q_defaults(params, insert_zeroes=False):
 
     raw = params.get('RawExtensions', [])[:]
     if not any(oid == '1.2.643.100.111' for (oid, _, _) in raw):
-        extstr = encoder.encode(char.UTF8String('"КриптоПро CSP" (версия 3.6)'.encode('utf-8')))
+        extstr = encoder.encode(char.UTF8String('"КриптоПро CSP" (версия 4.0)'.encode('utf-8')))
         raw.append(('1.2.643.100.111', extstr, False))
     params['RawExtensions'] = raw
 
@@ -94,7 +94,7 @@ class CertExtensions(CertAttribute):
         val = univ.SequenceOf()
         for i, ext in enumerate(exts):
             val.setComponentByPosition(i, ext.asn)
-        super(CertExtensions, self).__init__(csp.szOID_CERT_EXTENSIONS, val)
+        super(CertExtensions, self).__init__(csp.szOID_CERT_EXTENSIONS, [val])
 
 
 class CertExtension(object):

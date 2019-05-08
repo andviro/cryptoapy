@@ -308,6 +308,8 @@ def test_cert_info():
     ci = cryptoapi.cert_info(cert)
     assert ci
     assert ci['Thumbprint'] == thumb
+    assert ci.get('PublicKeyAlgorithm')
+    assert ci.get('SignatureAlgorithm')
 
 
 def test_cert_key_id():
@@ -319,10 +321,14 @@ def test_cert_key_id():
 
 def test_hash_digest_empty():
     data = b''
-    h = cryptoapi.Hash(data)
+    length = 0 if test_cn.endswith(b'2012') else 2001
+    h = cryptoapi.Hash(data, length=length)
     digest_str = hexlify(h.digest())
     print(digest_str)
-    assert digest_str == b'981e5f3ca30c841487830f84fb433e13ac1101569b9c13584ac483234cd656c0'
+    if length == 2001:
+        assert digest_str == b'981e5f3ca30c841487830f84fb433e13ac1101569b9c13584ac483234cd656c0'
+        return
+    assert digest_str == b'3f539a213e97c802cc229d474c6aa32a825a360b2a933a949fd925208d9ce1bb'
 
 
 def test_hash_sign_verify():
@@ -330,20 +336,22 @@ def test_hash_sign_verify():
     bad_data = os.urandom(1024)
     thumb = get_test_thumb()
     cert = cryptoapi.get_certificate(thumb)
+    length = 0 if test_cn.endswith(b'2012') else 2001
 
     h = cryptoapi.SignedHash(thumb, data)
     sig = h.sign()
 
-    good = cryptoapi.Hash(data)
+    good = cryptoapi.Hash(data, length=length)
     assert good.verify(cert, sig)
 
-    bad = cryptoapi.Hash(bad_data)
+    bad = cryptoapi.Hash(bad_data, length=length)
     assert not bad.verify(cert, sig)
 
 
 def test_hash_sign_verify_cont_provider():
     data = os.urandom(1024)
     bad_data = os.urandom(1024)
+    length = 0 if test_cn.endswith(b'2012') else 2001
 
     h = cryptoapi.SignedHash(None, data, cont=test_container,
                              provider=test_provider)
@@ -352,9 +360,9 @@ def test_hash_sign_verify_cont_provider():
     cert = cryptoapi.get_certificate(None, cont=test_container,
                                      provider=test_provider)
     assert cert
-    good = cryptoapi.Hash(data)
+    good = cryptoapi.Hash(data, length=length)
     assert good.verify(cert, sig)
-    bad = cryptoapi.Hash(bad_data)
+    bad = cryptoapi.Hash(bad_data, length=length)
     assert not bad.verify(cert, sig)
 
 
@@ -362,7 +370,8 @@ def test_hmac():
     key = b'1234'
     data = b'The quick brown fox jumps over the lazy dog'
     mac = cryptoapi.HMAC(key, data)
-    assert mac.hexdigest() == b'7b61bdd0c74c9eb391c640ccff001ff0ac533bcdff2e0f063e453c2eb8d7508d'
+    print(mac.hexdigest())
+    assert mac.hexdigest() == b'3e7dea7f2384b6c5a3d0e24aaa29c05e89ddd762145030ec22c71a6db8b2c1f4'
 
 
 def test_pkcs7_info_from_file():
@@ -376,6 +385,32 @@ def test_pkcs7_info_from_file():
 def test_gen_remove_key():
     if TEST_ALL is None:
         return
-
     assert cryptoapi.gen_key('test_container_temp'), 'Could not generate key'
+    key_exists = True
     assert cryptoapi.remove_key('test_container_temp'), 'Could not remove key'
+    try:
+        key = cryptoapi.get_key('test_container_temp')
+        assert not key
+    except (SystemError, ValueError):
+        key_exists = False
+    assert not key_exists
+
+
+def test_block_encrypt_decrypt():
+    thumb = get_test_thumb()
+    cert = cryptoapi.get_certificate(thumb)
+    data = b'hello world'
+    encryptedData, ephemData, sessionKeyData, ivData = cryptoapi.block_encrypt(cert, data)
+    assert len(encryptedData)
+    assert len(ephemData)
+    assert len(sessionKeyData)
+    assert len(ivData)
+    open('encdata.bin', 'wb').write(encryptedData)
+    decryptedData = cryptoapi.block_decrypt(test_container, encryptedData, ephemData, sessionKeyData, ivData)
+    open('decdata.bin', 'wb').write(decryptedData)
+    assert decryptedData[:len(data)] == data
+
+
+def test_provider_params(provider=None):
+    info = cryptoapi.provider_params(test_container, provider)
+    assert len(info) == 9

@@ -4,6 +4,15 @@
 using namespace std;
 #define MY_ENCODING_TYPE  (PKCS_7_ASN_ENCODING | X509_ASN_ENCODING)
 
+char *hashAlg(char *pubKeyAlg) {
+    if (0 == strcmp(pubKeyAlg, szOID_CP_GOST_R3410EL)) {
+        return (char *)szOID_CP_GOST_R3411;
+    }
+    if (0 == strcmp(pubKeyAlg, szOID_CP_GOST_R3410_12_512)) {
+        return (char *)szOID_CP_GOST_R3411_12_512;
+    }
+    return (char *)szOID_CP_GOST_R3411_12_256;
+}
 
 HCRYPTMSG CryptMsg::get_handle() throw (CSPException) {
     LOG("CryptMsg::get_handle()\n");
@@ -110,8 +119,8 @@ void CryptMsg::encrypt_data(BYTE *STRING, DWORD LENGTH, BYTE **s, DWORD *slen) t
 
     // Инициализация структуры с нулем.
     memset(&EncryptAlgorithm, 0, sizeof(CRYPT_ALGORITHM_IDENTIFIER));
-    //EncryptAlgorithm.pszObjId = OID_CipherVar_Default;
-    EncryptAlgorithm.pszObjId = (LPSTR)szOID_CP_GOST_28147;
+//     EncryptAlgorithm.pszObjId = OID_CipherVar_Default;
+    EncryptAlgorithm.pszObjId = (LPSTR)ENCRYPT_OID;
 
     // Инициализация структуры CRYPT_ENCRYPT_MESSAGE_PARA.
     memset(&EncryptParams, 0, sizeof(EncryptParams));
@@ -355,9 +364,8 @@ void CryptMsg::sign_data(BYTE *STRING, DWORD LENGTH, BYTE **s, DWORD *slen, Cert
     SigParams.dwMsgEncodingType = MY_ENCODING_TYPE;
     SigParams.pSigningCert = pCert;
     //SigParams.HashAlgorithm.pszObjId = szOID_RSA_SHA1RSA;
-    SigParams.HashAlgorithm.pszObjId = (LPSTR)szOID_CP_GOST_R3411;
+    SigParams.HashAlgorithm.pszObjId = hashAlg(pCert->pCertInfo->SubjectPublicKeyInfo.Algorithm.pszObjId);
     SigParams.HashAlgorithm.Parameters.cbData = 0;
-
     SigParams.cMsgCert = 1;
     SigParams.rgpMsgCert = &pCert;
     LOG("1\n");

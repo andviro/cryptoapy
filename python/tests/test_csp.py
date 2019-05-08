@@ -1,7 +1,7 @@
 # coding: utf-8
 from __future__ import unicode_literals, print_function
 
-from cprocsp import csp
+from cprocsp import csp, PROV_GOST
 from nose.tools import raises
 import sys
 import os
@@ -36,7 +36,7 @@ def test_context_simple():
     '''
     context = csp.Crypt(
         b'',
-        csp.PROV_GOST_2001_DH,
+        PROV_GOST,
         csp.CRYPT_VERIFYCONTEXT,
         test_provider
     )
@@ -51,7 +51,7 @@ def test_context_named_keystore():
     '''
     context = csp.Crypt(
         test_container,
-        csp.PROV_GOST_2001_DH,
+        PROV_GOST,
         0,
         test_provider,
     )
@@ -63,7 +63,7 @@ def test_context_named_keystore():
 def test_context_not_found():
     ctx = csp.Crypt(
         b"some_wrong_ctx",
-        csp.PROV_GOST_2001_DH,
+        PROV_GOST,
         csp.CRYPT_SILENT,
         test_provider,
     )
@@ -91,9 +91,9 @@ def test_export_import_pubkey():
     `Key` для расшифровки закрытого ключа.
 
     '''
-    context = csp.Crypt(test_container, csp.PROV_GOST_2001_DH, 0, test_provider)
+    context = csp.Crypt(test_container, PROV_GOST, 0, test_provider)
 
-    recipient = csp.Crypt(b'', csp.PROV_GOST_2001_DH, csp.CRYPT_VERIFYCONTEXT, test_provider)
+    recipient = csp.Crypt(b'', PROV_GOST, csp.CRYPT_VERIFYCONTEXT, test_provider)
 
     sk = context.get_key()
     assert sk
@@ -113,9 +113,9 @@ def test_export_import_pubkey():
 #      функцией `Key.encode()`. Параметр `keyspec` принимает значение
 #      `csp.AT_KEYEXCHANGE` или `csp.AT_SIGNATURE`.
 #      '''
-#      ctx = csp.Context('new_test', csp.PROV_GOST_2001_DH, 0)
+#      ctx = csp.Context('new_test', PROV_GOST, 0)
 #      if ctx is None:
-#          ctx = csp.Context(r'\\.\hdimage\new_test', csp.PROV_GOST_2001_DH, csp.CRYPT_NEWKEYSET)
+#          ctx = csp.Context(r'\\.\hdimage\new_test', PROV_GOST, csp.CRYPT_NEWKEYSET)
 #      assert ctx
 #      name = ctx.name()
 #      assert name == 'new_test'
@@ -131,8 +131,8 @@ def test_export_import_pubkey():
 #
 #  def test_export_import_private_key():
 #      name = test_create_named_container()
-#      sender = csp.Context(name, csp.PROV_GOST_2001_DH, 0)
-#      receiver = csp.Context("test", csp.PROV_GOST_2001_DH, 0)
+#      sender = csp.Context(name, PROV_GOST, 0)
+#      receiver = csp.Context("test", PROV_GOST, 0)
 #      rec_key = receiver.get_key(csp.AT_KEYEXCHANGE)
 #      assert rec_key
 #      sender_key = sender.get_key(csp.AT_KEYEXCHANGE)
@@ -146,7 +146,7 @@ def test_export_import_pubkey():
 #      # Для удаления ключевого контейнера функции `csp.Context()` в числе флагов
 #      # передается `csp.CRYPT_DELETEKEYSET`. При этом она возвращает `None`, т.к.
 #      # контекст не с чем связывать.
-#      res = csp.Context(name, csp.PROV_GOST_2001_DH, csp.CRYPT_DELETEKEYSET)
+#      res = csp.Context(name, PROV_GOST, csp.CRYPT_DELETEKEYSET)
 #      assert res is None
 
 
@@ -193,7 +193,7 @@ def test_extract_cert():
     Метод `Cert.extract()` возвращает закодированный сертификат в виде байтовой строки.
     '''
     cs = csp.CertStore(None, b"MY")
-    cert = list(cs.find_by_name(test_cn))[0]
+    cert = list(c for c in cs.find_by_name(bytes(test_cn)) if csp.CertInfo(c).name() == b'CN=' + test_cn)[0]
     cdata = cert.extract()
     assert len(cdata)
     return cdata
@@ -215,7 +215,7 @@ def test_cert_from_data():
 
 
 def test_store_key():
-    context = csp.Crypt(test_container, csp.PROV_GOST_2001_DH, 0, test_provider)
+    context = csp.Crypt(test_container, PROV_GOST, 0, test_provider)
     key = context.get_key()
     certdata = test_extract_cert()
     newc = csp.Cert(certdata)
@@ -354,7 +354,7 @@ def test_sign_data():
     '''
     ctx = csp.Crypt(
         test_container,
-        csp.PROV_GOST_2001_DH,
+        PROV_GOST,
         0, test_provider
     )
     cs = csp.CertStore(ctx, b"MY")
@@ -375,7 +375,7 @@ def test_detached_sign():
     '''
     ctx = csp.Crypt(
         test_container,
-        csp.PROV_GOST_2001_DH,
+        PROV_GOST,
         0,
         test_provider
     )
@@ -410,7 +410,7 @@ def test_msg_signatures():
     '''
     ctx = csp.Crypt(
         b'',
-        csp.PROV_GOST_2001_DH,
+        PROV_GOST,
         csp.CRYPT_VERIFYCONTEXT,
         test_provider
     )
@@ -461,7 +461,7 @@ def test_detached_sign2():
     '''
     ctx = csp.Crypt(
         test_container,
-        csp.PROV_GOST_2001_DH,
+        PROV_GOST,
         0,
         test_provider
     )
@@ -527,7 +527,9 @@ def test_verify_file():
         with open(case_path('{0}.p7s'.format(name)), 'rb') as f:
             sigdata = f.read()
         sign = csp.Signature(sigdata)
-        print(sign.num_signers)
+        print(name, sign.num_signers())
+        if sign.num_signers() <= 0:
+            continue
         for c in csp.CertStore(sign):
             print(b64encode(c.thumbprint()))
         assert all(sign.verify_data(data, n) for n in range(sign.num_signers()))
@@ -632,7 +634,7 @@ def test_cert_acquire_key():
     исключение `ValueError`.
     '''
     cs = csp.CertStore(None, b"MY")
-    cert = list(cs.find_by_name(test_cn))[0]
+    cert = list(c for c in cs.find_by_name(bytes(test_cn)) if csp.CertInfo(c).name() == b'CN=' + test_cn)[0]
     ctx = csp.Crypt(cert)
     return ctx
 
@@ -651,73 +653,80 @@ def test_hash_digest_random():
     '''
     ctx = csp.Crypt(
         b'',
-        csp.PROV_GOST_2001_DH,
+        PROV_GOST,
         csp.CRYPT_VERIFYCONTEXT,
         test_provider
     )
     data = os.urandom(1024)
-    hash1 = csp.Hash(ctx, data)
-    hash2 = csp.Hash(ctx)
+    length = 0 if test_cn.endswith(b'2012') else 2001
+    hash1 = csp.Hash(ctx, data, length)
+    hash2 = csp.Hash(ctx, length)
     hash2.update(data)
     digest1 = hash1.digest()
     digest2 = hash2.digest()
+    print(hexlify(digest1), hexlify(digest2))
     assert digest1 == digest2
 
 
 def test_hash_digest_empty():
     ctx = csp.Crypt(
         b'',
-        csp.PROV_GOST_2001_DH,
+        PROV_GOST,
         csp.CRYPT_VERIFYCONTEXT,
         test_provider
     )
     data = b''
-    hash1 = csp.Hash(ctx, data)
+    length = 0 if test_cn.endswith(b'2012') else 2001
+    hash1 = csp.Hash(ctx, data, length)
     digest_str = hexlify(hash1.digest())
-    print(digest_str)
-    assert digest_str == b'981e5f3ca30c841487830f84fb433e13ac1101569b9c13584ac483234cd656c0'
+    print(digest_str, length)
+    if length == 2001:
+        assert digest_str == b'981e5f3ca30c841487830f84fb433e13ac1101569b9c13584ac483234cd656c0'
+        return
+    assert digest_str == b'3f539a213e97c802cc229d474c6aa32a825a360b2a933a949fd925208d9ce1bb'
 
 
 def test_hash_digest_string():
     ctx = csp.Crypt(
         b'',
-        csp.PROV_GOST_2001_DH,
+        PROV_GOST,
         csp.CRYPT_VERIFYCONTEXT,
         test_provider
     )
     data = b'The quick brown fox jumps over the lazy dog'
-    hash1 = csp.Hash(ctx, data)
+    length = 0 if test_cn.endswith(b'2012') else 2001
+    hash1 = csp.Hash(ctx, data, length)
     digest_str = hexlify(hash1.digest())
-    print(digest_str)
-    assert digest_str == b'9004294a361a508c586fe53d1f1b02746765e71b765472786e4770d565830a76'
+    print(digest_str, length)
+    if length == 2001:
+        assert digest_str == b'9004294a361a508c586fe53d1f1b02746765e71b765472786e4770d565830a76'
+        return
+    assert digest_str == b'3e7dea7f2384b6c5a3d0e24aaa29c05e89ddd762145030ec22c71a6db8b2c1f4'
 
 
 def test_sign_hash():
     ctx = test_cert_acquire_key()
     data = os.urandom(1024)
-    hash1 = csp.Hash(ctx, data)
+    length = 0 if test_cn.endswith(b'2012') else 2001
+    hash1 = csp.Hash(ctx, data, length)
     signature1 = hash1.sign()
     return signature1, data
 
 
 def test_verify_hash():
-    ctx = csp.Crypt(
-        b'',
-        csp.PROV_GOST_2001_DH,
-        csp.CRYPT_VERIFYCONTEXT,
-        test_provider
-    )
     sign, data = test_sign_hash()
+    ctx = test_cert_acquire_key()
     cs = csp.CertStore(ctx, b"MY")
-    cert = list(cs.find_by_name(test_cn))[0]
-    hash1 = csp.Hash(ctx, data)
+    cert = list(c for c in cs.find_by_name(bytes(test_cn)) if csp.CertInfo(c).name() == b'CN=' + test_cn)[0]
+    length = 0 if test_cn.endswith(b'2012') else 2001
+    hash1 = csp.Hash(ctx, data, length)
     assert hash1.verify(cert, sign)
 
 
 def test_derive_key():
     ctx = csp.Crypt(
         b'',
-        csp.PROV_GOST_2001_DH,
+        PROV_GOST,
         csp.CRYPT_VERIFYCONTEXT,
         test_provider
     )
@@ -731,22 +740,31 @@ def test_hash_hmac():
     key = test_derive_key()
     ctx = csp.Crypt(
         b'',
-        csp.PROV_GOST_2001_DH,
+        PROV_GOST,
         csp.CRYPT_VERIFYCONTEXT,
         test_provider
     )
     data = b'The quick brown fox jumps over the lazy dog'
-    hash1 = csp.Hash(ctx, data, key)
+    hash1 = csp.Hash(ctx, data, key, 0)
     digest_str = hexlify(hash1.digest())
-    assert digest_str == b'7b61bdd0c74c9eb391c640ccff001ff0ac533bcdff2e0f063e453c2eb8d7508d'
+    print(digest_str)
+    assert digest_str == b'3e7dea7f2384b6c5a3d0e24aaa29c05e89ddd762145030ec22c71a6db8b2c1f4'
 
 
 def test_import_public_key_info():
-    context = csp.Crypt(test_container, csp.PROV_GOST_2001_DH, 0, test_provider)
+    context = csp.Crypt(test_container, PROV_GOST, 0, test_provider)
     cs = csp.CertStore(None, b"MY")
-    cert = list(cs.find_by_name(test_cn))[0]
+    cert = list(c for c in cs.find_by_name(bytes(test_cn)) if csp.CertInfo(c).name() == b'CN=' + test_cn)[0]
     pkey = context.import_public_key_info(cert)
     assert pkey
     keyBlob = pkey.encode(None)
     print(len(keyBlob))
-    assert len(keyBlob) == 100
+    assert len(keyBlob) >= 100
+
+
+def test_csp_info():
+    context = csp.Crypt(test_container, PROV_GOST, 0, test_provider)
+    info = csp.CSPInfo(context)
+    assert info
+    assert info.version()
+    assert len(info.bytes())

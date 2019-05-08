@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-#-*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 from __future__ import unicode_literals, print_function
 import os
 from base64 import b64encode
@@ -8,10 +8,12 @@ from pyasn1_modules.rfc2459 import id_at_commonName as CN
 from cprocsp import csp, cryptoapi
 from binascii import hexlify
 
+suffix = b'_2012'
+#  suffix = b''
 test_local = True
 test_provider = str("Crypto-Pro HSM CSP") if not test_local else None
-test_container = b'csp_test_keyset_hsm' if not test_local else b'csp_test_keyset'
-test_cn = b'CSP Test certificate' if test_local else b'HSM CSP Test certificate'
+test_container = b'csp_test_keyset_hsm' if not test_local else b'csp_test_keyset' + suffix
+test_cn = (b'CSP Test certificate' + suffix) if test_local else b'HSM CSP Test certificate'
 test_cer_fn = 'test_cer.cer'
 test_req_fn = 'test_req.req'
 test_thumb = None
@@ -37,7 +39,7 @@ def setup_package():
                               EKU=[csp.szOID_PKIX_KP_EMAIL_PROTECTION,
                                    csp.szOID_PKIX_KP_CLIENT_AUTH],
                               # CertificatePolicies=[('1.2.643.100.113.1', []),
-                              #('1.2.643.100.113.2', [])],
+                              # ('1.2.643.100.113.2', [])],
                               )
             request = cryptoapi.create_request(test_container, req_params,
                                                local=test_local)
@@ -63,6 +65,7 @@ def teardown_package():
 
 def get_test_thumb():
     cs = csp.CertStore(None, b"MY")
-    certs = list(cs.find_by_name(test_cn))
+    certs = list(c for c in cs.find_by_name(bytes(test_cn))
+                 if csp.CertInfo(c).name() == b'CN=' + test_cn)
     assert len(certs), 'Test certificate not found'
     return hexlify(certs[0].thumbprint())
