@@ -23,4 +23,6 @@ void debug_log(char *s, ...);
 #    define LOG(...)
 #endif
 
+#define CERTSIGN_OID szOID_CP_GOST_R3411_12_256_R3410
+
 #endif
