@@ -100,7 +100,7 @@ if platform.system() == 'Windows':
         './',
         './cprocsp/',
     ]
-    libraries += ['crypt32', 'pthread']
+    libraries += ['crypt32', 'pthread', 'advapi32']
 else:
     include_dirs += [
         '/opt/cprocsp/include',
